@@ -30,7 +30,7 @@
             
             <div>
                 <label class="block text-sm font-semibold mb-1">اسم الطالب الثلاثي:</label>
-                <input type="text" id="pStudentName" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="مثال: علي محمد حسن">
+                <input type="text" id="pStudentName" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="مثال: زيد باسل ميرام">
             </div>
             <div>
                 <label class="block text-sm font-semibold mb-1">اسم الأم الثلاثي:</label>
@@ -68,11 +68,11 @@
 
             <div id="loginMessage" class="text-center text-sm font-semibold hidden"></div>
             
-            <button onclick="submitParentRequest()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition mt-2">دخول المنصة</button>
+            <button onclick="submitParentRequest()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition mt-2">إرسال الطلب للإدارة</button>
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة (إرسال تنبيهات كتابية أو صوتية للشعبة) ================= -->
+        <!-- ================= 2. لوحة الإدارة ================= -->
         <div id="adminView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h2 class="text-lg font-bold text-blue-600 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
@@ -133,9 +133,8 @@
                 </div>
 
                 <div id="audioInputContainer" class="hidden space-y-2">
-                    <label class="block text-sm font-semibold mb-1">رابط الملف الصوتي (أو رابط تسجيل جاهز):</label>
+                    <label class="block text-sm font-semibold mb-1">رابط الملف الصوتي:</label>
                     <input type="text" id="audioUrl" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="ضع رابط الملف الصوتي هنا (مثل ملف mp3)">
-                    <p class="text-xs text-gray-500">يمكنك رفع ملف صوتي على أي منصة وضع الرابط هنا، ليتمكن ولي الأمر من الاستماع إليه مباشرة.</p>
                 </div>
                 
                 <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-sm">إرسال التنبيه للشعبة المحددة</button>
@@ -149,7 +148,7 @@
             </div>
         </div>
 
-        <!-- ================= 3. بوابة ولي الأمر (عرض التنبيهات النصية والصوتية الخاصة بصفه حصراً) ================= -->
+        <!-- ================= 3. بوابة ولي الأمر ================= -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                 <div>
@@ -159,7 +158,7 @@
                 <button onclick="switchView('parentLogin')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">خروج</button>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة (النصية والصوتية) -->
+            <!-- التنبيهات والرسائل الواردة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h3 class="font-bold text-gray-700 flex items-center gap-2">
                     📢 التنبيهات والرسائل الموجهة (كتابية وصوتية):
@@ -188,11 +187,6 @@
     </div>
 
     <script>
-        const registeredStudents = [
-            { student: "علي محمد حسن", mother: "زينب علي حسين", stage: "الابتدائية", grade: "الرابع", section: "أ" },
-            { student: "فاطمة أحمد كاظم", mother: "مريم جاسم محمد", stage: "المتوسطة", grade: "الأول", section: "ب" }
-        ];
-
         let pendingRequests = [];
         let sortedStudentsList = []; 
         let currentStudentSession = null;
@@ -230,13 +224,8 @@
             const section = document.getElementById('pSection').value;
             const msg = document.getElementById('loginMessage');
 
-            const isValid = registeredStudents.some(st => 
-                st.student === sName && st.mother === mName && 
-                st.stage === stage && st.grade === grade && st.section === section
-            );
-
-            if (!isValid) {
-                msg.textContent = "❌ البيانات غير مطابقة لسجلات المدرسة!";
+            if (!sName || !mName) {
+                msg.textContent = "❌ الرجاء إدخال اسم الطالب واسم الأم ثلاثياً!";
                 msg.className = "text-center text-sm font-semibold text-red-500";
                 msg.classList.remove('hidden');
                 return;
@@ -248,12 +237,12 @@
                 stage, 
                 grade, 
                 section, 
-                notifications: [{ type: 'text', title: "حالة النظام", body: "تم اعتماد دخول ولي الأمر بنجاح." }] 
+                notifications: [{ type: 'text', title: "حالة النظام", body: "تم إرسال الطلب للإدارة بانتظار الموافقة." }] 
             };
             
             pendingRequests.push(currentStudentSession);
             
-            msg.textContent = "⏳ تم إرسال البيانات، بانتظار موافقة الإدارة...";
+            msg.textContent = "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة لفتح المنصة...";
             msg.className = "text-center text-sm font-semibold text-blue-600";
             msg.classList.remove('hidden');
         }
@@ -271,7 +260,7 @@
                     <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center">
                         <div>
                             <p class="font-bold text-blue-900">الطالب: ${req.student}</p>
-                            <p class="text-xs text-gray-600">${req.stage} - الصف ${req.grade} - شعبة (${req.section})</p>
+                            <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.stage} - الصف ${req.grade} - شعبة (${req.section})</p>
                         </div>
                         <button onclick="approveAndSort(${index})" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">✓ موافقة وقبول</button>
                     </div>
@@ -310,7 +299,6 @@
             });
         }
 
-        // إرسال الرسالة (سواء نصية أو صوتية) حصراً للشعبة والصف المحدد
         function sendTargetedBroadcast() {
             const stage = document.getElementById('targetStage').value;
             const grade = document.getElementById('targetGrade').value;
@@ -357,7 +345,7 @@
                 document.getElementById('audioUrl').value = '';
             }
 
-            alert(`✓ تم إرسال التنبيه (${contentType === 'text' ? 'نصي' : 'صوتي'}) بنجاح إلى (${matchCount}) طالباً مطابقاً للمرحلة والصف والشعبة المحددة فقط!`);
+            alert(`✓ تم إرسال التنبيه بنجاح إلى (${matchCount}) طالباً مطابقاً للمرحلة والصف والشعبة المحددة!`);
         }
 
         function updateParentDashboardUI(student) {
