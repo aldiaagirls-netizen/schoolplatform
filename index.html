@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- أسئلة واستفسارات أولياء الأمور الواردة للإدارة -->
+            <!-- أسئلة واستفسارات أولياء الأمور الواردة للإدارة (نصية أو صوتية) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
                 <div id="adminInquiriesContainer" class="space-y-3">
@@ -139,7 +139,7 @@
                 </div>
             </div>
 
-            <!-- لوحة إرسال إشعار توجيهي مخصص لصف أو شعبة محددة بدقة (من الأول للساس الابتدائي) -->
+            <!-- لوحة إرسال إشعار توجيهي مخصص لصف أو شعبة محددة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه لصف وشعبة محددة (من الأول للسادس الابتدائي)</h2>
                 
@@ -200,14 +200,30 @@
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
             </div>
 
-            <!-- خانة استفسار ولي الأمر مع التنبيه التمويهي الخفيف -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-2">
+            <!-- خانة استفسار ولي الأمر (نصية أو صوتية) مع التنبيه التمويهي الخفيف -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-blue-900 text-sm">💬 استفسار أو سؤال للإدارة (عن السلوك أو الوضع الدراسي):</h3>
+                    <h3 class="font-bold text-blue-900 text-sm">💬 إرسال رسالة أو استفسار للإدارة (نصية أو صوتية):</h3>
                     <span class="text-[10px] text-gray-400 font-light italic tracking-wide">ملاحظة: يمكنك إرسال رسالتين كحد أقصى خلال الأسبوع</span>
                 </div>
-                <textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-1 focus:ring-blue-400 focus:outline-none" placeholder="اكتب سؤالك أو استفسارك هنا..."></textarea>
-                <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">إرسال السؤال إلى الإدارة</button>
+                
+                <div>
+                    <label class="block text-xs font-semibold mb-1">نوع الرسالة:</label>
+                    <select id="parentMsgType" onchange="toggleParentInputType()" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                        <option value="text">رسالة نصية</option>
+                        <option value="audio">رسالة صوتية (Voice Note)</option>
+                    </select>
+                </div>
+
+                <div id="parentTextInputDiv">
+                    <textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-1 focus:ring-blue-400 focus:outline-none" placeholder="اكتب سؤالك أو استفسارك هنا..."></textarea>
+                </div>
+
+                <div id="parentAudioInputDiv" class="hidden">
+                    <input type="text" id="parentAudioUrl" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="ضع رابط الملف الصوتي (MP3) هنا...">
+                </div>
+
+                <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700 transition">إرسال إلى الإدارة</button>
             </div>
 
             <!-- التنبيهات والرسائل الواردة الخاصة بالطالبة حصراً -->
@@ -247,21 +263,34 @@
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
         let parentInquiries = JSON.parse(localStorage.getItem('school_inquiries')) || [];
         let currentSessionStudent = JSON.parse(localStorage.getItem('school_current')) || null;
+        let activeScreen = localStorage.getItem('school_active_screen') || 'parentLogin';
 
         window.onload = function() {
             document.getElementById('displayPrincipalName').textContent = `مديرة المدرسة: ${principalName}`;
             document.getElementById('displaySupervisorName').textContent = `مشرف المنصة: ${supervisorName}`;
 
-            if (currentSessionStudent) {
+            if (activeScreen === 'adminView') {
+                document.getElementById('parentLoginView').classList.add('hidden');
+                document.getElementById('parentDashboardView').classList.add('hidden');
+                document.getElementById('adminView').classList.remove('hidden');
+                renderRequests();
+                renderAdminStudentsList();
+                renderAdminInquiries();
+            } else if (activeScreen === 'parentDashboard' && currentSessionStudent) {
                 const stillApproved = approvedStudents.some(st => st.id === currentSessionStudent.id);
                 if (stillApproved) {
                     currentSessionStudent = approvedStudents.find(st => st.id === currentSessionStudent.id);
                     document.getElementById('parentLoginView').classList.add('hidden');
+                    document.getElementById('adminView').classList.add('hidden');
                     document.getElementById('parentDashboardView').classList.remove('hidden');
                     updateParentDashboardUI(currentSessionStudent);
                 } else {
                     logoutParent();
                 }
+            } else {
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('parentDashboardView').classList.add('hidden');
+                document.getElementById('parentLoginView').classList.remove('hidden');
             }
         };
 
@@ -270,13 +299,36 @@
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
             localStorage.setItem('school_inquiries', JSON.stringify(parentInquiries));
             localStorage.setItem('school_current', JSON.stringify(currentSessionStudent));
+            localStorage.setItem('school_active_screen', activeScreen);
+        }
+
+        function toggleParentInputType() {
+            const type = document.getElementById('parentMsgType').value;
+            if (type === 'text') {
+                document.getElementById('parentTextInputDiv').classList.remove('hidden');
+                document.getElementById('parentAudioInputDiv').classList.add('hidden');
+            } else {
+                document.getElementById('parentTextInputDiv').classList.add('hidden');
+                document.getElementById('parentAudioInputDiv').classList.remove('hidden');
+            }
         }
 
         function sendParentInquiry() {
-            const inquiryText = document.getElementById('parentInquiryText').value.trim();
-            if (!inquiryText) {
-                alert("الرجاء كتابة السؤال أو الاستفسار أولاً.");
-                return;
+            const msgType = document.getElementById('parentMsgType').value;
+            let content = '';
+
+            if (msgType === 'text') {
+                content = document.getElementById('parentInquiryText').value.trim();
+                if (!content) {
+                    alert("الرجاء كتابة النص أولاً.");
+                    return;
+                }
+            } else {
+                content = document.getElementById('parentAudioUrl').value.trim();
+                if (!content) {
+                    alert("الرجاء إدخال رابط الملف الصوتي أولاً.");
+                    return;
+                }
             }
 
             if (!currentSessionStudent.weeklyInquiries) {
@@ -298,7 +350,8 @@
                 stage: currentSessionStudent.stage,
                 grade: currentSessionStudent.grade,
                 section: currentSessionStudent.section,
-                question: inquiryText,
+                type: msgType, // text or audio
+                content: content,
                 time: new Date().toLocaleDateString('ar-SA')
             };
 
@@ -322,7 +375,8 @@
             saveData();
 
             document.getElementById('parentInquiryText').value = '';
-            alert("✓ تم إرسال سؤالك بنجاح وتم إرسال تأكيد الاستلام من الإدارة.");
+            document.getElementById('parentAudioUrl').value = '';
+            alert("✓ تم إرسال الرسالة بنجاح إلى الإدارة وتم إرسال تأكيد الاستلام الآلي.");
             updateParentDashboardUI(currentSessionStudent);
         }
 
@@ -343,7 +397,7 @@
                 if (targetStudent) {
                     targetStudent.notifications.unshift({
                         type: 'text',
-                        title: `💬 رد الإدارة على استفسارك (بخصوص: ${inquiry.question})`,
+                        title: `💬 رد الإدارة على استفسارك`,
                         body: replyText
                     });
 
@@ -372,13 +426,28 @@
 
             container.innerHTML = '';
             parentInquiries.forEach((q) => {
+                let contentHTML = '';
+                if (q.type === 'text') {
+                    contentHTML = `<p class="text-gray-800 bg-white p-2 rounded border"><strong>النص:</strong> ${q.content}</p>`;
+                } else {
+                    contentHTML = `
+                        <div class="bg-white p-2 rounded border space-y-1">
+                            <strong>رسالة صوتية واردة:</strong>
+                            <audio controls class="w-full">
+                                <source src="${q.content}" type="audio/mpeg">
+                                متصفحك لا يدعم تشغيل الملفات الصوتية.
+                            </audio>
+                        </div>
+                    `;
+                }
+
                 container.innerHTML += `
                     <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-2 text-xs">
                         <div class="flex justify-between items-center">
                             <span class="font-bold text-blue-900 text-sm">👧 الطالبة: ${q.studentName}</span>
-                            <span class="text-gray-500">${q.stage} - الصف ${q.grade} - شعبة (${q.section})</span>
+                            <span class="text-gray-500">${q.stage} - ${q.grade} - شعبة (${q.section})</span>
                         </div>
-                        <p class="text-gray-800 bg-white p-2 rounded border"><strong>السؤال:</strong> ${q.question}</p>
+                        ${contentHTML}
                         <div class="flex gap-2">
                             <input type="text" id="reply_input_${q.id}" class="flex-1 px-3 py-1.5 border border-blue-300 rounded-lg text-xs focus:ring-1 focus:ring-blue-400 focus:outline-none" placeholder="اكتب الرد هنا لولي الأمر...">
                             <button onclick="sendInquiryReply(${q.id})" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-blue-700">إرسال الرد للطالبة</button>
@@ -419,6 +488,8 @@
             const pass = prompt("أدخل كلمة المرور:");
 
             if (user === adminUser && pass === adminPass) {
+                activeScreen = 'adminView';
+                saveData();
                 toggleAdminPanel();
             } else {
                 alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
@@ -493,8 +564,12 @@
         function closeAdminPanel() {
             document.getElementById('adminView').classList.add('hidden');
             if (currentSessionStudent) {
+                activeScreen = 'parentDashboard';
+                saveData();
                 document.getElementById('parentDashboardView').classList.remove('hidden');
             } else {
+                activeScreen = 'parentLogin';
+                saveData();
                 document.getElementById('parentLoginView').classList.remove('hidden');
             }
         }
@@ -506,6 +581,7 @@
                 approvedStudents = [];
                 parentInquiries = [];
                 currentSessionStudent = null;
+                activeScreen = 'parentLogin';
                 alert("🗑️ تم حذف كافة البيانات بنجاح.");
                 location.reload();
             }
@@ -541,6 +617,7 @@
             
             approvedStudents.push(student);
             currentSessionStudent = student;
+            activeScreen = 'parentDashboard';
             saveData();
 
             alert(`تمت الموافقة بنجاح! تم فتح البوابة لولي أمر الطّالبة (${student.student}) بشكل دائم.`);
@@ -614,7 +691,9 @@
         function logoutParent() {
             if (confirm("هل أنت متأكد من رغبتك في تسجيل الخروج من النظام؟")) {
                 currentSessionStudent = null;
+                activeScreen = 'parentLogin';
                 localStorage.removeItem('school_current');
+                localStorage.setItem('school_active_screen', activeScreen);
                 document.getElementById('parentDashboardView').classList.add('hidden');
                 document.getElementById('parentLoginView').classList.remove('hidden');
                 document.getElementById('pStudentName').value = '';
@@ -634,7 +713,6 @@
             }
         }
 
-        // إرسال توجيه أو تنبيه لصف وشعبة محددة بدقة لجميع الطالبات المطابقات
         function sendTargetedBroadcast() {
             const targetGrade = document.getElementById('targetGrade').value;
             const targetSection = document.getElementById('targetSection').value;
@@ -711,6 +789,7 @@
         function renderParentNotifications(student) {
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
+            student.notifications.notificationsList = student.notifications || [];
             student.notifications.forEach(n => {
                 if (n.type === 'text') {
                     list.innerHTML += `
