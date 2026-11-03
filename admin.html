@@ -12,7 +12,7 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- شاشة تسجيل دخول الإدارة -->
+        <!-- شاشة تسجيل دخول الإدارة (تظهر فقط عند تسجيل الخروج) -->
         <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow-sm border border-pink-100 max-w-md mx-auto space-y-4">
             <h2 class="text-xl font-bold text-pink-700 text-center">🔒 دخول لوحة إدارة المدرسة</h2>
             <div>
@@ -26,7 +26,7 @@
             <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm">دخول اللوحة</button>
         </div>
 
-        <!-- لوحة الإدارة -->
+        <!-- لوحة الإدارة (تظل مفتوحة عند التحديث ولا تختفي إلا عند تسجيل الخروج) -->
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-pink-800">إدارة مدرسة الضياء للبنات - لوحة التحكم المركزية</h2>
@@ -130,11 +130,31 @@
         let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
         let parentInquiries = JSON.parse(localStorage.getItem('school_inquiries')) || [];
+        
+        // التحقق مما إذا كانت جلسة الإدارة مسجلة مسبقاً
+        let isAdminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
+
+        window.onload = function() {
+            if (isAdminLoggedIn) {
+                // إذا كان مسجلاً مسبقاً، افتح لوحة التحكم مباشرة عند التحديث ولا تظهر شاشة تسجيل الدخول
+                document.getElementById('adminAuthView').classList.add('hidden');
+                document.getElementById('adminDashboardView').classList.remove('hidden');
+                renderRequests();
+                renderAdminStudentsList();
+                renderAdminInquiries();
+            } else {
+                // إظهار شاشة تسجيل الدخول إذا لم يسجل دخوله بعد
+                document.getElementById('adminAuthView').classList.remove('hidden');
+                document.getElementById('adminDashboardView').classList.add('hidden');
+            }
+        };
 
         function loginAdmin() {
             const u = document.getElementById('adminUserInput').value.trim();
             const p = document.getElementById('adminPassInput').value.trim();
             if (u === adminUser && p === adminPass) {
+                isAdminLoggedIn = true;
+                localStorage.setItem('school_admin_logged', 'true');
                 document.getElementById('adminAuthView').classList.add('hidden');
                 document.getElementById('adminDashboardView').classList.remove('hidden');
                 renderRequests();
@@ -145,9 +165,16 @@
             }
         }
 
+        // عند الضغط على زر تسجيل الخروج، يتم مسح حالة الجلسة وتظهر شاشة تسجيل الدخول
         function logoutAdmin() {
-            document.getElementById('adminDashboardView').classList.add('hidden');
-            document.getElementById('adminAuthView').classList.remove('hidden');
+            if (confirm("هل أنت متأكد من تسجيل الخروج من لوحة الإدارة؟")) {
+                isAdminLoggedIn = false;
+                localStorage.removeItem('school_admin_logged');
+                document.getElementById('adminDashboardView').classList.add('hidden');
+                document.getElementById('adminAuthView').classList.remove('hidden');
+                document.getElementById('adminUserInput').value = '';
+                document.getElementById('adminPassInput').value = '';
+            }
         }
 
         function saveData() {
@@ -220,7 +247,6 @@
             });
         }
 
-        // فتح نافذة الأرشيف وسجل المراسلات للطالبة المحددة
         function openStudentArchive(studentId) {
             const student = approvedStudents.find(st => st.id === studentId);
             if (!student) return;
@@ -259,7 +285,6 @@
             document.getElementById('studentArchiveModal').classList.add('hidden');
         }
 
-        // البحث الذكي عن الطّالبة
         function filterStudents() {
             const query = document.getElementById('studentSearchInput').value.toLowerCase().trim();
             const items = document.querySelectorAll('.student-item');
@@ -320,7 +345,6 @@
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
-                    // حفظ الاستفسار والرد في أرشيف الطالبة لتتمكن الإدارة من مراجعته دائماً
                     student.notifications.unshift({ type: 'text', title: `💬 سؤال ولي الأمر: ${inquiry.content}`, body: `الرد: ${replyText}` });
                     parentInquiries.splice(idx, 1);
                     saveData();
