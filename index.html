@@ -14,16 +14,16 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- زر خفي خاص بالإدارة فقط للاختبار (أو يمكنك الدخول إليه بربط مباشر) -->
-        <div class="bg-white p-3 rounded-xl shadow-sm border flex justify-between items-center text-xs">
-            <span class="font-bold text-gray-500">المنصة المدرسية الرسمية الآمنة</span>
-            <button onclick="switchView('admin')" class="text-blue-600 underline font-semibold">دخول لوحة الإدارة</button>
+        <!-- زر خفي في الأعلى خاص بالإدارة فقط -->
+        <div class="bg-white p-2 rounded-xl shadow-sm border flex justify-between items-center text-xs">
+            <span class="font-bold text-gray-400">نظام المدرسة المعتمد</span>
+            <button onclick="toggleAdminPanel()" class="text-blue-600 underline font-semibold">دخول لوحة الإدارة</button>
         </div>
 
-        <!-- ================= 1. بوابة تسجيل دخول ولي الأمر (الشاشة الرئيسية) ================= -->
+        <!-- ================= 1. بوابة تسجيل دخول ولي الأمر (الواجهة الافتتاحية) ================= -->
         <div id="parentLoginView" class="bg-white p-8 rounded-2xl shadow-sm border max-w-lg mx-auto space-y-4">
             <h2 class="text-xl font-bold text-blue-600 text-center mb-1">بوابة ولي الأمر</h2>
-            <p class="text-xs text-gray-500 text-center mb-4">أدخل بيانات الطالب للوصول إلى التنبيهات والرسائل المخصصة لصفك</p>
+            <p class="text-xs text-gray-500 text-center mb-4">أدخل بيانات الطالب للوصول إلى التنبيهات المخصصة لصفك</p>
             
             <div>
                 <label class="block text-sm font-semibold mb-1">اسم الطالب الثلاثي:</label>
@@ -69,11 +69,11 @@
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة (مخفية ولا تظهر لولي الأمر أبداً) ================= -->
+        <!-- ================= 2. لوحة الإدارة (مخفية ولا تظهر لولي الأمر) ================= -->
         <div id="adminView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
                 <h2 class="text-lg font-bold text-blue-600">لوحة التحكم الإدارية</h2>
-                <button onclick="switchView('parentLogin')" class="bg-gray-500 text-white px-3 py-1 rounded text-xs">العودة لبوابة ولي الأمر</button>
+                <button onclick="closeAdminPanel()" class="bg-gray-500 text-white px-3 py-1 rounded text-xs">إغلاق لوحة الإدارة</button>
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
@@ -83,13 +83,13 @@
                 </div>
             </div>
 
-            <!-- لوحة إرسال إشعار أو رسالة صوتية/كتابية موجهة -->
+            <!-- لوحة إرسال تنبيهات موجهة (كتابية أو صوتية) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h2 class="text-base font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية (كتابية أو صوتية) لشعبة محددة</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold mb-1">المرحلة المستهدفة:</label>
+                        <label class="block text-xs font-semibold mb-1">المرحلة:</label>
                         <select id="targetStage" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع المراحل</option>
                             <option value="الابتدائية">الابتدائية</option>
@@ -98,7 +98,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
+                        <label class="block text-xs font-semibold mb-1">الصف:</label>
                         <select id="targetGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع الصفوف</option>
                             <option value="الأول">الأول</option>
@@ -110,7 +110,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1">الشعبة المستهدفة:</label>
+                        <label class="block text-xs font-semibold mb-1">الشعبة:</label>
                         <select id="targetSection" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع الشعب</option>
                             <option value="أ">الشعبة (أ)</option>
@@ -129,44 +129,37 @@
                 </div>
 
                 <div id="textInputContainer">
-                    <label class="block text-xs font-semibold mb-1">عنوان وتفاصيل الرسالة النصية:</label>
+                    <label class="block text-xs font-semibold mb-1">عنوان وتفاصيل الرسالة:</label>
                     <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="عنوان التنبيه (مثال: درجة امتحان أو غياب)">
                     <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه هنا..."></textarea>
                 </div>
 
                 <div id="audioInputContainer" class="hidden space-y-1">
-                    <label class="block text-xs font-semibold mb-1">رابط الملف الصوتي:</label>
-                    <input type="text" id="audioUrl" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="ضع رابط الملف الصوتي هنا (مثل mp3)">
+                    <label class="block text-xs font-semibold mb-1">رابط الملف الصوتي (MP3):</label>
+                    <input type="text" id="audioUrl" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="ضع رابط الملف الصوتي هنا">
                 </div>
                 
                 <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-xs">إرسال التنبيه للشعبة المحددة</button>
             </div>
-
-            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-base font-bold text-green-600 border-b pb-2">📁 سجل الطلاب المقبولين في النظام</h2>
-                <div id="sortedStudentsContainer" class="space-y-3">
-                    <p class="text-gray-500 text-sm">لم يتم قبول أي طالب بعد.</p>
-                </div>
-            </div>
         </div>
 
-        <!-- ================= 3. بوابة ولي الأمر المعتمدة (للقراءة فقط - تظهر بعد موافقة الإدارة) ================= -->
+        <!-- ================= 3. واجهة ولي الأمر (تفتح فور موافقة الإدارة وتظهر له وحده) ================= -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-bold text-blue-600">بوابة المتابعة المدرسية</h2>
                     <div id="sortedBadge" class="mt-1 inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold"></div>
                 </div>
-                <button onclick="switchView('parentLogin')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
+                <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة الخاصة بابنه وصفه حصراً -->
+            <!-- التنبيهات والرسائل الواردة لصفه وشعبته حصراً -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h3 class="font-bold text-gray-700 flex items-center gap-2">
                     📢 التنبيهات والرسائل الواردة لصفك وشعبتك:
                 </h3>
                 <div id="parentTargetedNotificationsList" class="space-y-3">
-                    <!-- يتم تعبئتها تلقائياً حسب الفرز -->
+                    <!-- تعبئة تلقائية -->
                 </div>
             </div>
 
@@ -186,35 +179,9 @@
     </div>
 
     <script>
-        // حفظ بيانات الطلبات والطلاب المقبولين في الذاكرة المؤقتة للصفحة
         let pendingRequests = [];
-        let sortedStudentsList = []; 
-        let currentStudentSession = null;
-
-        function switchView(viewName) {
-            document.getElementById('parentLoginView').classList.add('hidden');
-            document.getElementById('adminView').classList.add('hidden');
-            document.getElementById('parentDashboardView').classList.add('hidden');
-
-            if (viewName === 'parentLogin') document.getElementById('parentLoginView').classList.remove('hidden');
-            if (viewName === 'admin') {
-                document.getElementById('adminView').classList.remove('hidden');
-                renderRequests();
-                renderSortedStudents();
-            }
-            if (viewName === 'parentDashboard') document.getElementById('parentDashboardView').classList.remove('hidden');
-        }
-
-        function toggleContentInput() {
-            const type = document.getElementById('contentType').value;
-            if (type === 'text') {
-                document.getElementById('textInputContainer').classList.remove('hidden');
-                document.getElementById('audioInputContainer').classList.add('hidden');
-            } else {
-                document.getElementById('textInputContainer').classList.add('hidden');
-                document.getElementById('audioInputContainer').classList.remove('hidden');
-            }
-        }
+        let approvedStudents = []; // قائمة الطلاب الذين تمت الموافقة عليهم
+        let currentSessionStudent = null; // الطالب الذي يتابع جلسته الحالية
 
         function submitParentRequest() {
             const sName = document.getElementById('pStudentName').value.trim();
@@ -231,21 +198,33 @@
                 return;
             }
 
-            // حفظ بيانات الجلسة الحالية لولي الأمر
-            currentStudentSession = { 
+            currentSessionStudent = { 
                 student: sName, 
                 mother: mName, 
                 stage, 
                 grade, 
                 section, 
-                notifications: [{ type: 'text', title: "حالة النظام", body: "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة لفتح المنصة..." }] 
+                notifications: [{ type: 'text', title: "حالة الطلب", body: "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة لفتح البوابة..." }] 
             };
             
-            pendingRequests.push(currentStudentSession);
+            pendingRequests.push(currentSessionStudent);
             
-            msg.textContent = "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة لفتح المنصة...";
+            // إظهار رسالة الانتظار لولي الأمر وعدم فتح البوابة إلا بعد الموافقة
+            msg.textContent = "⏳ تم إرسال الطلب بنجاح، يرجى الانتظار لحين موافقة الإدارة لفتح البوابة...";
             msg.className = "text-center text-sm font-semibold text-blue-600";
             msg.classList.remove('hidden');
+        }
+
+        function toggleAdminPanel() {
+            document.getElementById('parentLoginView').classList.add('hidden');
+            document.getElementById('parentDashboardView').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+            renderRequests();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('parentLoginView').classList.remove('hidden');
         }
 
         function renderRequests() {
@@ -258,51 +237,54 @@
             container.innerHTML = '';
             pendingRequests.forEach((req, index) => {
                 container.innerHTML += `
-                    <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center text-sm">
+                    <div class="p-3 bg-gray-50 border rounded-lg flex justify-between items-center text-sm">
                         <div>
                             <p class="font-bold text-blue-900">الطالب: ${req.student}</p>
                             <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.stage} - الصف ${req.grade} - شعبة (${req.section})</p>
                         </div>
-                        <button onclick="approveAndSort(${index})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700">✓ موافقة وقبول</button>
+                        <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700">✓ موافقة وفتح البوابة</button>
                     </div>
                 `;
             });
         }
 
-        function approveAndSort(index) {
+        // عند موافقة الإدارة: يتم فتح البوابة وتوجيه ولي الأمر لواجهته الخاصة فوراً
+        function approveStudent(index) {
             const student = pendingRequests.splice(index, 1)[0];
-            sortedStudentsList.push(student);
-            currentStudentSession = student;
+            approvedStudents.push(student);
+            currentSessionStudent = student;
 
-            // تحديث رسالة الترحيب بداخل لوحة ولي الأمر
-            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على طلبك بنجاح. أهلاً بك في بوابة متابعة صفك وشعبتك." }];
+            // تحديث رسالة الترحيب في واجهة ولي الأمر
+            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك. أهلاً بك في بوابة متابعة صفك وشعبتك." }];
 
-            alert(`تمت الموافقة على دخول الطالب (${student.student}) بنجاح!`);
+            alert(`تمت الموافقة بنجاح! سيتم فتح البوابة لولي أمر الطالب (${student.student}) الآن.`);
             
-            // العودة التلقائية لبوابة ولي الأمر وعرض شاشته الخاصة فقط
-            switchView('parentDashboard');
+            // إخفاء الإدارة وفتح واجهة ولي الأمر حصراً
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('parentLoginView').classList.add('hidden');
+            document.getElementById('parentDashboardView').classList.remove('hidden');
+            
             updateParentDashboardUI(student);
         }
 
-        function renderSortedStudents() {
-            const container = document.getElementById('sortedStudentsContainer');
-            if (sortedStudentsList.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-sm">لم يتم قبول أي طالب بعد.</p>`;
-                return;
-            }
+        function logoutParent() {
+            currentSessionStudent = null;
+            document.getElementById('parentDashboardView').classList.add('hidden');
+            document.getElementById('parentLoginView').classList.remove('hidden');
+            document.getElementById('pStudentName').value = '';
+            document.getElementById('pMotherName').value = '';
+            document.getElementById('loginMessage').classList.add('hidden');
+        }
 
-            container.innerHTML = '';
-            sortedStudentsList.forEach((st) => {
-                container.innerHTML += `
-                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg flex justify-between items-center text-sm">
-                        <div>
-                            <span class="font-bold text-gray-900">${st.student}</span>
-                            <span class="text-xs text-gray-600 mr-2">(${st.stage} - الصف ${st.grade} - شعبة ${st.section})</span>
-                        </div>
-                        <span class="text-xs text-green-700 font-bold">تم الفرز بنجاح</span>
-                    </div>
-                `;
-            });
+        function toggleContentInput() {
+            const type = document.getElementById('contentType').value;
+            if (type === 'text') {
+                document.getElementById('textInputContainer').classList.remove('hidden');
+                document.getElementById('audioInputContainer').classList.add('hidden');
+            } else {
+                document.getElementById('textInputContainer').classList.add('hidden');
+                document.getElementById('audioInputContainer').classList.remove('hidden');
+            }
         }
 
         function sendTargetedBroadcast() {
@@ -321,7 +303,7 @@
                     return;
                 }
 
-                sortedStudentsList.forEach(st => {
+                approvedStudents.forEach(st => {
                     if ((stage === 'الكل' || st.stage === stage) &&
                         (grade === 'الكل' || st.grade === grade) &&
                         (section === 'الكل' || st.section === section)) {
@@ -339,7 +321,7 @@
                     return;
                 }
 
-                sortedStudentsList.forEach(st => {
+                approvedStudents.forEach(st => {
                     if ((stage === 'الكل' || st.stage === stage) &&
                         (grade === 'الكل' || st.grade === grade) &&
                         (section === 'الكل' || st.section === section)) {
@@ -352,14 +334,24 @@
             }
 
             alert(`✓ تم إرسال التنبيه بنجاح إلى (${matchCount}) طالباً مطابقاً للمرحلة والصف والشعبة المحددة!`);
+            
+            // إذا كان الطالب الحالي ضمن الصف المستهدف، قم بتحديث واجهته فوراً
+            if (currentSessionStudent) {
+                const stageMatch = (stage === 'الكل' || currentSessionStudent.stage === stage);
+                const gradeMatch = (grade === 'الكل' || currentSessionStudent.grade === grade);
+                const sectionMatch = (section === 'الكل' || currentSessionStudent.section === section);
+                if (stageMatch && gradeMatch && sectionMatch) {
+                    renderParentNotifications(currentSessionStudent);
+                }
+            }
         }
 
         function updateParentDashboardUI(student) {
             document.getElementById('sortedBadge').textContent = `الطالب: ${student.student} (${student.stage} - الصف ${student.grade} - شعبة ${student.section})`;
-            renderTargetedNotifications(student);
+            renderParentNotifications(student);
         }
 
-        function renderTargetedNotifications(student) {
+        function renderParentNotifications(student) {
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
             student.notifications.forEach(n => {
