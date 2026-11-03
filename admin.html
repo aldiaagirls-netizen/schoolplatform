@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -34,6 +33,23 @@
                 <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1 rounded text-xs">خروج الإدارة</button>
             </div>
 
+            <!-- إعدادات أسماء الإدارة -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
+                <h2 class="text-base font-bold text-pink-600 border-b pb-2">👩‍💼 إعدادات المدرسة والأسماء</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">اسم مديرة المدرسة:</label>
+                        <input type="text" id="newPrincipalName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="أدخل اسم المديرة">
+                        <button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-pink-700">حفظ اسم المديرة</button>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">اسم مشرف المنصة:</label>
+                        <input type="text" id="newSupervisorName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="أدخل اسم المشرف">
+                        <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-pink-700">حفظ اسم المشرف</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- طلبات أولياء الأمور المعلقة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
@@ -48,7 +64,7 @@
 
             <!-- التنبيهات الموجهة لكل صف وشعبة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-200 space-y-4">
-                <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه لصف وشعبة محددة</h2>
+                <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه لصف وشعبة محددة (من الأول للسادس)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
@@ -72,9 +88,9 @@
                         </select>
                     </div>
                 </div>
-                <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="عنوان التنبيه">
-                <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه أو دروس اليوم..."></textarea>
-                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-purple-700">إرسال التوجيه</button>
+                <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="عنوان التنبيه أو الدروس">
+                <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه أو التفاصيل هنا..."></textarea>
+                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-purple-700">إرسال التوجيه للشعبة المحددة</button>
             </div>
         </div>
 
@@ -83,6 +99,8 @@
     <script>
         let adminUser = localStorage.getItem('school_admin_user') || 'admin';
         let adminPass = localStorage.getItem('school_admin_pass') || '123456';
+        let principalName = localStorage.getItem('school_principal_name') || 'د. أمل عبد الله';
+        let supervisorName = localStorage.getItem('school_supervisor_name') || 'الأستاذ أحمد علي';
 
         let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
@@ -112,6 +130,20 @@
             localStorage.setItem('school_inquiries', JSON.stringify(parentInquiries));
         }
 
+        function updatePrincipalName() {
+            const val = document.getElementById('newPrincipalName').value.trim();
+            if (!val) { alert("أدخل اسم المديرة."); return; }
+            localStorage.setItem('school_principal_name', val);
+            alert("✓ تم حفظ اسم المديرة بنجاح.");
+        }
+
+        function updateSupervisorName() {
+            const val = document.getElementById('newSupervisorName').value.trim();
+            if (!val) { alert("أدخل اسم المشرف."); return; }
+            localStorage.setItem('school_supervisor_name', val);
+            alert("✓ تم حفظ اسم المشرف بنجاح.");
+        }
+
         function renderRequests() {
             const container = document.getElementById('requestsContainer');
             if (pendingRequests.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; return; }
@@ -139,12 +171,16 @@
             if (parentInquiries.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p>`; return; }
             container.innerHTML = '';
             parentInquiries.forEach((q) => {
+                let contentHTML = q.type === 'text' 
+                    ? `<p class="bg-white p-2 rounded border"><strong>النص:</strong> ${q.content}</p>` 
+                    : `<div class="bg-white p-2 rounded border"><strong>رسالة صوتية:</strong><audio controls class="w-full mt-1"><source src="${q.content}" type="audio/mpeg"></audio></div>`;
+
                 container.innerHTML += `
                     <div class="p-3 bg-blue-50 border rounded-lg space-y-2 text-xs">
                         <p class="font-bold text-blue-900">👧 الطّالبة: ${q.studentName} (${q.grade} - شعبة ${q.section})</p>
-                        <p class="bg-white p-2 rounded border"><strong>الرسالة:</strong> ${q.content}</p>
+                        ${contentHTML}
                         <div class="flex gap-2">
-                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs" placeholder="اكتب الرد هنا...">
+                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs" placeholder="اكتب الرد هنا لولي الأمر...">
                             <button onclick="replyInquiry(${q.id})" class="bg-blue-600 text-white px-3 py-1 rounded">إرسال الرد</button>
                         </div>
                     </div>`;
@@ -153,16 +189,16 @@
 
         function replyInquiry(id) {
             const replyText = document.getElementById(`reply_${id}`).value.trim();
-            if (!replyText) return;
+            if (!replyText) { alert("أدخل نص الرد."); return; }
             const idx = parentInquiries.findIndex(q => q.id === id);
             if (idx !== -1) {
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
-                    student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة`, body: replyText });
+                    student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفسارك`, body: replyText });
                     parentInquiries.splice(idx, 1);
                     saveData();
-                    alert("✓ تم إرسال الرد لولي الأمر.");
+                    alert("✓ تم إرسال الرد لولي الأمر بنجاح.");
                     renderAdminInquiries();
                 }
             }
@@ -176,13 +212,15 @@
 
             if (!title || !body) { alert("الرجاء تعبئة العنوان والنص."); return; }
 
+            let matchCount = 0;
             approvedStudents.forEach(st => {
                 if ((grade === 'الكل' || st.grade === grade) && (section === 'الكل' || st.section === section)) {
-                    st.notifications.unshift({ type: 'text', title: `📢 ${title}`, body: body });
+                    st.notifications.unshift({ type: 'text', title: `📢 ${title} (${st.grade} - شعبة ${st.section})`, body: body });
+                    matchCount++;
                 }
             });
             saveData();
-            alert("✓ تم إرسال التنبيه للشعبة المحددة بنجاح.");
+            alert(`✓ تم إرسال التنبيه بنجاح إلى (${matchCount}) طالبة مطابقة للصف والشعبة.`);
         }
     </script>
 </body>
