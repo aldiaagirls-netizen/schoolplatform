@@ -111,13 +111,13 @@
                 <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700">إرسال إلى الإدارة</button>
             </div>
 
-            <!-- جدول الحصص اليومي والدروس (يعرض الدرس الحالي ويستبدل القديم تلقائياً) -->
+            <!-- جدول الحصص اليومي والدروس -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (الدرس الحالي):</h3>
                 <div id="parentScheduleContainer" class="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs"></div>
             </div>
 
-            <!-- التنبيهات والرسائل الإدارية الخاصة -->
+            <!-- التنبيهات والرسائل الإدارية الخاصة (تعرض كافة الرسائل الواردة بوضوح) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الإدارية الخاصة بالطّالبة:</h3>
@@ -312,11 +312,12 @@
                 `;
             });
 
+            // عرض كافة الرسائل والتنبيهات الواردة دون فلترة أو استثناء
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
             
             let unreadCount = 0;
-            const notifications = (student.notifications || []).filter(n => !n.title.includes('واجب / درس جديد'));
+            const notifications = student.notifications || [];
 
             if (notifications.length === 0) {
                 list.innerHTML = `<p class="text-gray-400 text-xs text-center py-2">لا توجد رسائل إدارية حالياً.</p>`;
