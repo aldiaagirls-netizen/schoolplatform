@@ -14,19 +14,16 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- أزرار التنقل السريعة للتجربة -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
-            <span class="text-sm font-bold text-gray-600">نظام المدرسة الذكي (رسائل نصية وصوتية موجهة)</span>
-            <div class="space-x-2 space-x-reverse">
-                <button onclick="switchView('admin')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold">لوحة الإدارة</button>
-                <button onclick="switchView('parentLogin')" class="bg-gray-600 text-white px-3 py-1 rounded text-sm font-semibold">بوابة ولي الأمر</button>
-            </div>
+        <!-- زر خفي خاص بالإدارة فقط للاختبار (أو يمكنك الدخول إليه بربط مباشر) -->
+        <div class="bg-white p-3 rounded-xl shadow-sm border flex justify-between items-center text-xs">
+            <span class="font-bold text-gray-500">المنصة المدرسية الرسمية الآمنة</span>
+            <button onclick="switchView('admin')" class="text-blue-600 underline font-semibold">دخول لوحة الإدارة</button>
         </div>
 
-        <!-- ================= 1. بوابة تسجيل دخول ولي الأمر ================= -->
+        <!-- ================= 1. بوابة تسجيل دخول ولي الأمر (الشاشة الرئيسية) ================= -->
         <div id="parentLoginView" class="bg-white p-8 rounded-2xl shadow-sm border max-w-lg mx-auto space-y-4">
             <h2 class="text-xl font-bold text-blue-600 text-center mb-1">بوابة ولي الأمر</h2>
-            <p class="text-xs text-gray-500 text-center mb-4">أدخل بيانات الطالب للوصول إلى التنبيهات والرسائل الصوتية المخصصة لصفك</p>
+            <p class="text-xs text-gray-500 text-center mb-4">أدخل بيانات الطالب للوصول إلى التنبيهات والرسائل المخصصة لصفك</p>
             
             <div>
                 <label class="block text-sm font-semibold mb-1">اسم الطالب الثلاثي:</label>
@@ -72,10 +69,15 @@
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة ================= -->
+        <!-- ================= 2. لوحة الإدارة (مخفية ولا تظهر لولي الأمر أبداً) ================= -->
         <div id="adminView" class="hidden space-y-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
+                <h2 class="text-lg font-bold text-blue-600">لوحة التحكم الإدارية</h2>
+                <button onclick="switchView('parentLogin')" class="bg-gray-500 text-white px-3 py-1 rounded text-xs">العودة لبوابة ولي الأمر</button>
+            </div>
+
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-lg font-bold text-blue-600 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
+                <h2 class="text-base font-bold text-blue-600 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
                 <div id="requestsContainer" class="space-y-3">
                     <p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>
                 </div>
@@ -83,12 +85,12 @@
 
             <!-- لوحة إرسال إشعار أو رسالة صوتية/كتابية موجهة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-lg font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية (كتابية أو صوتية) لشعبة محددة</h2>
+                <h2 class="text-base font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية (كتابية أو صوتية) لشعبة محددة</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-sm font-semibold mb-1">المرحلة المستهدفة:</label>
-                        <select id="targetStage" class="w-full px-3 py-2 border rounded-lg bg-white text-sm">
+                        <label class="block text-xs font-semibold mb-1">المرحلة المستهدفة:</label>
+                        <select id="targetStage" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع المراحل</option>
                             <option value="الابتدائية">الابتدائية</option>
                             <option value="المتوسطة">المتوسطة</option>
@@ -96,8 +98,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">الصف المستهدف:</label>
-                        <select id="targetGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-sm">
+                        <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
+                        <select id="targetGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع الصفوف</option>
                             <option value="الأول">الأول</option>
                             <option value="الثاني">الثاني</option>
@@ -108,8 +110,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">الشعبة المستهدفة:</label>
-                        <select id="targetSection" class="w-full px-3 py-2 border rounded-lg bg-white text-sm">
+                        <label class="block text-xs font-semibold mb-1">الشعبة المستهدفة:</label>
+                        <select id="targetSection" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الكل">جميع الشعب</option>
                             <option value="أ">الشعبة (أ)</option>
                             <option value="ب">الشعبة (ب)</option>
@@ -119,55 +121,52 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">نوع الإرسال:</label>
-                    <select id="contentType" onchange="toggleContentInput()" class="w-full px-3 py-2 border rounded-lg bg-white text-sm">
+                    <label class="block text-xs font-semibold mb-1">نوع الإرسال:</label>
+                    <select id="contentType" onchange="toggleContentInput()" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                         <option value="text">رسالة نصية (كتابة)</option>
                         <option value="audio">رسالة صوتية (Voice Note)</option>
                     </select>
                 </div>
 
                 <div id="textInputContainer">
-                    <label class="block text-sm font-semibold mb-1">عنوان وتفاصيل الرسالة النصية:</label>
-                    <input type="text" id="targetTitle" class="w-full px-4 py-2 border rounded-lg text-sm mb-2" placeholder="عنوان التنبيه (مثال: درجة امتحان أو تنبيه غياب)">
-                    <textarea id="targetBody" rows="3" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="اكتب نص التنبيه أو الدروس هنا..."></textarea>
+                    <label class="block text-xs font-semibold mb-1">عنوان وتفاصيل الرسالة النصية:</label>
+                    <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="عنوان التنبيه (مثال: درجة امتحان أو غياب)">
+                    <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه هنا..."></textarea>
                 </div>
 
-                <div id="audioInputContainer" class="hidden space-y-2">
-                    <label class="block text-sm font-semibold mb-1">رابط الملف الصوتي:</label>
-                    <input type="text" id="audioUrl" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="ضع رابط الملف الصوتي هنا (مثل ملف mp3)">
+                <div id="audioInputContainer" class="hidden space-y-1">
+                    <label class="block text-xs font-semibold mb-1">رابط الملف الصوتي:</label>
+                    <input type="text" id="audioUrl" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="ضع رابط الملف الصوتي هنا (مثل mp3)">
                 </div>
                 
-                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-sm">إرسال التنبيه للشعبة المحددة</button>
+                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-xs">إرسال التنبيه للشعبة المحددة</button>
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-lg font-bold text-green-600 border-b pb-2">📁 سجل الطلاب المقبولين في النظام</h2>
+                <h2 class="text-base font-bold text-green-600 border-b pb-2">📁 سجل الطلاب المقبولين في النظام</h2>
                 <div id="sortedStudentsContainer" class="space-y-3">
                     <p class="text-gray-500 text-sm">لم يتم قبول أي طالب بعد.</p>
                 </div>
             </div>
         </div>
 
-        <!-- ================= 3. بوابة ولي الأمر ================= -->
+        <!-- ================= 3. بوابة ولي الأمر المعتمدة (للقراءة فقط - تظهر بعد موافقة الإدارة) ================= -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-bold text-blue-600">بوابة المتابعة المدرسية</h2>
                     <div id="sortedBadge" class="mt-1 inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold"></div>
                 </div>
-                <button onclick="switchView('parentLogin')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">خروج</button>
+                <button onclick="switchView('parentLogin')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة -->
+            <!-- التنبيهات والرسائل الواردة الخاصة بابنه وصفه حصراً -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                    📢 التنبيهات والرسائل الموجهة (كتابية وصوتية):
+                    📢 التنبيهات والرسائل الواردة لصفك وشعبتك:
                 </h3>
                 <div id="parentTargetedNotificationsList" class="space-y-3">
-                    <div class="p-4 bg-yellow-50 border-r-4 border-yellow-500 rounded-lg">
-                        <h4 class="font-bold text-yellow-900">حالة الدخول</h4>
-                        <p class="text-sm text-gray-700 mt-1">تم تفعيل متابعة صفك وشعبتك بنجاح.</p>
-                    </div>
+                    <!-- يتم تعبئتها تلقائياً حسب الفرز -->
                 </div>
             </div>
 
@@ -187,6 +186,7 @@
     </div>
 
     <script>
+        // حفظ بيانات الطلبات والطلاب المقبولين في الذاكرة المؤقتة للصفحة
         let pendingRequests = [];
         let sortedStudentsList = []; 
         let currentStudentSession = null;
@@ -231,13 +231,14 @@
                 return;
             }
 
+            // حفظ بيانات الجلسة الحالية لولي الأمر
             currentStudentSession = { 
                 student: sName, 
                 mother: mName, 
                 stage, 
                 grade, 
                 section, 
-                notifications: [{ type: 'text', title: "حالة النظام", body: "تم إرسال الطلب للإدارة بانتظار الموافقة." }] 
+                notifications: [{ type: 'text', title: "حالة النظام", body: "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة لفتح المنصة..." }] 
             };
             
             pendingRequests.push(currentStudentSession);
@@ -257,12 +258,12 @@
             container.innerHTML = '';
             pendingRequests.forEach((req, index) => {
                 container.innerHTML += `
-                    <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center">
+                    <div class="p-4 bg-gray-50 border rounded-lg flex justify-between items-center text-sm">
                         <div>
                             <p class="font-bold text-blue-900">الطالب: ${req.student}</p>
                             <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.stage} - الصف ${req.grade} - شعبة (${req.section})</p>
                         </div>
-                        <button onclick="approveAndSort(${index})" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">✓ موافقة وقبول</button>
+                        <button onclick="approveAndSort(${index})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700">✓ موافقة وقبول</button>
                     </div>
                 `;
             });
@@ -273,9 +274,14 @@
             sortedStudentsList.push(student);
             currentStudentSession = student;
 
-            updateParentDashboardUI(student);
-            alert(`تمت الموافقة ودخول ولي أمر الطالب (${student.student}) بنجاح!`);
+            // تحديث رسالة الترحيب بداخل لوحة ولي الأمر
+            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على طلبك بنجاح. أهلاً بك في بوابة متابعة صفك وشعبتك." }];
+
+            alert(`تمت الموافقة على دخول الطالب (${student.student}) بنجاح!`);
+            
+            // العودة التلقائية لبوابة ولي الأمر وعرض شاشته الخاصة فقط
             switchView('parentDashboard');
+            updateParentDashboardUI(student);
         }
 
         function renderSortedStudents() {
