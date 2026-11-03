@@ -26,11 +26,10 @@
             <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm">دخول اللوحة</button>
         </div>
 
-        <!-- لوحة الإدارة (تبقى مفتوحة عند التحديث ولا تختفي إلا عند تسجيل الخروج) -->
+        <!-- لوحة الإدارة -->
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <!-- الأيقونة الشاملة على يمين النظام للوصول إلى معلومات وأرشيف الطالبات -->
                     <button onclick="openGlobalStudentsModal()" class="bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1.5 shadow-sm">
                         📁 سجل ومعلومات الطّالبات
                     </button>
@@ -62,31 +61,27 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
-            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة مع البحث الفردي -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
-                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات (موزعة حسب الصفوف والشعب)</h2>
-                    <input type="text" id="studentSearchInput" onkeyup="filterStudents()" class="px-3 py-1.5 border rounded-lg text-xs w-full md:w-64 focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث باسم الطّالبة...">
-                </div>
-                <!-- حاوية توزيع الطالبات حسب الصفوف والشعب -->
-                <div id="adminStudentsList" class="space-y-4">
-                    <p class="text-gray-500 text-sm">لم يتم قبول أي طالبة حتى الآن.</p>
-                </div>
-            </div>
-
-            <!-- استفسارات أولياء الأمور الواردة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
-                <div id="adminInquiriesContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد استفسارات جديدة حالياً.</p></div>
-            </div>
-
-            <!-- التنبيهات العامة الموجهة لصف أو شعبة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-200 space-y-4">
-                <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه عام لصف وشعبة محددة</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <!-- إدارة جدول الحصص والدروس اليدوية لكل مادة -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
+                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي (إدخال الواجبات والدروس يدوياً وإرسالها)</h2>
+                <p class="text-xs text-gray-500">اختر المادة والصف والشعبة ثم اكتب الواجب أو الدرس واضغط إرسال ليصل إلى جدول ولي الأمر.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
+                        <select id="lessonSubject" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                            <option value="القرآن الكريم">القرآن الكريم</option>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="الاجتماعيات">الاجتماعيات</option>
+                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                            <option value="الأخلاقية">الأخلاقية</option>
+                            <option value="العلوم">العلوم</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
-                        <select id="targetGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                        <select id="lessonGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="الأول الابتدائي">الأول الابتدائي</option>
                             <option value="الثاني الابتدائي">الثاني الابتدائي</option>
                             <option value="الثالث الابتدائي">الثالث الابتدائي</option>
@@ -97,16 +92,37 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold mb-1">الشعبة المستهدفة:</label>
-                        <select id="targetSection" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                        <select id="lessonSection" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
                             <option value="أ">الشعبة (أ)</option>
                             <option value="ب">الشعبة (ب)</option>
                             <option value="ج">الشعبة (ج)</option>
                         </select>
                     </div>
                 </div>
-                <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="عنوان التنبيه أو الدروس">
-                <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه أو التفاصيل هنا..."></textarea>
-                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">إرسال التوجيه للشعبة المحددة</button>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
+                    <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: حفظ سورة الفاتحة / حل الصفحة 15..."></textarea>
+                </div>
+
+                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس/الواجب إلى جدول ولي الأمر</button>
+            </div>
+
+            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
+                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات والتنبيه الفردي</h2>
+                    <input type="text" id="studentSearchInput" onkeyup="filterStudents()" class="px-3 py-1.5 border rounded-lg text-xs w-full md:w-64 focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث باسم الطّالبة...">
+                </div>
+                <div id="adminStudentsList" class="space-y-4">
+                    <p class="text-gray-500 text-sm">لم يتم قبول أي طالبة حتى الآن.</p>
+                </div>
+            </div>
+
+            <!-- استفسارات أولياء الأمور الواردة -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+                <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
+                <div id="adminInquiriesContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد استفسارات جديدة حالياً.</p></div>
             </div>
         </div>
 
@@ -136,6 +152,7 @@
         let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
         let parentInquiries = JSON.parse(localStorage.getItem('school_inquiries')) || [];
+        let schoolSchedule = JSON.parse(localStorage.getItem('school_schedule')) || {};
         
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
@@ -183,6 +200,7 @@
             localStorage.setItem('school_pending', JSON.stringify(pendingRequests));
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
             localStorage.setItem('school_inquiries', JSON.stringify(parentInquiries));
+            localStorage.setItem('school_schedule', JSON.stringify(schoolSchedule));
         }
 
         function updatePrincipalName() {
@@ -197,6 +215,43 @@
             if (!val) { alert("أدخل اسم المشرف."); return; }
             localStorage.setItem('school_supervisor_name', val);
             alert("✓ تم حفظ اسم المشرف بنجاح.");
+        }
+
+        // إرسال الواجب أو الدرس إلى جدول الحصص الخاص بالصف والشعبة وتنبيه الطالبة
+        function sendLessonToSchedule() {
+            const subject = document.getElementById('lessonSubject').value;
+            const grade = document.getElementById('lessonGrade').value;
+            const section = document.getElementById('lessonSection').value;
+            const content = document.getElementById('lessonContent').value.trim();
+
+            if (!content) {
+                alert("الرجاء كتابة تفاصيل الدرس أو الواجب أولاً.");
+                return;
+            }
+
+            const key = `${grade}_${section}`;
+            if (!schoolSchedule[key]) {
+                schoolSchedule[key] = {};
+            }
+
+            schoolSchedule[key][subject] = content;
+
+            // إرسال إشعار وتنبيه للطالبات المطابقات للصف والشعبة
+            let matchCount = 0;
+            approvedStudents.forEach(st => {
+                if (st.grade === grade && st.section === section) {
+                    st.notifications.unshift({
+                        type: 'text',
+                        title: `📚 واجب / درس جديد في مادة (${subject})`,
+                        body: content
+                    });
+                    matchCount++;
+                }
+            });
+
+            saveData();
+            document.getElementById('lessonContent').value = '';
+            alert(`✓ تم إرسال الدرس بنجاح إلى جدول وحسابات (${matchCount}) طالبة في ${grade} - شعبة (${section})!`);
         }
 
         function renderRequests() {
@@ -222,7 +277,6 @@
             renderAdminStudentsList();
         }
 
-        // توزيع الطالبات وترتيبهن تلقائياً حسب الصفوف والشعب داخل لوحة الإدارة
         function renderAdminStudentsList() {
             const container = document.getElementById('adminStudentsList');
             if (approvedStudents.length === 0) {
@@ -293,7 +347,7 @@
         function renderGlobalStudentsModalContent(studentsList) {
             const container = document.getElementById('globalStudentsContent');
             if (studentsList.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-center py-6">لا توجد طالبات مقطورات أو مسجلات في النظام حالياً.</p>`;
+                container.innerHTML = `<p class="text-gray-500 text-center py-6">لا توجد طالبات مسجلات في النظام حالياً.</p>`;
                 return;
             }
 
@@ -407,25 +461,6 @@
                     renderAdminInquiries();
                 }
             }
-        }
-
-        function sendTargetedBroadcast() {
-            const grade = document.getElementById('targetGrade').value;
-            const section = document.getElementById('targetSection').value;
-            const title = document.getElementById('targetTitle').value.trim();
-            const body = document.getElementById('targetBody').value.trim();
-
-            if (!title || !body) { alert("الرجاء تعبئة العنوان والنص."); return; }
-
-            let matchCount = 0;
-            approvedStudents.forEach(st => {
-                if ((grade === 'الكل' || st.grade === grade) && (section === 'الكل' || st.section === section)) {
-                    st.notifications.unshift({ type: 'text', title: `📢 ${title} (${st.grade} - شعبة ${st.section})`, body: body });
-                    matchCount++;
-                }
-            });
-            saveData();
-            alert(`✓ تم إرسال التنبيه بنجاح إلى (${matchCount}) طالبة مطابقة للصف والشعبة.`);
         }
     </script>
 </body>
