@@ -33,7 +33,6 @@
                     <button onclick="openGlobalStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1 shadow-sm">
                         📁 سجل الطّالبات
                     </button>
-                    <!-- أيقونة تعديل الرمز والباسورد الخاصة بالإدارة -->
                     <button onclick="openAdminSettingsModal()" class="bg-purple-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition flex items-center gap-1 shadow-sm">
                         🔐 تغيير بيانات الدخول
                     </button>
@@ -67,7 +66,7 @@
 
             <!-- إدارة جدول الحصص والدروس اليدوية لكل مادة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي (إدخال الواجبات والدروس يدوياً وإرسالها)</h2>
+                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات (مع تتبع المشاهدات)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
@@ -108,10 +107,10 @@
                 <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس/الواجب إلى جدول ولي الأمر</button>
             </div>
 
-            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة -->
+            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة مع متابعة المشاهدات -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
-                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات والتنبيه الفردي</h2>
+                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات ومتابعة مشاهدات الرسائل</h2>
                     <input type="text" id="studentSearchInput" onkeyup="filterStudents()" class="px-3 py-1.5 border rounded-lg text-xs w-full md:w-64 focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث باسم الطّالبة...">
                 </div>
                 <div id="adminStudentsList" class="space-y-4">
@@ -128,7 +127,7 @@
 
     </div>
 
-    <!-- نافذة منبثقة لتغيير اسم المستخدم وكلمة المرور الخاصة بالإدارة -->
+    <!-- نافذة منبثقة لتغيير بيانات الدخول -->
     <div id="adminSettingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
@@ -152,15 +151,15 @@
         </div>
     </div>
 
-    <!-- النافذة المنبثقة الشاملة لمعلومات وأرشيف جميع الطالبات -->
+    <!-- النافذة المنبثقة الشاملة لمعلومات وأرشيف جميع الطالبات ومشاهداتهن -->
     <div id="globalStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="font-bold text-pink-700 text-base">📁 سجل ومحتويات ومعلومات الطّالبات المقبولات</h3>
+                <h3 class="font-bold text-pink-700 text-base">📁 سجل ومحتويات ومشاهدات الطّالبات المقبولات</h3>
                 <button onclick="closeGlobalStudentsModal()" class="text-gray-500 hover:text-red-600 font-bold text-xl">✕</button>
             </div>
             <div>
-                <input type="text" id="modalSearchInput" onkeyup="filterModalStudents()" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث هنا باسم الطّالبة لعرض تفاصيلها الواردة والصادرة...">
+                <input type="text" id="modalSearchInput" onkeyup="filterModalStudents()" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث هنا باسم الطّالبة لعرض تفاصيلها ومشاهداتها...">
             </div>
             <div id="globalStudentsContent" class="space-y-4 text-xs"></div>
             <button onclick="closeGlobalStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold text-xs hover:bg-gray-600">إغلاق النافذة</button>
@@ -220,7 +219,6 @@
             }
         }
 
-        // إبقاء الجلسة فعالة عند التحديث
         window.onbeforeunload = function() {
             if (adminLoggedIn) {
                 localStorage.setItem('school_admin_logged', 'true');
@@ -236,7 +234,6 @@
             localStorage.setItem('school_admin_pass', adminPass);
         }
 
-        // فتح وإغلاق نافذة تغيير بيانات الدخول
         function openAdminSettingsModal() {
             document.getElementById('modalNewAdminUser').value = adminUser;
             document.getElementById('modalNewAdminPass').value = adminPass;
@@ -290,7 +287,7 @@
             if (!schoolSchedule[key]) {
                 schoolSchedule[key] = {};
             }
-            schoolSchedule[key][subject] = content;
+            schoolSchedule[key][subject] = { text: content, viewed: false };
 
             let matchCount = 0;
             approvedStudents.forEach(st => {
@@ -298,7 +295,8 @@
                     st.notifications.unshift({
                         type: 'text',
                         title: `📚 واجب / درس جديد في مادة (${subject})`,
-                        body: content
+                        body: content,
+                        unread: true
                     });
                     matchCount++;
                 }
@@ -324,7 +322,7 @@
 
         function approveStudent(index) {
             const student = pendingRequests.splice(index, 1)[0];
-            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة." }];
+            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
             alert(`تمت الموافقة على دخول الطّالبة (${student.student}) وتوجيهها إلى صفها.`);
@@ -350,11 +348,20 @@
                     if (filtered.length > 0) {
                         let studentsCards = '';
                         filtered.forEach(st => {
+                            // حساب عدد الرسائل غير المقروءة (التي لم يشاهدها ولي الأمر بعد)
+                            const unreadNotifs = (st.notifications || []).filter(n => n.unread).length;
+                            const statusBadge = unreadNotifs === 0 
+                                ? `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">👁️ تم مشاهدة كافة الرسائل</span>` 
+                                : `<span class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px] font-bold">📬 ${unreadNotifs} رسائل بانتظار المشاهدة</span>`;
+
                             studentsCards += `
                                 <div class="student-item p-3 bg-white border border-pink-200 rounded-lg space-y-2 text-xs my-2 shadow-sm" data-name="${st.student.toLowerCase()}">
                                     <div class="flex justify-between items-center">
                                         <span class="font-bold text-pink-900 text-sm">👧 الطّالبة: ${st.student}</span>
-                                        <span class="text-gray-500 font-semibold">الأم: ${st.mother}</span>
+                                        <div class="flex items-center gap-2">
+                                            ${statusBadge}
+                                            <span class="text-gray-500 font-semibold">الأم: ${st.mother}</span>
+                                        </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <input type="text" id="ind_msg_${st.id}" class="flex-1 px-3 py-1.5 border border-pink-200 rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="اكتب تنبيه خاص للطالبة (غياب، سلوك، درجة)...">
@@ -414,17 +421,24 @@
                     notifsHTML = `<p class="text-gray-400 italic">لا توجد رسائل أو تفاصيل مسجلة بعد.</p>`;
                 } else {
                     notifs.forEach(n => {
+                        const readStatus = n.unread 
+                            ? `<span class="text-red-500 font-bold">[لم تشاهد بعد ❌]</span>` 
+                            : `<span class="text-green-600 font-bold">[تمت المشاهدة ✔️]</span>`;
+
                         if (n.type === 'text') {
                             notifsHTML += `
-                                <div class="p-2 bg-white border-r-2 border-pink-500 rounded my-1">
-                                    <div class="font-bold text-pink-900">${n.title}</div>
-                                    <div class="text-gray-700">${n.body}</div>
+                                <div class="p-2 bg-white border-r-2 border-pink-500 rounded my-1 flex justify-between items-start">
+                                    <div>
+                                        <div class="font-bold text-pink-900">${n.title}</div>
+                                        <div class="text-gray-700">${n.body}</div>
+                                    </div>
+                                    <div class="text-[10px] mt-1">${readStatus}</div>
                                 </div>
                             `;
                         } else {
                             notifsHTML += `
                                 <div class="p-2 bg-white border-r-2 border-pink-600 rounded my-1">
-                                    <div class="font-bold text-pink-900">${n.title}</div>
+                                    <div class="font-bold text-pink-900">${n.title} ${readStatus}</div>
                                     <audio controls class="w-full mt-1"><source src="${n.url}" type="audio/mpeg"></audio>
                                 </div>
                             `;
@@ -439,7 +453,7 @@
                             <span class="text-gray-500 font-semibold">الأم: ${st.mother} | ${st.grade} - شعبة (${st.section})</span>
                         </div>
                         <div class="space-y-1">
-                            <p class="font-semibold text-gray-700">📜 التفاصيل والمراسلات الواردة والصادرة:</p>
+                            <p class="font-semibold text-gray-700">📜 تفاصيل ومشاهدات المراسلات:</p>
                             <div class="max-h-40 overflow-y-auto space-y-1 pr-1">
                                 ${notifsHTML}
                             </div>
@@ -472,11 +486,13 @@
                 targetStudent.notifications.unshift({
                     type: 'text',
                     title: `📌 تنبيه إداري خاص من المدرسة`,
-                    body: text
+                    body: text,
+                    unread: true
                 });
                 saveData();
                 inputField.value = '';
                 alert(`✓ تم إرسال التنبيه وحفظه في أرشيف الطّالبة بنجاح!`);
+                renderAdminStudentsList();
             }
         }
 
@@ -509,11 +525,12 @@
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
-                    student.notifications.unshift({ type: 'text', title: `💬 سؤال ولي الأمر: ${inquiry.content}`, body: `الرد الإداري: ${replyText}` });
+                    student.notifications.unshift({ type: 'text', title: `💬 سؤال ولي الأمر: ${inquiry.content}`, body: `الرد الإداري: ${replyText}`, unread: true });
                     parentInquiries.splice(idx, 1);
                     saveData();
                     alert("✓ تم إرسال الرد لولي الأمر وحفظه في أرشيف الطالبة.");
                     renderAdminInquiries();
+                    renderAdminStudentsList();
                 }
             }
         }
