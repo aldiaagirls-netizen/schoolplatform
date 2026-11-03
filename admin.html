@@ -64,9 +64,9 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
-            <!-- إدارة جدول الحصص والدروس اليدوية لكل مادة -->
+            <!-- إدارة جدول الحصص والدروس (الدرس الجديد يستبدل القديم تلقائياً) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات (مع تتبع المشاهدات)</h2>
+                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات (استبدال تلقائي للدرس القديم)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
@@ -104,10 +104,10 @@
                     <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
                     <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: حفظ سورة الفاتحة / حل الصفحة 15..."></textarea>
                 </div>
-                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس/الواجب إلى جدول ولي الأمر</button>
+                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس واستبدال القديم</button>
             </div>
 
-            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة مع متابعة المشاهدات -->
+            <!-- سجل الطّالبات المقبولات مصنفة حسب الصف والشعبة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
                     <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات ومتابعة مشاهدات الرسائل</h2>
@@ -272,6 +272,7 @@
             alert("✓ تم حفظ اسم المشرف بنجاح.");
         }
 
+        // إرسال الدرس الجديد بحيث يستبدل الدرس القديم حصرياً للمادة
         function sendLessonToSchedule() {
             const subject = document.getElementById('lessonSubject').value;
             const grade = document.getElementById('lessonGrade').value;
@@ -287,24 +288,13 @@
             if (!schoolSchedule[key]) {
                 schoolSchedule[key] = {};
             }
-            schoolSchedule[key][subject] = { text: content, viewed: false };
 
-            let matchCount = 0;
-            approvedStudents.forEach(st => {
-                if (st.grade === grade && st.section === section) {
-                    st.notifications.unshift({
-                        type: 'text',
-                        title: `📚 واجب / درس جديد في مادة (${subject})`,
-                        body: content,
-                        unread: true
-                    });
-                    matchCount++;
-                }
-            });
+            // استبدال الدرس القديم بالدرس الجديد مباشرة (بدون حفظ قديم)
+            schoolSchedule[key][subject] = content;
 
             saveData();
             document.getElementById('lessonContent').value = '';
-            alert(`✓ تم إرسال الدرس بنجاح إلى جدول وحسابات (${matchCount}) طالبة في ${grade} - شعبة (${section})!`);
+            alert(`✓ تم إرسال الدرس بنجاح واستبدال الدرس القديم لمادة (${subject}) في ${grade} - شعبة (${section})!`);
         }
 
         function renderRequests() {
@@ -348,7 +338,6 @@
                     if (filtered.length > 0) {
                         let studentsCards = '';
                         filtered.forEach(st => {
-                            // حساب عدد الرسائل غير المقروءة (التي لم يشاهدها ولي الأمر بعد)
                             const unreadNotifs = (st.notifications || []).filter(n => n.unread).length;
                             const statusBadge = unreadNotifs === 0 
                                 ? `<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">👁️ تم مشاهدة كافة الرسائل</span>` 
