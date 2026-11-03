@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- أسئلة واستفسارات أولياء الأمور الواردة للإدارة (نصية أو صوتية) -->
+            <!-- أسئلة واستفسارات أولياء الأمور الواردة للإدارة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
                 <div id="adminInquiriesContainer" class="space-y-3">
@@ -200,7 +200,7 @@
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
             </div>
 
-            <!-- خانة استفسار ولي الأمر (نصية أو صوتية) مع التنبيه التمويهي الخفيف -->
+            <!-- خانة استفسار ولي الأمر مع التنبيه التمويهي الخفيف -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-blue-900 text-sm">💬 إرسال رسالة أو استفسار للإدارة (نصية أو صوتية):</h3>
@@ -350,7 +350,7 @@
                 stage: currentSessionStudent.stage,
                 grade: currentSessionStudent.grade,
                 section: currentSessionStudent.section,
-                type: msgType, // text or audio
+                type: msgType,
                 content: content,
                 time: new Date().toLocaleDateString('ar-SA')
             };
@@ -789,7 +789,7 @@
         function renderParentNotifications(student) {
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
-            student.notifications.notificationsList = student.notifications || [];
+            student.notifications = student.notifications || [];
             student.notifications.forEach(n => {
                 if (n.type === 'text') {
                     list.innerHTML += `
