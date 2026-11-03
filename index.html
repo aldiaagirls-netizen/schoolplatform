@@ -21,7 +21,12 @@
                     <span id="displaySupervisorName" class="text-pink-600">مشرف المنصة: الأستاذ أحمد علي</span>
                 </div>
             </div>
-            <span class="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-1 rounded-full">بوابة أولياء الأمور</span>
+            <div class="flex items-center gap-2">
+                <div id="liveBadgeAlert" class="hidden bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full animate-bounce">
+                    🔔 رسائل جديدة!
+                </div>
+                <span class="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-1 rounded-full">بوابة أولياء الأمور</span>
+            </div>
         </div>
 
         <!-- 1. نموذج طلب دخول ولي الأمر -->
@@ -70,7 +75,7 @@
             <button onclick="submitParentRequest()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 transition mt-2">إرسال الطلب للإدارة</button>
         </div>
 
-        <!-- 2. لوحة متابعة ولي الأمر (تفتح تلقائياً فور موافقة الإدارة) -->
+        <!-- 2. لوحة متابعة ولي الأمر -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <div>
@@ -106,27 +111,31 @@
                 <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700">إرسال إلى الإدارة</button>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة للطالبة -->
+            <!-- جدول الحصص والدروس اليومية -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الواردة الخاصة بالطّالبة:</h3>
-                <div id="parentTargetedNotificationsList" class="space-y-3"></div>
+                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (مرتبط بإدارة المدرسة):</h3>
+                <div id="parentScheduleContainer" class="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs"></div>
             </div>
 
-            <!-- جدول الحصص اليومي والدروس -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-3">
-                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (تلقائي):</h3>
-                <div class="grid grid-cols-1 md:grid-cols-7 gap-2 text-center text-xs">
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">الأولى</span>القرآن الكريم</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">الثانية</span>اللغة العربية</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">الثالثة</span>الرياضيات</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">الرابعة</span>الاجتماعيات</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">الخامسة</span>اللغة الإنجليزية</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">السادسة</span>الأخلاقية</div>
-                    <div class="p-3 bg-pink-50 border border-pink-100 rounded"><span class="block font-bold text-pink-700 mb-1">السابعة</span>العلوم</div>
+            <!-- التنبيهات والرسائل الواردة للطالبة مع زر الحذف -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الواردة الخاصة بالطّالبة:</h3>
+                    <span id="unreadCountBadge" class="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full hidden">0 رسائل جديدة</span>
                 </div>
+                <div id="parentTargetedNotificationsList" class="space-y-3"></div>
             </div>
         </div>
 
+    </div>
+
+    <!-- نافذة منبثقة تفاعلية لعرض الدرس أو الواجب -->
+    <div id="lessonDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <h3 id="modalLessonTitle" class="font-bold text-pink-700 text-base border-b pb-2">📖 تفاصيل الحصة</h3>
+            <div id="modalLessonBody" class="text-sm text-gray-700 bg-pink-50 p-4 rounded-lg leading-relaxed"></div>
+            <button onclick="closeLessonModal()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold text-xs hover:bg-pink-700">إغلاق النافذة</button>
+        </div>
     </div>
 
     <script>
@@ -136,14 +145,14 @@
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
         let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let parentInquiries = JSON.parse(localStorage.getItem('school_inquiries')) || [];
+        let schoolSchedule = JSON.parse(localStorage.getItem('school_schedule')) || {};
         let currentSessionStudent = JSON.parse(localStorage.getItem('school_current')) || null;
 
         window.onload = function() {
             document.getElementById('displayPrincipalName').textContent = `مديرة المدرسة: ${principalName}`;
             document.getElementById('displaySupervisorName').textContent = `مشرف المنصة: ${supervisorName}`;
 
-            // التحقق المستمر من حالة الموافقة تلقائياً كل ثانية إذا كان ولي الأمر بانتظار الموافقة
-            setInterval(checkApprovalStatus, 1000);
+            setInterval(liveDataSync, 1000);
 
             if (currentSessionStudent) {
                 const stillApproved = approvedStudents.some(st => st.id === currentSessionStudent.id);
@@ -165,6 +174,34 @@
             localStorage.setItem('school_current', JSON.stringify(currentSessionStudent));
         }
 
+        function liveDataSync() {
+            approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
+            pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
+            schoolSchedule = JSON.parse(localStorage.getItem('school_schedule')) || {};
+
+            const waitingStr = localStorage.getItem('school_waiting_student');
+            if (waitingStr && !currentSessionStudent) {
+                const waitingObj = JSON.parse(waitingStr);
+                const foundApproved = approvedStudents.find(st => st.student === waitingObj.student && st.mother === waitingObj.mother);
+                if (foundApproved) {
+                    currentSessionStudent = foundApproved;
+                    localStorage.removeItem('school_waiting_student');
+                    saveData();
+                    document.getElementById('parentLoginView').classList.add('hidden');
+                    document.getElementById('parentDashboardView').classList.remove('hidden');
+                    updateParentDashboardUI(currentSessionStudent);
+                }
+            }
+
+            if (currentSessionStudent) {
+                const freshStudent = approvedStudents.find(st => st.id === currentSessionStudent.id);
+                if (freshStudent) {
+                    currentSessionStudent = freshStudent;
+                    updateParentDashboardUI(currentSessionStudent);
+                }
+            }
+        }
+
         function submitParentRequest() {
             const sName = document.getElementById('pStudentName').value.trim();
             const mName = document.getElementById('pMotherName').value.trim();
@@ -180,46 +217,18 @@
                 return;
             }
 
-            // حفظ بيانات الطلب مؤقتاً لتتبعه
             const tempStudentObj = { 
                 id: Date.now(), student: sName, mother: mName, stage, grade, section, weeklyInquiries: [], hasReceivedAutoReply: false,
-                notifications: [{ type: 'text', title: "حالة الطلب", body: "✓ تمت الموافقة على دخولك المنصة." }] 
+                notifications: [{ type: 'text', title: "حالة الطلب", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }] 
             };
             
             pendingRequests.push(tempStudentObj);
-            // حفظ مؤقت للاستدلال به عند فحص الموافقة
             localStorage.setItem('school_waiting_student', JSON.stringify(tempStudentObj));
             saveData();
             
             msg.textContent = "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة (سيتم الدخول تلقائياً فور الموافقة)...";
             msg.className = "text-center text-sm font-semibold text-pink-600";
             msg.classList.remove('hidden');
-        }
-
-        // فحص ما إذا وافقت الإدارة على الطالبة المنتظرة
-        function checkApprovalStatus() {
-            // تحديث البيانات من التخزين المشترك
-            approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
-            pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
-            
-            const waitingStr = localStorage.getItem('school_waiting_student');
-            if (!waitingStr || currentSessionStudent) return;
-
-            const waitingObj = JSON.parse(waitingStr);
-            
-            // البحث عن الطالبة في قائمة المقبولين التي حدثتها الإدارة
-            const foundApproved = approvedStudents.find(st => st.student === waitingObj.student && st.mother === waitingObj.mother);
-            
-            if (foundApproved) {
-                // تمت الموافقة! فتح نافذة الطالبة تلقائياً
-                currentSessionStudent = foundApproved;
-                localStorage.removeItem('school_waiting_student');
-                saveData();
-
-                document.getElementById('parentLoginView').classList.add('hidden');
-                document.getElementById('parentDashboardView').classList.remove('hidden');
-                updateParentDashboardUI(currentSessionStudent);
-            }
         }
 
         function toggleParentInputType() {
@@ -248,7 +257,7 @@
             parentInquiries.push(newInquiry);
 
             if (!currentSessionStudent.hasReceivedAutoReply) {
-                currentSessionStudent.notifications.unshift({ type: 'text', title: '💬 رد آلي من إدارة المدرسة', body: 'شكراً لتعاونكم مع إدارة مدرسة الضياء الابتدائية للبنات، سوف نقوم بالرد عليكم بأقرب وقت ممكن.' });
+                currentSessionStudent.notifications.unshift({ type: 'text', title: '💬 رد آلي من إدارة المدرسة', body: 'شكراً لتعاونكم مع إدارة مدرسة الضياء الابتدائية للبنات، سوف نقوم بالرد عليكم بأقرب وقت ممكن.', unread: true });
                 currentSessionStudent.hasReceivedAutoReply = true;
             }
 
@@ -258,7 +267,6 @@
             saveData();
             document.getElementById('parentInquiryText').value = '';
             document.getElementById('parentAudioUrl').value = '';
-            alert("✓ تم إرسال الرسالة بنجاح للإدارة.");
             updateParentDashboardUI(currentSessionStudent);
         }
 
@@ -273,15 +281,116 @@
 
         function updateParentDashboardUI(student) {
             document.getElementById('sortedBadge').textContent = `الطّالبة: ${student.student} (${student.grade} - شعبة ${student.section})`;
+            
+            const scheduleContainer = document.getElementById('parentScheduleContainer');
+            scheduleContainer.innerHTML = '';
+
+            const subjects = [
+                { title: "الأولى", name: "القرآن الكريم" },
+                { title: "الثانية", name: "اللغة العربية" },
+                { title: "الثالثة", name: "الرياضيات" },
+                { title: "الرابعة", name: "الاجتماعيات" },
+                { title: "الخامسة", name: "اللغة الإنجليزية" },
+                { title: "السادسة", name: "الأخلاقية" },
+                { title: "السابعة", name: "العلوم" }
+            ];
+
+            const key = `${student.grade}_${student.section}`;
+            const gradeSchedule = schoolSchedule[key] || {};
+
+            subjects.forEach(sub => {
+                const lessonText = gradeSchedule[sub.name] || "لا يوجد واجب أو درس مضاف من الإدارة حالياً.";
+                const hasNew = gradeSchedule[sub.name] ? true : false;
+                
+                scheduleContainer.innerHTML += `
+                    <div onclick="openLessonModal('${sub.title}', '${sub.name}', \`${lessonText}\`)" class="p-3 bg-pink-50 border border-pink-200 rounded-xl cursor-pointer hover:bg-pink-100 transition space-y-1 relative shadow-sm">
+                        ${hasNew ? '<span class="absolute top-1.5 left-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>' : ''}
+                        <span class="block font-bold text-pink-700 text-xs">${sub.title}</span>
+                        <span class="block text-gray-700 font-semibold text-[11px]">${sub.name}</span>
+                        <span class="text-[9px] text-pink-500 block">عرض الدرس 📋</span>
+                    </div>
+                `;
+            });
+
+            // عرض التنبيهات مع زر الحذف بجانب كل رسالة
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
-            // تحديث بيانات الطالبة الحالية من القائمة المعتمدة
-            const freshStudent = approvedStudents.find(st => st.id === student.id) || student;
-            (freshStudent.notifications || []).forEach(n => {
-                list.innerHTML += n.type === 'text' 
-                    ? `<div class="p-4 bg-pink-50 border-r-4 border-pink-500 rounded-lg"><h4 class="font-bold text-pink-900">${n.title}</h4><p class="text-sm text-gray-700 mt-1">${n.body}</p></div>`
-                    : `<div class="p-4 bg-pink-50 border-r-4 border-pink-600 rounded-lg space-y-2"><h4 class="font-bold text-pink-900">${n.title}</h4><audio controls class="w-full"><source src="${n.url}" type="audio/mpeg"></audio></div>`;
-            });
+            
+            let unreadCount = 0;
+            const notifications = student.notifications || [];
+
+            if (notifications.length === 0) {
+                list.innerHTML = `<p class="text-gray-400 text-xs text-center py-2">لا توجد رسائل أو تنبيهات حالياً.</p>`;
+            } else {
+                notifications.forEach((n, idx) => {
+                    if (n.unread) unreadCount++;
+                    
+                    let contentBox = n.type === 'text' 
+                        ? `<div onclick="markAsRead(${idx})" class="flex-1 cursor-pointer">
+                             <div class="flex justify-between items-center">
+                                 <h4 class="font-bold text-pink-900">${n.title}</h4>
+                                 ${n.unread ? '<span class="text-[10px] bg-red-500 text-white font-bold px-2 py-0.5 rounded-full">جديدة غير مفتوحة</span>' : ''}
+                             </div>
+                             <p class="text-sm text-gray-700 mt-1">${n.body}</p>
+                           </div>`
+                        : `<div class="flex-1 space-y-2">
+                             <h4 class="font-bold text-pink-900">${n.title}</h4>
+                             <audio controls class="w-full"><source src="${n.url}" type="audio/mpeg"></audio>
+                           </div>`;
+
+                    list.innerHTML += `
+                        <div class="p-4 bg-pink-50 border-r-4 ${n.unread ? 'border-red-500 bg-red-50/40' : 'border-pink-500'} rounded-lg flex justify-between items-center gap-3 transition">
+                            ${contentBox}
+                            <button onclick="deleteNotification(${idx})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 transition shadow-sm" title="حذف الرسالة">
+                                🗑️ حذف
+                            </button>
+                        </div>`;
+                });
+            }
+
+            const badgeAlert = document.getElementById('liveBadgeAlert');
+            const unreadBadge = document.getElementById('unreadCountBadge');
+            if (unreadCount > 0) {
+                badgeAlert.classList.remove('hidden');
+                unreadBadge.textContent = `${unreadCount} رسائل جديدة`;
+                unreadBadge.classList.remove('hidden');
+            } else {
+                badgeAlert.classList.add('hidden');
+                unreadBadge.classList.add('hidden');
+            }
+        }
+
+        function markAsRead(index) {
+            if (currentSessionStudent && currentSessionStudent.notifications[index]) {
+                currentSessionStudent.notifications[index].unread = false;
+                const stIndex = approvedStudents.findIndex(st => st.id === currentSessionStudent.id);
+                if (stIndex !== -1) approvedStudents[stIndex] = currentSessionStudent;
+                saveData();
+                updateParentDashboardUI(currentSessionStudent);
+            }
+        }
+
+        // دالة حذف الرسالة أو التنبيه المحدد
+        function deleteNotification(index) {
+            if (confirm("هل أنت متأكد من رغبتك في حذف هذه الرسالة؟")) {
+                if (currentSessionStudent && currentSessionStudent.notifications) {
+                    currentSessionStudent.notifications.splice(index, 1);
+                    const stIndex = approvedStudents.findIndex(st => st.id === currentSessionStudent.id);
+                    if (stIndex !== -1) approvedStudents[stIndex] = currentSessionStudent;
+                    saveData();
+                    updateParentDashboardUI(currentSessionStudent);
+                }
+            }
+        }
+
+        function openLessonModal(period, subjectName, details) {
+            document.getElementById('modalLessonTitle').textContent = `📖 الحصة ${period}: ${subjectName}`;
+            document.getElementById('modalLessonBody').textContent = details;
+            document.getElementById('lessonDetailModal').classList.remove('hidden');
+        }
+
+        function closeLessonModal() {
+            document.getElementById('lessonDetailModal').classList.add('hidden');
         }
     </script>
 </body>
