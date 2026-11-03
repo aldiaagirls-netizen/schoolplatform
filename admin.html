@@ -29,11 +29,15 @@
         <!-- لوحة الإدارة -->
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <button onclick="openGlobalStudentsModal()" class="bg-pink-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1.5 shadow-sm">
-                        📁 سجل ومعلومات الطّالبات
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="openGlobalStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1 shadow-sm">
+                        📁 سجل الطّالبات
                     </button>
-                    <h2 class="text-base font-bold text-pink-800 hidden md:block">لوحة التحكم المركزية</h2>
+                    <!-- أيقونة تعديل الرمز والباسورد الخاصة بالإدارة -->
+                    <button onclick="openAdminSettingsModal()" class="bg-purple-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition flex items-center gap-1 shadow-sm">
+                        🔐 تغيير بيانات الدخول
+                    </button>
+                    <h2 class="text-sm font-bold text-pink-800 hidden md:block">لوحة التحكم المركزية</h2>
                 </div>
                 <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">تسجيل الخروج 🚪</button>
             </div>
@@ -64,8 +68,6 @@
             <!-- إدارة جدول الحصص والدروس اليدوية لكل مادة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
                 <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي (إدخال الواجبات والدروس يدوياً وإرسالها)</h2>
-                <p class="text-xs text-gray-500">اختر المادة والصف والشعبة ثم اكتب الواجب أو الدرس واضغط إرسال ليصل إلى جدول ولي الأمر.</p>
-                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
@@ -99,12 +101,10 @@
                         </select>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
                     <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: حفظ سورة الفاتحة / حل الصفحة 15..."></textarea>
                 </div>
-
                 <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس/الواجب إلى جدول ولي الأمر</button>
             </div>
 
@@ -126,6 +126,30 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- نافذة منبثقة لتغيير اسم المستخدم وكلمة المرور الخاصة بالإدارة -->
+    <div id="adminSettingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-purple-700 text-base">🔐 تغيير بيانات دخول الإدارة</h3>
+                <button onclick="closeAdminSettingsModal()" class="text-gray-500 hover:text-red-600 font-bold text-xl">✕</button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">اسم المستخدم الجديد:</label>
+                    <input type="text" id="modalNewAdminUser" class="w-full px-3 py-2 border rounded-lg" placeholder="أدخل اسم المستخدم الجديد">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">كلمة المرور الجديدة:</label>
+                    <input type="password" id="modalNewAdminPass" class="w-full px-3 py-2 border rounded-lg" placeholder="أدخل كلمة المرور الجديدة">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveNewAdminCredentials()" class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold text-xs hover:bg-purple-700">حفظ البيانات الجديدة</button>
+                <button onclick="closeAdminSettingsModal()" class="bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold text-xs">إلغاء</button>
+            </div>
+        </div>
     </div>
 
     <!-- النافذة المنبثقة الشاملة لمعلومات وأرشيف جميع الطالبات -->
@@ -196,11 +220,45 @@
             }
         }
 
+        // إبقاء الجلسة فعالة عند التحديث
+        window.onbeforeunload = function() {
+            if (adminLoggedIn) {
+                localStorage.setItem('school_admin_logged', 'true');
+            }
+        };
+
         function saveData() {
             localStorage.setItem('school_pending', JSON.stringify(pendingRequests));
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
             localStorage.setItem('school_inquiries', JSON.stringify(parentInquiries));
             localStorage.setItem('school_schedule', JSON.stringify(schoolSchedule));
+            localStorage.setItem('school_admin_user', adminUser);
+            localStorage.setItem('school_admin_pass', adminPass);
+        }
+
+        // فتح وإغلاق نافذة تغيير بيانات الدخول
+        function openAdminSettingsModal() {
+            document.getElementById('modalNewAdminUser').value = adminUser;
+            document.getElementById('modalNewAdminPass').value = adminPass;
+            document.getElementById('adminSettingsModal').classList.remove('hidden');
+        }
+
+        function closeAdminSettingsModal() {
+            document.getElementById('adminSettingsModal').classList.add('hidden');
+        }
+
+        function saveNewAdminCredentials() {
+            const u = document.getElementById('modalNewAdminUser').value.trim();
+            const p = document.getElementById('modalNewAdminPass').value.trim();
+            if (!u || !p) {
+                alert("الرجاء إدخال اسم المستخدم وكلمة المرور الجديدة.");
+                return;
+            }
+            adminUser = u;
+            adminPass = p;
+            saveData();
+            alert("✓ تم تحديث وحفظ بيانات دخول الإدارة بنجاح!");
+            closeAdminSettingsModal();
         }
 
         function updatePrincipalName() {
@@ -217,7 +275,6 @@
             alert("✓ تم حفظ اسم المشرف بنجاح.");
         }
 
-        // إرسال الواجب أو الدرس إلى جدول الحصص الخاص بالصف والشعبة وتنبيه الطالبة
         function sendLessonToSchedule() {
             const subject = document.getElementById('lessonSubject').value;
             const grade = document.getElementById('lessonGrade').value;
@@ -233,10 +290,8 @@
             if (!schoolSchedule[key]) {
                 schoolSchedule[key] = {};
             }
-
             schoolSchedule[key][subject] = content;
 
-            // إرسال إشعار وتنبيه للطالبات المطابقات للصف والشعبة
             let matchCount = 0;
             approvedStudents.forEach(st => {
                 if (st.grade === grade && st.section === section) {
@@ -272,7 +327,7 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة." }];
             approvedStudents.push(student);
             saveData();
-            alert(`تمت الموافقة على دخول الطّالبة (${student.student}) وتوجيهها إلى صفها (${student.grade} - شعبة ${student.section}).`);
+            alert(`تمت الموافقة على دخول الطّالبة (${student.student}) وتوجيهها إلى صفها.`);
             renderRequests();
             renderAdminStudentsList();
         }
@@ -421,7 +476,7 @@
                 });
                 saveData();
                 inputField.value = '';
-                alert(`✓ تم إرسال التنبيه وحفظه في أرشيف الطّالبة: ${targetStudent.student} بنجاح!`);
+                alert(`✓ تم إرسال التنبيه وحفظه في أرشيف الطّالبة بنجاح!`);
             }
         }
 
