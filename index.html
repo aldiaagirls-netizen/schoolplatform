@@ -12,7 +12,7 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- رأس الصفحة الخاص بولي الأمر فقط -->
+        <!-- رأس الصفحة -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
             <div>
                 <h1 class="text-base font-bold text-pink-700">مدرسة الضياء للبنات 🌸</h1>
@@ -70,7 +70,7 @@
             <button onclick="submitParentRequest()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 transition mt-2">إرسال الطلب للإدارة</button>
         </div>
 
-        <!-- 2. لوحة متابعة ولي الأمر (تفتح فقط عند الموافقة) -->
+        <!-- 2. لوحة متابعة ولي الأمر (تفتح تلقائياً فور موافقة الإدارة) -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <div>
@@ -133,14 +133,17 @@
         let principalName = localStorage.getItem('school_principal_name') || 'د. أمل عبد الله';
         let supervisorName = localStorage.getItem('school_supervisor_name') || 'الأستاذ أحمد علي';
 
-        let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
+        let pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
         let parentInquiries = JSON.parse(localStorage.getItem('school_inquiries')) || [];
         let currentSessionStudent = JSON.parse(localStorage.getItem('school_current')) || null;
 
         window.onload = function() {
             document.getElementById('displayPrincipalName').textContent = `مديرة المدرسة: ${principalName}`;
             document.getElementById('displaySupervisorName').textContent = `مشرف المنصة: ${supervisorName}`;
+
+            // التحقق المستمر من حالة الموافقة تلقائياً كل ثانية إذا كان ولي الأمر بانتظار الموافقة
+            setInterval(checkApprovalStatus, 1000);
 
             if (currentSessionStudent) {
                 const stillApproved = approvedStudents.some(st => st.id === currentSessionStudent.id);
@@ -177,17 +180,46 @@
                 return;
             }
 
-            const newReq = { 
+            // حفظ بيانات الطلب مؤقتاً لتتبعه
+            const tempStudentObj = { 
                 id: Date.now(), student: sName, mother: mName, stage, grade, section, weeklyInquiries: [], hasReceivedAutoReply: false,
-                notifications: [{ type: 'text', title: "حالة الطلب", body: "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة..." }] 
+                notifications: [{ type: 'text', title: "حالة الطلب", body: "✓ تمت الموافقة على دخولك المنصة." }] 
             };
             
-            pendingRequests.push(newReq);
+            pendingRequests.push(tempStudentObj);
+            // حفظ مؤقت للاستدلال به عند فحص الموافقة
+            localStorage.setItem('school_waiting_student', JSON.stringify(tempStudentObj));
             saveData();
             
-            msg.textContent = "⏳ تم إرسال الطلب بنجاح، يرجى الانتظار لحين موافقة إدارة المدرسة لفتح البوابة...";
+            msg.textContent = "⏳ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة (سيتم الدخول تلقائياً فور الموافقة)...";
             msg.className = "text-center text-sm font-semibold text-pink-600";
             msg.classList.remove('hidden');
+        }
+
+        // فحص ما إذا وافقت الإدارة على الطالبة المنتظرة
+        function checkApprovalStatus() {
+            // تحديث البيانات من التخزين المشترك
+            approvedStudents = JSON.parse(localStorage.getItem('school_approved')) || [];
+            pendingRequests = JSON.parse(localStorage.getItem('school_pending')) || [];
+            
+            const waitingStr = localStorage.getItem('school_waiting_student');
+            if (!waitingStr || currentSessionStudent) return;
+
+            const waitingObj = JSON.parse(waitingStr);
+            
+            // البحث عن الطالبة في قائمة المقبولين التي حدثتها الإدارة
+            const foundApproved = approvedStudents.find(st => st.student === waitingObj.student && st.mother === waitingObj.mother);
+            
+            if (foundApproved) {
+                // تمت الموافقة! فتح نافذة الطالبة تلقائياً
+                currentSessionStudent = foundApproved;
+                localStorage.removeItem('school_waiting_student');
+                saveData();
+
+                document.getElementById('parentLoginView').classList.add('hidden');
+                document.getElementById('parentDashboardView').classList.remove('hidden');
+                updateParentDashboardUI(currentSessionStudent);
+            }
         }
 
         function toggleParentInputType() {
@@ -234,8 +266,8 @@
             if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
                 currentSessionStudent = null;
                 localStorage.removeItem('school_current');
-                document.getElementById('parentDashboardView').classList.add('hidden');
-                document.getElementById('parentLoginView').classList.remove('hidden');
+                localStorage.removeItem('school_waiting_student');
+                location.reload();
             }
         }
 
@@ -243,7 +275,9 @@
             document.getElementById('sortedBadge').textContent = `الطّالبة: ${student.student} (${student.grade} - شعبة ${student.section})`;
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
-            (student.notifications || []).forEach(n => {
+            // تحديث بيانات الطالبة الحالية من القائمة المعتمدة
+            const freshStudent = approvedStudents.find(st => st.id === student.id) || student;
+            (freshStudent.notifications || []).forEach(n => {
                 list.innerHTML += n.type === 'text' 
                     ? `<div class="p-4 bg-pink-50 border-r-4 border-pink-500 rounded-lg"><h4 class="font-bold text-pink-900">${n.title}</h4><p class="text-sm text-gray-700 mt-1">${n.body}</p></div>`
                     : `<div class="p-4 bg-pink-50 border-r-4 border-pink-600 rounded-lg space-y-2"><h4 class="font-bold text-pink-900">${n.title}</h4><audio controls class="w-full"><source src="${n.url}" type="audio/mpeg"></audio></div>`;
