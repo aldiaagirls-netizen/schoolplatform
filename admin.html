@@ -56,15 +56,26 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
+            <!-- سجل وطالبات المدرسة المقبولات مع مربع بحث وتنبيه فردي -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
+                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات (بحث وتنبيه فردي)</h2>
+                    <input type="text" id="studentSearchInput" onkeyup="filterStudents()" class="px-3 py-1.5 border rounded-lg text-xs w-full md:w-64 focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث باسم الطّالبة...">
+                </div>
+                <div id="adminStudentsList" class="space-y-3">
+                    <p class="text-gray-500 text-sm">لم يتم قبول أي طالبة حتى الآن.</p>
+                </div>
+            </div>
+
             <!-- استفسارات أولياء الأمور الواردة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
                 <div id="adminInquiriesContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد استفسارات جديدة حالياً.</p></div>
             </div>
 
-            <!-- التنبيهات الموجهة لكل صف وشعبة -->
+            <!-- التنبيهات العامة الموجهة لصف أو شعبة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-200 space-y-4">
-                <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه لصف وشعبة محددة (من الأول للسادس)</h2>
+                <h2 class="text-base font-bold text-purple-700 border-b pb-2">📢 إرسال توجيه أو تنبيه عام لصف وشعبة محددة</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
@@ -113,6 +124,7 @@
                 document.getElementById('adminAuthView').classList.add('hidden');
                 document.getElementById('adminDashboardView').classList.remove('hidden');
                 renderRequests();
+                renderAdminStudentsList();
                 renderAdminInquiries();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
@@ -162,8 +174,66 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة." }];
             approvedStudents.push(student);
             saveData();
-            alert(`تمت الموافقة على دخول الطّالبة (${student.student}).`);
+            alert(`تمت الموافقة على دخول الطّالبة (${student.student}) وحفظ بياناتها في السجل.`);
             renderRequests();
+            renderAdminStudentsList();
+        }
+
+        function renderAdminStudentsList() {
+            const container = document.getElementById('adminStudentsList');
+            if (approvedStudents.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-sm">لم يتم قبول أي طالبة حتى الآن.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            approvedStudents.forEach((st) => {
+                container.innerHTML += `
+                    <div class="student-item p-3 bg-pink-50 border border-pink-100 rounded-lg space-y-2 text-xs" data-name="${st.student.toLowerCase()}">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-pink-900 text-sm">👧 الطّالبة: ${st.student}</span>
+                            <span class="text-gray-500">الأم: ${st.mother} | ${st.grade} - شعبة (${st.section})</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="ind_msg_${st.id}" class="flex-1 px-3 py-1.5 border border-pink-200 rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="اكتب تنبيه خاص للطالبة (غياب، سلوك، درجة)...">
+                            <button onclick="sendIndividualNote(${st.id})" class="bg-pink-600 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-pink-700">إرسال للطالبة فقط</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ميزة البحث الذكي عن الطّالبة
+        function filterStudents() {
+            const query = document.getElementById('studentSearchInput').value.toLowerCase().trim();
+            const items = document.querySelectorAll('.student-item');
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if (name.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // إرسال تنبيه لطالبة محددة وحدها دون غيرها
+        function sendIndividualNote(studentId) {
+            const inputField = document.getElementById(`ind_msg_${studentId}`);
+            const text = inputField.value.trim();
+            if (!text) { alert("الرجاء كتابة نص التنبيه أو الحالة أولاً."); return; }
+
+            const targetStudent = approvedStudents.find(st => st.id === studentId);
+            if (targetStudent) {
+                targetStudent.notifications.unshift({
+                    type: 'text',
+                    title: `📌 تنبيه إداري خاص بالطّالبة (${targetStudent.student})`,
+                    body: text
+                });
+                saveData();
+                inputField.value = '';
+                alert(`✓ تم إرسال التنبيه بنجاح إلى ولي أمر الطّالبة: ${targetStudent.student} وحدها!`);
+            }
         }
 
         function renderAdminInquiries() {
