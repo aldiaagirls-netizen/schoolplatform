@@ -111,16 +111,16 @@
                 <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700">إرسال إلى الإدارة</button>
             </div>
 
-            <!-- جدول الحصص والدروس اليومية -->
+            <!-- جدول الحصص اليومي والدروس (يعرض الدرس الحالي ويستبدل القديم تلقائياً) -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (مرتبط بإدارة المدرسة):</h3>
+                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (الدرس الحالي):</h3>
                 <div id="parentScheduleContainer" class="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs"></div>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة للطالبة مع زر الحذف -->
+            <!-- التنبيهات والرسائل الإدارية الخاصة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الواردة الخاصة بالطّالبة:</h3>
+                    <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الإدارية الخاصة بالطّالبة:</h3>
                     <span id="unreadCountBadge" class="text-[10px] bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full hidden">0 رسائل جديدة</span>
                 </div>
                 <div id="parentTargetedNotificationsList" class="space-y-3"></div>
@@ -129,10 +129,10 @@
 
     </div>
 
-    <!-- نافذة منبثقة تفاعلية لعرض الدرس أو الواجب -->
+    <!-- نافذة منبثقة تفاعلية لعرض الدرس الحالي للمادة -->
     <div id="lessonDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <h3 id="modalLessonTitle" class="font-bold text-pink-700 text-base border-b pb-2">📖 تفاصيل الحصة</h3>
+            <h3 id="modalLessonTitle" class="font-bold text-pink-700 text-base border-b pb-2">📖 تفاصيل المادة</h3>
             <div id="modalLessonBody" class="text-sm text-gray-700 bg-pink-50 p-4 rounded-lg leading-relaxed"></div>
             <button onclick="closeLessonModal()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold text-xs hover:bg-pink-700">إغلاق النافذة</button>
         </div>
@@ -312,15 +312,14 @@
                 `;
             });
 
-            // عرض التنبيهات مع زر الحذف بجانب كل رسالة
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
             
             let unreadCount = 0;
-            const notifications = student.notifications || [];
+            const notifications = (student.notifications || []).filter(n => !n.title.includes('واجب / درس جديد'));
 
             if (notifications.length === 0) {
-                list.innerHTML = `<p class="text-gray-400 text-xs text-center py-2">لا توجد رسائل أو تنبيهات حالياً.</p>`;
+                list.innerHTML = `<p class="text-gray-400 text-xs text-center py-2">لا توجد رسائل إدارية حالياً.</p>`;
             } else {
                 notifications.forEach((n, idx) => {
                     if (n.unread) unreadCount++;
@@ -370,7 +369,6 @@
             }
         }
 
-        // دالة حذف الرسالة أو التنبيه المحدد
         function deleteNotification(index) {
             if (confirm("هل أنت متأكد من رغبتك في حذف هذه الرسالة؟")) {
                 if (currentSessionStudent && currentSessionStudent.notifications) {
