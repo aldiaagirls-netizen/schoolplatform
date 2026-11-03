@@ -16,7 +16,7 @@
         
         <!-- زر خفي في الأعلى خاص بالإدارة فقط -->
         <div class="bg-white p-2 rounded-xl shadow-sm border flex justify-between items-center text-xs">
-            <span class="font-bold text-gray-400">نظام المدرسة المعتمد</span>
+            <span class="font-bold text-gray-400">نظام المدرسة الآمن (بدون حفظ دائم)</span>
             <button onclick="toggleAdminPanel()" class="text-blue-600 underline font-semibold">دخول لوحة الإدارة</button>
         </div>
 
@@ -69,7 +69,7 @@
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة (إدارة الطلاب مع أزرار الموافقة والرفض) ================= -->
+        <!-- ================= 2. لوحة الإدارة ================= -->
         <div id="adminView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
                 <h2 class="text-lg font-bold text-blue-600">لوحة التحكم الإدارية</h2>
@@ -92,7 +92,7 @@
                 </div>
             </div>
 
-            <!-- لوحة إرسال إشعار جماعي لشعبة محددة (كتابي أو صوتي) -->
+            <!-- لوحة إرسال إشعار جماعي لشعبة محددة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h2 class="text-base font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية عامة لشعبة أو صف محدد</h2>
                 
@@ -188,6 +188,7 @@
     </div>
 
     <script>
+        // استخدام الذاكرة المؤقتة البحتة (Session Storage) لعدم الحفظ الدائم على المتصفح
         let pendingRequests = [];
         let approvedStudents = []; 
         let currentSessionStudent = null; 
@@ -277,10 +278,9 @@
             updateParentDashboardUI(student);
         }
 
-        // دالة رفض الطلب وحذفه فوراً
         function rejectStudent(index) {
-            const rejected = pendingRequests.splice(index, 1)[0];
-            alert(`تم رفض طلب الطالب: ${rejected.student}`);
+            pendingRequests.splice(index, 1);
+            alert(`تم رفض الطلب بنجاح.`);
             renderRequests();
         }
 
@@ -335,12 +335,14 @@
         }
 
         function logoutParent() {
+            // مسح وتفريغ البيانات فوراً عند تسجيل الخروج لضمان عدم حفظ أي معلومات مدخلة
             currentSessionStudent = null;
-            document.getElementById('parentDashboardView').classList.add('hidden');
-            document.getElementById('parentLoginView').classList.remove('hidden');
             document.getElementById('pStudentName').value = '';
             document.getElementById('pMotherName').value = '';
             document.getElementById('loginMessage').classList.add('hidden');
+            
+            document.getElementById('parentDashboardView').classList.add('hidden');
+            document.getElementById('parentLoginView').classList.remove('hidden');
         }
 
         function toggleContentInput() {
