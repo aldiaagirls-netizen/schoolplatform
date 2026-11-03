@@ -26,7 +26,7 @@
             <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm">دخول اللوحة</button>
         </div>
 
-        <!-- لوحة الإدارة (تظهر فقط بعد إدخال كلمة المرور الصحيحة) -->
+        <!-- لوحة الإدارة -->
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <h2 class="text-lg font-bold text-pink-800">إدارة مدرسة الضياء للبنات - لوحة التحكم المركزية</h2>
@@ -56,10 +56,10 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
-            <!-- سجل وطالبات المدرسة المقبولات مع مربع بحث وتنبيه فردي -->
+            <!-- سجل الطّالبات المقبولات مع مربع البحث وأيقونة السجل والأرشيف -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-center border-b pb-2 gap-2">
-                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات (بحث وتنبيه فردي)</h2>
+                    <h2 class="text-base font-bold text-pink-700">🎯 سجل الطّالبات المقبولات (بحث وتنبيه وأرشيف)</h2>
                     <input type="text" id="studentSearchInput" onkeyup="filterStudents()" class="px-3 py-1.5 border rounded-lg text-xs w-full md:w-64 focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="🔍 ابحث باسم الطّالبة...">
                 </div>
                 <div id="adminStudentsList" class="space-y-3">
@@ -101,10 +101,24 @@
                 </div>
                 <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="عنوان التنبيه أو الدروس">
                 <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه أو التفاصيل هنا..."></textarea>
-                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-purple-700">إرسال التوجيه للشعبة المحددة</button>
+                <button onclick="sendTargetedBroadcast()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">إرسال التوجيه للشعبة المحددة</button>
             </div>
         </div>
 
+    </div>
+
+    <!-- نافذة منبثقة (Modal) لعرض أرشيف وسجل مراسلات الطالبة بالتفصيل -->
+    <div id="studentArchiveModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-lg max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 id="modalStudentTitle" class="font-bold text-pink-700 text-base">📁 أرشيف مراسلات الطّالبة</h3>
+                <button onclick="closeArchiveModal()" class="text-gray-500 hover:text-red-600 font-bold text-lg">✕</button>
+            </div>
+            <div id="modalArchiveContent" class="space-y-3 text-xs">
+                <!-- تعبئة تفاصيل السجل -->
+            </div>
+            <button onclick="closeArchiveModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold text-xs">إغلاق الأرشيف</button>
+        </div>
     </div>
 
     <script>
@@ -192,7 +206,10 @@
                     <div class="student-item p-3 bg-pink-50 border border-pink-100 rounded-lg space-y-2 text-xs" data-name="${st.student.toLowerCase()}">
                         <div class="flex justify-between items-center">
                             <span class="font-bold text-pink-900 text-sm">👧 الطّالبة: ${st.student}</span>
-                            <span class="text-gray-500">الأم: ${st.mother} | ${st.grade} - شعبة (${st.section})</span>
+                            <div class="space-x-1 space-x-reverse">
+                                <button onclick="openStudentArchive(${st.id})" class="bg-blue-500 text-white px-2.5 py-1 rounded-lg font-semibold hover:bg-blue-600">📁 سجل المراسلات والتفاصيل</button>
+                                <span class="text-gray-500">الأم: ${st.mother} | ${st.grade} - شعبة (${st.section})</span>
+                            </div>
                         </div>
                         <div class="flex gap-2">
                             <input type="text" id="ind_msg_${st.id}" class="flex-1 px-3 py-1.5 border border-pink-200 rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="اكتب تنبيه خاص للطالبة (غياب، سلوك، درجة)...">
@@ -203,7 +220,46 @@
             });
         }
 
-        // ميزة البحث الذكي عن الطّالبة
+        // فتح نافذة الأرشيف وسجل المراسلات للطالبة المحددة
+        function openStudentArchive(studentId) {
+            const student = approvedStudents.find(st => st.id === studentId);
+            if (!student) return;
+
+            document.getElementById('modalStudentTitle').textContent = `📁 أرشيف مراسلات وتفاصيل الطّالبة: ${student.student}`;
+            const contentDiv = document.getElementById('modalArchiveContent');
+            contentDiv.innerHTML = '';
+
+            const notifs = student.notifications || [];
+            if (notifs.length === 0) {
+                contentDiv.innerHTML = `<p class="text-gray-500 text-center py-4">لا توجد رسائل أو تنبيهات مسجلة لهذه الطالبة حتى الآن.</p>`;
+            } else {
+                notifs.forEach(n => {
+                    if (n.type === 'text') {
+                        contentDiv.innerHTML += `
+                            <div class="p-3 bg-gray-50 border-r-4 border-pink-500 rounded space-y-1">
+                                <div class="font-bold text-pink-800">${n.title}</div>
+                                <div class="text-gray-700">${n.body}</div>
+                            </div>
+                        `;
+                    } else {
+                        contentDiv.innerHTML += `
+                            <div class="p-3 bg-gray-50 border-r-4 border-pink-600 rounded space-y-1">
+                                <div class="font-bold text-pink-800">${n.title}</div>
+                                <audio controls class="w-full mt-1"><source src="${n.url}" type="audio/mpeg"></audio>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            document.getElementById('studentArchiveModal').classList.remove('hidden');
+        }
+
+        function closeArchiveModal() {
+            document.getElementById('studentArchiveModal').classList.add('hidden');
+        }
+
+        // البحث الذكي عن الطّالبة
         function filterStudents() {
             const query = document.getElementById('studentSearchInput').value.toLowerCase().trim();
             const items = document.querySelectorAll('.student-item');
@@ -217,7 +273,6 @@
             });
         }
 
-        // إرسال تنبيه لطالبة محددة وحدها دون غيرها
         function sendIndividualNote(studentId) {
             const inputField = document.getElementById(`ind_msg_${studentId}`);
             const text = inputField.value.trim();
@@ -227,12 +282,12 @@
             if (targetStudent) {
                 targetStudent.notifications.unshift({
                     type: 'text',
-                    title: `📌 تنبيه إداري خاص بالطّالبة (${targetStudent.student})`,
+                    title: `📌 تنبيه إداري خاص من المدرسة`,
                     body: text
                 });
                 saveData();
                 inputField.value = '';
-                alert(`✓ تم إرسال التنبيه بنجاح إلى ولي أمر الطّالبة: ${targetStudent.student} وحدها!`);
+                alert(`✓ تم إرسال التنبيه وحفظه في أرشيف الطّالبة: ${targetStudent.student} بنجاح!`);
             }
         }
 
@@ -265,10 +320,11 @@
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
-                    student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفسارك`, body: replyText });
+                    // حفظ الاستفسار والرد في أرشيف الطالبة لتتمكن الإدارة من مراجعته دائماً
+                    student.notifications.unshift({ type: 'text', title: `💬 سؤال ولي الأمر: ${inquiry.content}`, body: `الرد: ${replyText}` });
                     parentInquiries.splice(idx, 1);
                     saveData();
-                    alert("✓ تم إرسال الرد لولي الأمر بنجاح.");
+                    alert("✓ تم إرسال الرد لولي الأمر وحفظه في أرشيف الطالبة.");
                     renderAdminInquiries();
                 }
             }
