@@ -69,7 +69,7 @@
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة (مخفية ولا تظهر لولي الأمر) ================= -->
+        <!-- ================= 2. لوحة الإدارة (إدارة الطلاب وإرسال التنبيه الفردي المباشر) ================= -->
         <div id="adminView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
                 <h2 class="text-lg font-bold text-blue-600">لوحة التحكم الإدارية</h2>
@@ -83,9 +83,18 @@
                 </div>
             </div>
 
-            <!-- لوحة إرسال تنبيهات موجهة (كتابية أو صوتية) -->
+            <!-- قائمة الطلاب المقبولين مع مربع إدخال الحالة الفردي لكل طالب -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
-                <h2 class="text-base font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية (كتابية أو صوتية) لشعبة محددة</h2>
+                <h2 class="text-base font-bold text-green-600 border-b pb-2">🎯 سجل الطلاب المقبولين (إرسال تنبيه مباشر لكل طالب)</h2>
+                <p class="text-xs text-gray-500">اكتب حالة الطالب (غياب، سلوك، تحضير، درجة) في المربع الخاص به ثم اضغط إرسال ليذهب لولي أمره حصراً.</p>
+                <div id="adminStudentsList" class="space-y-3">
+                    <p class="text-gray-500 text-sm">لم يتم قبول أي طالب حتى الآن.</p>
+                </div>
+            </div>
+
+            <!-- لوحة إرسال إشعار جماعي لشعبة محددة (كتابي أو صوتي) -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                <h2 class="text-base font-bold text-purple-600 border-b pb-2">🎙️ إرسال رسالة توجيهية عامة لشعبة أو صف محدد</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
@@ -130,7 +139,7 @@
 
                 <div id="textInputContainer">
                     <label class="block text-xs font-semibold mb-1">عنوان وتفاصيل الرسالة:</label>
-                    <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="عنوان التنبيه (مثال: درجة امتحان أو غياب)">
+                    <input type="text" id="targetTitle" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="عنوان التنبيه">
                     <textarea id="targetBody" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التنبيه هنا..."></textarea>
                 </div>
 
@@ -153,10 +162,10 @@
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1 rounded text-sm">تسجيل خروج</button>
             </div>
 
-            <!-- التنبيهات والرسائل الواردة لصفه وشعبته حصراً -->
+            <!-- التنبيهات والرسائل الواردة الخاصة بابنه حصراً -->
             <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
                 <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                    📢 التنبيهات والرسائل الواردة لصفك وشعبتك:
+                    📢 التنبيهات والرسائل الواردة الخاصة بالطالب:
                 </h3>
                 <div id="parentTargetedNotificationsList" class="space-y-3">
                     <!-- تعبئة تلقائية -->
@@ -180,8 +189,8 @@
 
     <script>
         let pendingRequests = [];
-        let approvedStudents = []; // قائمة الطلاب الذين تمت الموافقة عليهم
-        let currentSessionStudent = null; // الطالب الذي يتابع جلسته الحالية
+        let approvedStudents = []; 
+        let currentSessionStudent = null; 
 
         function submitParentRequest() {
             const sName = document.getElementById('pStudentName').value.trim();
@@ -199,6 +208,7 @@
             }
 
             currentSessionStudent = { 
+                id: Date.now(),
                 student: sName, 
                 mother: mName, 
                 stage, 
@@ -209,7 +219,6 @@
             
             pendingRequests.push(currentSessionStudent);
             
-            // إظهار رسالة الانتظار لولي الأمر وعدم فتح البوابة إلا بعد الموافقة
             msg.textContent = "⏳ تم إرسال الطلب بنجاح، يرجى الانتظار لحين موافقة الإدارة لفتح البوابة...";
             msg.className = "text-center text-sm font-semibold text-blue-600";
             msg.classList.remove('hidden');
@@ -220,6 +229,7 @@
             document.getElementById('parentDashboardView').classList.add('hidden');
             document.getElementById('adminView').classList.remove('hidden');
             renderRequests();
+            renderAdminStudentsList();
         }
 
         function closeAdminPanel() {
@@ -248,23 +258,73 @@
             });
         }
 
-        // عند موافقة الإدارة: يتم فتح البوابة وتوجيه ولي الأمر لواجهته الخاصة فوراً
         function approveStudent(index) {
             const student = pendingRequests.splice(index, 1)[0];
             approvedStudents.push(student);
             currentSessionStudent = student;
 
-            // تحديث رسالة الترحيب في واجهة ولي الأمر
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك. أهلاً بك في بوابة متابعة صفك وشعبتك." }];
 
             alert(`تمت الموافقة بنجاح! سيتم فتح البوابة لولي أمر الطالب (${student.student}) الآن.`);
             
-            // إخفاء الإدارة وفتح واجهة ولي الأمر حصراً
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('parentLoginView').classList.add('hidden');
             document.getElementById('parentDashboardView').classList.remove('hidden');
             
             updateParentDashboardUI(student);
+        }
+
+        // عرض قائمة الطلاب المقبولين مع مربع إدخال خاص لكل طالب لإرسال معلومات فورية لولي أمره
+        function renderAdminStudentsList() {
+            const container = document.getElementById('adminStudentsList');
+            if (approvedStudents.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-sm">لم يتم قبول أي طالب حتى الآن.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            approvedStudents.forEach((st, idx) => {
+                container.innerHTML += `
+                    <div class="p-3 bg-gray-50 border rounded-lg space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-blue-900 text-sm">👤 ${st.student}</span>
+                            <span class="text-gray-500">${st.stage} - الصف ${st.grade} - شعبة (${st.section})</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="input_msg_${st.id}" class="flex-1 px-3 py-1.5 border rounded-lg text-xs" placeholder="اكتب هنا (غائب، نشاط سلوكي، تحضير، درجة)...">
+                            <button onclick="sendIndividualNote(${st.id})" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-blue-700">إرسال للطالب</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // إرسال التنبيه الفردي للطالب المحدد فقط الذي دخل من خلاله ولي الأمر
+        function sendIndividualNote(studentId) {
+            const inputField = document.getElementById(`input_msg_${studentId}`);
+            const messageText = inputField.value.trim();
+
+            if (!messageText) {
+                alert('الرجاء كتابة محتوى التنبيه أو الحالة أولاً.');
+                return;
+            }
+
+            const targetStudent = approvedStudents.find(st => st.id === studentId);
+            if (targetStudent) {
+                targetStudent.notifications.unshift({ 
+                    type: 'text', 
+                    title: '📌 تنبيه إداري جديد يخص الطالب', 
+                    body: messageText 
+                });
+
+                inputField.value = '';
+                alert(`✓ تم إرسال التنبيه بنجاح إلى ولي أمر الطالب: ${targetStudent.student} فقط!`);
+
+                // إذا كان ولي الأمر لهذا الطالب فاتحاً المنصة حالياً، سيتم تحديث شاشته فوراً
+                if (currentSessionStudent && currentSessionStudent.id === studentId) {
+                    renderParentNotifications(currentSessionStudent);
+                }
+            }
         }
 
         function logoutParent() {
@@ -333,9 +393,8 @@
                 document.getElementById('audioUrl').value = '';
             }
 
-            alert(`✓ تم إرسال التنبيه بنجاح إلى (${matchCount}) طالباً مطابقاً للمرحلة والصف والشعبة المحددة!`);
+            alert(`✓ تم إرسال التنبيه العام بنجاح إلى (${matchCount}) طالباً مطابقاً!`);
             
-            // إذا كان الطالب الحالي ضمن الصف المستهدف، قم بتحديث واجهته فوراً
             if (currentSessionStudent) {
                 const stageMatch = (stage === 'الكل' || currentSessionStudent.stage === stage);
                 const gradeMatch = (grade === 'الكل' || currentSessionStudent.grade === grade);
