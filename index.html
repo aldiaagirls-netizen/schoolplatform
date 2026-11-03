@@ -69,7 +69,7 @@
         </div>
 
 
-        <!-- ================= 2. لوحة الإدارة (إدارة الطلاب وإرسال التنبيه الفردي المباشر) ================= -->
+        <!-- ================= 2. لوحة الإدارة (إدارة الطلاب مع أزرار الموافقة والرفض) ================= -->
         <div id="adminView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
                 <h2 class="text-lg font-bold text-blue-600">لوحة التحكم الإدارية</h2>
@@ -152,7 +152,7 @@
             </div>
         </div>
 
-        <!-- ================= 3. واجهة ولي الأمر (تفتح فور موافقة الإدارة وتظهر له وحده) ================= -->
+        <!-- ================= 3. واجهة ولي الأمر ================= -->
         <div id="parentDashboardView" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
                 <div>
@@ -252,7 +252,10 @@
                             <p class="font-bold text-blue-900">الطالب: ${req.student}</p>
                             <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.stage} - الصف ${req.grade} - شعبة (${req.section})</p>
                         </div>
-                        <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700">✓ موافقة وفتح البوابة</button>
+                        <div class="space-x-1 space-x-reverse">
+                            <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700">✓ موافقة</button>
+                            <button onclick="rejectStudent(${index})" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700">✕ رفض</button>
+                        </div>
                     </div>
                 `;
             });
@@ -274,7 +277,13 @@
             updateParentDashboardUI(student);
         }
 
-        // عرض قائمة الطلاب المقبولين مع مربع إدخال خاص لكل طالب لإرسال معلومات فورية لولي أمره
+        // دالة رفض الطلب وحذفه فوراً
+        function rejectStudent(index) {
+            const rejected = pendingRequests.splice(index, 1)[0];
+            alert(`تم رفض طلب الطالب: ${rejected.student}`);
+            renderRequests();
+        }
+
         function renderAdminStudentsList() {
             const container = document.getElementById('adminStudentsList');
             if (approvedStudents.length === 0) {
@@ -283,7 +292,7 @@
             }
 
             container.innerHTML = '';
-            approvedStudents.forEach((st, idx) => {
+            approvedStudents.forEach((st) => {
                 container.innerHTML += `
                     <div class="p-3 bg-gray-50 border rounded-lg space-y-2 text-xs">
                         <div class="flex justify-between items-center">
@@ -299,7 +308,6 @@
             });
         }
 
-        // إرسال التنبيه الفردي للطالب المحدد فقط الذي دخل من خلاله ولي الأمر
         function sendIndividualNote(studentId) {
             const inputField = document.getElementById(`input_msg_${studentId}`);
             const messageText = inputField.value.trim();
@@ -320,7 +328,6 @@
                 inputField.value = '';
                 alert(`✓ تم إرسال التنبيه بنجاح إلى ولي أمر الطالب: ${targetStudent.student} فقط!`);
 
-                // إذا كان ولي الأمر لهذا الطالب فاتحاً المنصة حالياً، سيتم تحديث شاشته فوراً
                 if (currentSessionStudent && currentSessionStudent.id === studentId) {
                     renderParentNotifications(currentSessionStudent);
                 }
