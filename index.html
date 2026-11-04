@@ -111,13 +111,13 @@
                 <button onclick="sendParentInquiry()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-blue-700">إرسال إلى الإدارة</button>
             </div>
 
-            <!-- جدول الحصص اليومي والدروس -->
+            <!-- جدول الحصص والدروس اليومية -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (الدرس الحالي):</h3>
+                <h3 class="font-bold text-gray-700">📅 جدول الحصص اليومي والدروس (الدرس الحالي المحدث):</h3>
                 <div id="parentScheduleContainer" class="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs"></div>
             </div>
 
-            <!-- التنبيهات والرسائل الإدارية الخاصة (تعرض كافة الرسائل الواردة بوضوح) -->
+            <!-- التنبيهات والرسائل الإدارية الخاصة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-gray-700">📢 التنبيهات والرسائل الإدارية الخاصة بالطّالبة:</h3>
@@ -312,7 +312,6 @@
                 `;
             });
 
-            // عرض كافة الرسائل والتنبيهات الواردة دون فلترة أو استثناء
             const list = document.getElementById('parentTargetedNotificationsList');
             list.innerHTML = '';
             
