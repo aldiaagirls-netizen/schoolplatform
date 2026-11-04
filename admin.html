@@ -30,7 +30,7 @@
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center flex-wrap gap-2">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <!-- أيقونة فتح سجل الطالبات ومتابعة المشاهدات (مخفي وينفتح بالضغط) -->
+                    <!-- الأيقونة الخاصة المخفية التي تفتح سجل الطالبات ومتابعة المشاهدات -->
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1 shadow-sm">
                         📁 سجل الطّالبات ومتابعة المشاهدات
                     </button>
@@ -119,7 +119,7 @@
 
     </div>
 
-    <!-- النافذة المنبثقة (Modal) لسجل الطالبات ومتابعة المشاهدات (مخفية ولا تظهر إلا عند الضغط على الأيقونة) -->
+    <!-- نافذة منبثقة (Modal) لسجل الطالبات ومتابعة المشاهدات (مخفية ولا تفتح إلا عبر الأيقونة) -->
     <div id="studentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
@@ -232,7 +232,6 @@
             }
         }
 
-        // فتح وإغلاق نافذة سجل الطالبات ومتابعة المشاهدات
         function openStudentsModal() {
             renderModalStudentsContent(approvedStudents);
             document.getElementById('studentsModal').classList.remove('hidden');
@@ -325,7 +324,6 @@
 
             container.innerHTML = '';
             const grades = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
-            const sections = ["أ", "b", "ج"];
 
             grades.forEach(grade => {
                 ["أ", "ب", "ج"].forEach(section => {
