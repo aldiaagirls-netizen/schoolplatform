@@ -300,13 +300,17 @@
         }
 
         function updatePrincipalName() {
-            principalName = document.getElementById('newPrincipalName').value.trim();
+            const val = document.getElementById('newPrincipalName').value.trim();
+            if(!val) return;
+            principalName = val;
             saveData();
             alert("✓ تم حفظ اسم المديرة سحابياً.");
         }
 
         function updateSupervisorName() {
-            supervisorName = document.getElementById('newSupervisorName').value.trim();
+            const val = document.getElementById('newSupervisorName').value.trim();
+            if(!val) return;
+            supervisorName = val;
             saveData();
             alert("✓ تم حفظ اسم المشرف سحابياً.");
         }
@@ -354,9 +358,10 @@
                     <div class="p-3 bg-blue-50 border rounded-lg space-y-2 text-xs">
                         <p class="font-bold text-blue-900">👧 الطالبة: ${q.studentName} (${q.grade} - شعبة ${q.section})</p>
                         <p class="bg-white p-2 rounded border"><strong>النص:</strong> ${q.content}</p>
-                        <div class="flex gap-2">
-                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs" placeholder="اكتب الرد هنا...">
+                        <div class="flex gap-2 flex-wrap items-center">
+                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs min-w-[150px]" placeholder="اكتب الرد هنا...">
                             <button onclick="replyInquiry(${q.id})" class="bg-blue-600 text-white px-3 py-1 rounded">إرسال الرد</button>
+                            <button onclick="deleteInquiry(${q.id})" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">🗑️ حذف الاستفسار</button>
                         </div>
                     </div>`;
             });
@@ -375,6 +380,17 @@
                     parentInquiries.splice(idx, 1);
                     saveData();
                     alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
+                }
+            }
+        }
+
+        function deleteInquiry(id) {
+            if (confirm("⚠️ هل أنت متأكد من حذف هذا الاستفسار؟")) {
+                const idx = parentInquiries.findIndex(q => q.id === id);
+                if (idx !== -1) {
+                    parentInquiries.splice(idx, 1);
+                    saveData();
+                    alert("✓ تم حذف الاستفسار بنجاح.");
                 }
             }
         }
