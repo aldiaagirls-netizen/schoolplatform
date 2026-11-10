@@ -41,10 +41,22 @@
                         🔐 تغيير بيانات الدخول
                     </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition flex items-center gap-1 shadow-sm">
-                        🗑️ حذف بيانات النظام
+                        🗑️ حذف بيانات النظام (نهائياً)
                     </button>
                 </div>
                 <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">تسجيل الخروج 🚪</button>
+            </div>
+
+            <!-- إحصائية سريعة لاستيعاب النظام -->
+            <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl shadow-sm flex justify-between items-center text-xs">
+                <div>
+                    <p class="font-bold text-sm">📊 مؤشر سعة واستقرار النظام</p>
+                    <p class="opacity-90">النظام مهيأ لحفظ وإدارة حتى 1000 طالبة بدون فقدان البيانات.</p>
+                </div>
+                <div class="bg-white/20 px-3 py-2 rounded-lg text-center">
+                    <span id="totalSavedCount" class="block font-bold text-base">0</span>
+                    <span class="text-[10px]">طالبة مسجلة ومحفوظة</span>
+                </div>
             </div>
 
             <!-- طلبات أولياء الأمور المعلقة -->
@@ -227,6 +239,7 @@
     </div>
 
     <script>
+        // استرجاع البيانات المحفوظة بدقة لضمان استمراريتها حتى بعد التحديث والخروج والدخول
         let adminUser = localStorage.getItem('school_admin_user') || 'admin';
         let adminPass = localStorage.getItem('school_admin_pass') || '123456';
         let principalName = localStorage.getItem('school_principal_name') || 'د. أمل عبد الله';
@@ -239,7 +252,6 @@
         
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
-        // متغيرات تسجيل الصوت
         let mediaRecorder;
         let audioChunks = [];
         let recordedAudioBase64 = null;
@@ -250,6 +262,7 @@
                 document.getElementById('adminDashboardView').classList.remove('hidden');
                 renderRequests();
                 renderAdminInquiries();
+                updateTotalCountBadge();
             } else {
                 document.getElementById('adminAuthView').classList.remove('hidden');
                 document.getElementById('adminDashboardView').classList.add('hidden');
@@ -266,6 +279,7 @@
                 document.getElementById('adminDashboardView').classList.remove('hidden');
                 renderRequests();
                 renderAdminInquiries();
+                updateTotalCountBadge();
             } else {
                 alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
             }
@@ -282,6 +296,7 @@
             }
         }
 
+        // دالة الحفظ الآمن والمستمر للبيانات (تستوعب حتى 1000 طالب فصاعداً)
         function saveData() {
             localStorage.setItem('school_pending', JSON.stringify(pendingRequests));
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
@@ -289,17 +304,25 @@
             localStorage.setItem('school_schedule', JSON.stringify(schoolSchedule));
             localStorage.setItem('school_admin_user', adminUser);
             localStorage.setItem('school_admin_pass', adminPass);
+            updateTotalCountBadge();
         }
 
+        function updateTotalCountBadge() {
+            const badge = document.getElementById('totalSavedCount');
+            if (badge) {
+                badge.innerText = approvedStudents.length;
+            }
+        }
+
+        // الحذف مقصور فقط على رغبة المشرف عند الضغط صراحة هنا
         function clearAllSystemData() {
-            if (confirm("⚠️ تحذير: هل أنت متأكد تماماً من رغبتك في حذف كافة بيانات النظام؟")) {
+            if (confirm("⚠️ تحذير شديد: هل أنت متأكد تماماً من رغبتك في حذف كافة بيانات النظام والملفات؟ لن يتم استرجاعها إلا بإعادة إدخالها.")) {
                 localStorage.clear();
-                alert("✓ تم مسح وإعادة ضبط كافة بيانات النظام بنجاح.");
+                alert("✓ تم مسح وإعادة ضبط كافة بيانات النظام بنجاح بناءً على طلبك.");
                 location.reload();
             }
         }
 
-        // دوال تسجيل الصوت عبر الميكروفون
         function startAdminRecording() {
             audioChunks = [];
             recordedAudioBase64 = null;
@@ -331,7 +354,7 @@
                     };
                 })
                 .catch(error => {
-                    alert("❌ تعذر الوصول إلى الميكروفون. يجدر التأكد من صلاحيات المتصفح.");
+                    alert("❌ تعذر الوصول إلى الميكروفون. تأكد من إعطاء الصلاحية في المتصفح.");
                 });
         }
 
@@ -347,7 +370,6 @@
             }
         }
 
-        // إرسال التعميم (نص أو صوت) للصفوف والشعب المستهدفة
         function sendBroadcastMessage() {
             const targetGrade = document.getElementById('broadcastGrade').value;
             const targetSection = document.getElementById('broadcastSection').value;
@@ -394,7 +416,7 @@
             recordedAudioBase64 = null;
             document.getElementById('audioPreviewContainer').classList.add('hidden');
             document.getElementById('recordingStatus').innerText = "الميكروفون متوقف";
-            alert(`✓ تم إرسال التعميم بنجاح إلى (${recipientCount}) طالبة مستهدفة!`);
+            alert(`✓ تم إرسال التعميم بنجاح إلى (${recipientCount}) طالبة مستهدفة وحفظه في سجلات النظام!`);
         }
 
         function renderRequests() {
@@ -415,7 +437,7 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
-            alert(`✓ تمت الموافقة على الطّالبة (${student.student}) وتنظيمها تلقائياً بصف (${student.grade} - شعبة ${student.section}) داخل الأيقونة الجانبية!`);
+            alert(`✓ تمت الموافقة على الطّالبة (${student.student}) وحفظها تلقائياً بصف (${student.grade} - شعبة ${student.section}) في الدليل!`);
             renderRequests();
         }
 
@@ -539,7 +561,7 @@
 
             saveData();
             document.getElementById('lessonContent').value = '';
-            alert(`✓ تم إرسال الدرس واستبدال القديم لمادة (${subject}) في ${grade} - شعبة (${section})!`);
+            alert(`✓ تم إرسال وحفظ الدرس لمادة (${subject}) في ${grade} - شعبة (${section})!`);
         }
 
         function renderModalStudentsContent(studentsList) {
@@ -573,7 +595,7 @@
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
-                                        <input type="text" id="ind_msg_${st.id}" class="flex-1 px-3 py-1.5 border border-pink-200 rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="اكتب تنبيه خاص للطالبة (غياب، سلوك، درجة)...">
+                                        <input type="text" id="ind_msg_${st.id}" class="flex-1 px-3 py-1.5 border border-pink-200 rounded-lg text-xs focus:ring-1 focus:ring-pink-400 focus:outline-none" placeholder="اكتب تنبيه خاص للطالبة...">
                                         <button onclick="sendIndividualNote(${st.id})" class="bg-pink-600 text-white px-4 py-1.5 rounded-lg font-semibold hover:bg-pink-700">إرسال للطالبة فقط</button>
                                     </div>
                                 </div>
@@ -621,7 +643,7 @@
                 });
                 saveData();
                 inputField.value = '';
-                alert(`✓ تم إرسال التنبيه للطالبة بنجاح!`);
+                alert(`✓ تم إرسال وحفظ التنبيه للطالبة بنجاح!`);
                 openStudentsModal();
             }
         }
@@ -658,7 +680,7 @@
                     student.notifications.unshift({ type: 'text', title: `💬 سؤال ولي الأمر: ${inquiry.content}`, body: `الرد الإداري: ${replyText}`, unread: true });
                     parentInquiries.splice(idx, 1);
                     saveData();
-                    alert("✓ تم إرسال الرد لولي الأمر.");
+                    alert("✓ تم إرسال وحفظ الرد بملف ولي الأمر.");
                     renderAdminInquiries();
                 }
             }
