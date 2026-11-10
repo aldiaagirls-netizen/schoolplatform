@@ -284,6 +284,10 @@
         let recordedAudioBase64 = null;
 
         window.onload = function() {
+            // تعيين الأسماء المحفوظة داخل الحقول تلقائياً
+            document.getElementById('newPrincipalName').value = principalName;
+            document.getElementById('newSupervisorName').value = supervisorName;
+
             if (adminLoggedIn) {
                 document.getElementById('adminAuthView').classList.add('hidden');
                 document.getElementById('adminDashboardView').classList.remove('hidden');
@@ -585,6 +589,7 @@
         function updatePrincipalName() {
             const val = document.getElementById('newPrincipalName').value.trim();
             if (!val) { alert("أدخل اسم المديرة."); return; }
+            principalName = val;
             localStorage.setItem('school_principal_name', val);
             alert("✓ تم حفظ اسم المديرة بنجاح.");
         }
@@ -592,6 +597,7 @@
         function updateSupervisorName() {
             const val = document.getElementById('newSupervisorName').value.trim();
             if (!val) { alert("أدخل اسم المشرف."); return; }
+            supervisorName = val;
             localStorage.setItem('school_supervisor_name', val);
             alert("✓ تم حفظ اسم المشرف بنجاح.");
         }
