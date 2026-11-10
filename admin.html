@@ -168,14 +168,22 @@
         </div>
     </div>
 
-    <!-- النافذة المنبثقة لدليل الطالبات المقبولات مرتبة حسب الصف والشعبة -->
+    <!-- نافذة دليل الطالبات التفاعلية (الصفوف -> الشعب -> الطالبات) -->
     <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
-            <h3 class="font-bold text-emerald-700 text-base border-b pb-2">📂 دليل الطالبات المقبولات (حسب الصف والشعبة)</h3>
-            <div id="acceptedStudentsContainer" class="space-y-4 text-xs">
-                <p class="text-gray-500">لا توجد طالبات مقبولات حالياً.</p>
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 id="modalTitle" class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات - اختر الصف</h3>
+                <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg hover:text-red-600">✕</button>
             </div>
-            <button onclick="closeAcceptedStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs font-bold">إغلاق</button>
+            
+            <!-- محتوى النافذة المتغير ديناميكياً -->
+            <div id="acceptedStudentsContent" class="space-y-3 text-xs">
+                <!-- يتم تعبئته تلقائياً بواسطة الجافاسكريبت -->
+            </div>
+
+            <div id="modalBackBtnContainer" class="hidden pt-2 border-t">
+                <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-700">← العودة لقائمة الصفوف</button>
+            </div>
         </div>
     </div>
 
@@ -230,7 +238,6 @@
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
-                    renderAcceptedStudentsByClass(); // تحديث دليل الطالبات تلقائياً
                 }
             });
 
@@ -262,7 +269,6 @@
                 renderRequests();
                 renderAdminInquiries();
                 updateTotalCountBadge();
-                renderAcceptedStudentsByClass();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
             }
@@ -297,57 +303,104 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
-            renderAcceptedStudentsByClass();
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
         }
 
-        // --- تصنيف وعرض الطالبات المقبولات حسب الصف والشعبة تلقائياً ---
-        function renderAcceptedStudentsByClass() {
-            const container = document.getElementById('acceptedStudentsContainer');
-            if (approvedStudents.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-center py-4">لا توجد طالبات مقبولات في السحابة حالياً.</p>`;
+        // --- نظام التصفح الهرمي التفاعلي (الصفوف -> الشعب -> الطالبات) ---
+        const gradesList = [
+            "الأول الابتدائي",
+            "الثاني الابتدائي",
+            "الثالث الابتدائي",
+            "الرابع الابتدائي",
+            "الخامس الابتدائي",
+            "السادس الابتدائي"
+        ];
+        const sectionsList = ["أ", "ب", "ج"];
+
+        function openAcceptedStudentsModal() {
+            document.getElementById('acceptedStudentsModal').classList.remove('hidden');
+            renderGradesView();
+        }
+
+        function closeAcceptedStudentsModal() {
+            document.getElementById('acceptedStudentsModal').classList.add('hidden');
+        }
+
+        // 1. عرض الصفوف من الأول إلى السادس
+        function renderGradesView() {
+            document.getElementById('modalTitle').innerText = "📂 دليل الطالبات - اختر الصف الدراسي";
+            document.getElementById('modalBackBtnContainer').classList.add('hidden');
+            const container = document.getElementById('acceptedStudentsContent');
+            
+            container.innerHTML = '';
+            gradesList.forEach(grade => {
+                // حساب عدد الطالبات في هذا الصف
+                const count = approvedStudents.filter(s => s.grade === grade).length;
+                container.innerHTML += `
+                    <button onclick="renderSectionsView('${grade}')" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
+                        <span>📚 ${grade}</span>
+                        <span class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
+                    </button>
+                `;
+            });
+        }
+
+        // 2. عرض الشعب (أ، ب، ج) عند الضغط على الصف
+        function renderSectionsView(grade) {
+            document.getElementById('modalTitle').innerText = `📂 ${grade} - اختر الشعبة`;
+            document.getElementById('modalBackBtnContainer').classList.remove('hidden');
+            const container = document.getElementById('acceptedStudentsContent');
+
+            container.innerHTML = '';
+            sectionsList.forEach(sec => {
+                // حساب عدد الطالبات في هذه الشعبة لهذا الصف
+                const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
+                container.innerHTML += `
+                    <button onclick="renderStudentsView('${grade}', '${sec}')" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
+                        <span>🏫 الشعبة (${sec})</span>
+                        <span class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
+                    </button>
+                `;
+            });
+        }
+
+        // 3. عرض الطالبات المقبولات في الصف والشعبة المحددة مع زر حذف
+        function renderStudentsView(grade, section) {
+            document.getElementById('modalTitle').innerText = `👧 طالبات ${grade} - شعبة (${section})`;
+            const container = document.getElementById('acceptedStudentsContent');
+
+            const filteredStudents = approvedStudents.map((st, idx) => ({ ...st, originalIndex: idx }))
+                                                     .filter(s => s.grade === grade && s.section === section);
+
+            if (filteredStudents.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-6">لا توجد طالبات مسجلات في هذه الشعبة حالياً.</p>`;
                 return;
             }
 
-            // تجميع الطالبات حسب الصف والشعبة
-            const grouped = {};
-            approvedStudents.forEach((st, idx) => {
-                const key = `${st.grade} - الشعبة (${st.section})`;
-                if (!grouped[key]) grouped[key] = [];
-                grouped[key].push({ ...st, originalIndex: idx });
-            });
-
             container.innerHTML = '';
-            for (const [groupName, studentsList] of Object.entries(grouped)) {
-                let studentsHtml = '';
-                studentsList.forEach((st) => {
-                    studentsHtml += `
-                        <div class="flex justify-between items-center bg-white p-2 border rounded shadow-sm mb-2">
-                            <div>
-                                <p class="font-bold text-gray-800">👧 الطالبة: ${st.student}</p>
-                                <p class="text-[11px] text-gray-500">ولي الأمر / الأم: ${st.mother}</p>
-                            </div>
-                            <button onclick="removeApprovedStudent(${st.originalIndex})" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] hover:bg-red-600">حذف من المقبولات</button>
-                        </div>
-                    `;
-                });
-
+            filteredStudents.forEach((st) => {
                 container.innerHTML += `
-                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-3">
-                        <h4 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">📚 ${groupName} (${studentsList.length} طالبة)</h4>
-                        <div class="space-y-1">${studentsHtml}</div>
+                    <div class="flex justify-between items-center bg-white p-3 border border-pink-100 rounded-lg shadow-sm">
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">👧 ${st.student}</p>
+                            <p class="text-[11px] text-gray-500">ولي الأمر / الأم: ${st.mother}</p>
+                        </div>
+                        <button onclick="removeStudentFromAccepted(${st.originalIndex}, '${grade}', '${section}')" class="bg-red-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-red-600 shadow-sm">حذف</button>
                     </div>
                 `;
-            }
+            });
         }
 
-        function removeApprovedStudent(index) {
-            if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من دليل المقبولات؟")) {
+        function backToGradesView() {
+            renderGradesView();
+        }
+
+        function removeStudentFromAccepted(index, grade, section) {
+            if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من المقبولات؟")) {
                 approvedStudents.splice(index, 1);
                 saveData();
-                renderAcceptedStudentsByClass();
+                renderStudentsView(grade, section);
                 updateTotalCountBadge();
-                alert("✓ تم الحذف بنجاح.");
             }
         }
 
@@ -427,7 +480,6 @@
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
-                    if(!student.notifications) student.notifications.midi = [];
                     if(!student.notifications) student.notifications = [];
                     student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
                     parentInquiries.splice(idx, 1);
@@ -456,11 +508,6 @@
             }
         }
 
-        function openAcceptedStudentsModal() { 
-            renderAcceptedStudentsByClass();
-            document.getElementById('acceptedStudentsModal').classList.remove('hidden'); 
-        }
-        function closeAcceptedStudentsModal() { document.getElementById('acceptedStudentsModal').classList.add('hidden'); }
         function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
         function closeStudentsModal() { document.getElementById('studentsModal').classList.add('hidden'); }
         function toggleBroadcastSection() { document.getElementById('broadcastContentBody').classList.toggle('hidden'); }
