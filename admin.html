@@ -39,9 +39,6 @@
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
-                    <button onclick="openAdminSettingsModal()" class="bg-purple-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition shadow-sm">
-                        🔐 تغيير بيانات الدخول
-                    </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm">
                         🗑️ مسح السحابة
                     </button>
@@ -171,12 +168,14 @@
         </div>
     </div>
 
-    <!-- النوافذ المنبثقة Modal -->
+    <!-- النافذة المنبثقة لدليل الطالبات المقبولات مرتبة حسب الصف والشعبة -->
     <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
-            <h3 class="font-bold text-emerald-700 text-base border-b pb-2">📂 دليل الطالبات المقبولات بالسحاب</h3>
-            <div id="acceptedStudentsContainer" class="space-y-4 text-xs"></div>
-            <button onclick="closeAcceptedStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs">إغلاق</button>
+            <h3 class="font-bold text-emerald-700 text-base border-b pb-2">📂 دليل الطالبات المقبولات (حسب الصف والشعبة)</h3>
+            <div id="acceptedStudentsContainer" class="space-y-4 text-xs">
+                <p class="text-gray-500">لا توجد طالبات مقبولات حالياً.</p>
+            </div>
+            <button onclick="closeAcceptedStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs font-bold">إغلاق</button>
         </div>
     </div>
 
@@ -231,6 +230,7 @@
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
+                    renderAcceptedStudentsByClass(); // تحديث دليل الطالبات تلقائياً
                 }
             });
 
@@ -262,6 +262,7 @@
                 renderRequests();
                 renderAdminInquiries();
                 updateTotalCountBadge();
+                renderAcceptedStudentsByClass();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
             }
@@ -296,7 +297,58 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
+            renderAcceptedStudentsByClass();
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
+        }
+
+        // --- تصنيف وعرض الطالبات المقبولات حسب الصف والشعبة تلقائياً ---
+        function renderAcceptedStudentsByClass() {
+            const container = document.getElementById('acceptedStudentsContainer');
+            if (approvedStudents.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-4">لا توجد طالبات مقبولات في السحابة حالياً.</p>`;
+                return;
+            }
+
+            // تجميع الطالبات حسب الصف والشعبة
+            const grouped = {};
+            approvedStudents.forEach((st, idx) => {
+                const key = `${st.grade} - الشعبة (${st.section})`;
+                if (!grouped[key]) grouped[key] = [];
+                grouped[key].push({ ...st, originalIndex: idx });
+            });
+
+            container.innerHTML = '';
+            for (const [groupName, studentsList] of Object.entries(grouped)) {
+                let studentsHtml = '';
+                studentsList.forEach((st) => {
+                    studentsHtml += `
+                        <div class="flex justify-between items-center bg-white p-2 border rounded shadow-sm mb-2">
+                            <div>
+                                <p class="font-bold text-gray-800">👧 الطالبة: ${st.student}</p>
+                                <p class="text-[11px] text-gray-500">ولي الأمر / الأم: ${st.mother}</p>
+                            </div>
+                            <button onclick="removeApprovedStudent(${st.originalIndex})" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] hover:bg-red-600">حذف من المقبولات</button>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl mb-3">
+                        <h4 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">📚 ${groupName} (${studentsList.length} طالبة)</h4>
+                        <div class="space-y-1">${studentsHtml}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function removeApprovedStudent(index) {
+            if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من دليل المقبولات؟")) {
+                approvedStudents.splice(index, 1);
+                saveData();
+                renderAcceptedStudentsByClass();
+                updateTotalCountBadge();
+                alert("✓ تم الحذف بنجاح.");
+            }
         }
 
         function updatePrincipalName() {
@@ -375,6 +427,7 @@
                 const inquiry = parentInquiries[idx];
                 const student = approvedStudents.find(s => s.id === inquiry.studentId);
                 if (student) {
+                    if(!student.notifications) student.notifications.midi = [];
                     if(!student.notifications) student.notifications = [];
                     student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
                     parentInquiries.splice(idx, 1);
@@ -390,6 +443,7 @@
                 if (idx !== -1) {
                     parentInquiries.splice(idx, 1);
                     saveData();
+                    renderAdminInquiries();
                     alert("✓ تم حذف الاستفسار بنجاح.");
                 }
             }
@@ -401,7 +455,11 @@
                 alert("✓ تم تفريغ قاعدة البيانات السحابية بالكامل.");
             }
         }
-        function openAcceptedStudentsModal() { document.getElementById('acceptedStudentsModal').classList.remove('hidden'); }
+
+        function openAcceptedStudentsModal() { 
+            renderAcceptedStudentsByClass();
+            document.getElementById('acceptedStudentsModal').classList.remove('hidden'); 
+        }
         function closeAcceptedStudentsModal() { document.getElementById('acceptedStudentsModal').classList.add('hidden'); }
         function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
         function closeStudentsModal() { document.getElementById('studentsModal').classList.add('hidden'); }
