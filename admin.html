@@ -41,7 +41,7 @@
                         🔐 تغيير بيانات الدخول
                     </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition flex items-center gap-1 shadow-sm">
-                        🗑️ حذف بيانات النظام (نهائياً)
+                        🗑️ حذف بيانات النظام
                     </button>
                 </div>
                 <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">تسجيل الخروج 🚪</button>
@@ -125,54 +125,82 @@
                 <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 text-xs">إرسال الدرس واستبدال القديم</button>
             </div>
 
-            <!-- قسم الإرسال المرن (نص أو تسجيل صوتي بالميكروفون) -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-indigo-200 space-y-4">
-                <h2 class="text-base font-bold text-indigo-700 border-b pb-2">🎙️ الإرسال العام (نص أو تسجيل صوتي) لصفوف أو شعب</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div>
-                        <label class="block font-semibold mb-1">اختر الصف المستهدف:</label>
-                        <select id="broadcastGrade" class="w-full px-3 py-2 border rounded-lg bg-white">
-                            <option value="الكل">جميع الصفوف (كل المدرسة)</option>
-                            <option value="الأول الابتدائي">الأول الابتدائي</option>
-                            <option value="الثاني الابتدائي">الثاني الابتدائي</option>
-                            <option value="الثالث الابتدائي">الثالث الابتدائي</option>
-                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
-                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
-                            <option value="السادس الابتدائي">السادس الابتدائي</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold mb-1">اختر الشعبة المستهدفة:</label>
-                        <select id="broadcastSection" class="w-full px-3 py-2 border rounded-lg bg-white">
-                            <option value="الكل">جميع الشعب (أ، ب، ج)</option>
-                            <option value="أ">الشعبة (أ)</option>
-                            <option value="ب">الشعبة (ب)</option>
-                            <option value="ج">الشعبة (ج)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="space-y-2 text-xs">
-                    <label class="block font-semibold">محتوى الرسالة (اكتب نصاً أو سجل صوتياً عبر الميكروفون):</label>
-                    <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="اكتب نص الإشعار هنا..."></textarea>
-                    
-                    <!-- أزرار الميكروفون والتحكم بالتسجيل -->
-                    <div class="flex items-center gap-2 flex-wrap pt-1">
-                        <button type="button" id="startRecordBtn" onclick="startAdminRecording()" class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-red-700 flex items-center gap-1 shadow-sm">
-                            🔴 بدء تسجيل صوتي (ميكروفون)
-                        </button>
-                        <button type="button" id="stopRecordBtn" onclick="stopAdminRecording()" disabled class="bg-gray-400 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-not-allowed">
-                            ⏹️ إيقاف التسجيل
-                        </button>
-                        <span id="recordingStatus" class="text-gray-500 font-semibold">الميكروفون متوقف</span>
-                    </div>
-                    <div id="audioPreviewContainer" class="hidden pt-2">
-                        <p class="text-[11px] font-bold text-gray-700 mb-1">معاينة الصوت المسجل:</p>
-                        <audio id="adminAudioPlayback" controls class="w-full h-9"></audio>
-                    </div>
-                </div>
-                <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 text-xs w-full shadow-sm">
-                    إرسال التعميم (نص أو صوت) للجهات المستهدفة 🚀
+            <!-- قسم الإرسال العام داخل أيقونة/زر قابل للفتح والإغلاق -->
+            <div class="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden">
+                <!-- رأس الأيقونة القابل للضغط -->
+                <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 hover:bg-indigo-100 p-4 flex justify-between items-center transition text-right">
+                    <span class="font-bold text-indigo-700 text-sm flex items-center gap-2">
+                        🎙️ لوحة الإرسال العام (نص أو تسجيل صوتي) لصفوف أو شعب
+                    </span>
+                    <span id="broadcastToggleIcon" class="text-indigo-700 font-bold text-lg">▼</span>
                 </button>
+
+                <!-- محتوى القسم (مخفي افتراضياً ويفتح بالضغط) -->
+                <div id="broadcastContentBody" class="hidden p-6 space-y-4 border-t border-indigo-100">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block font-semibold mb-1">اختر الصف المستهدف:</label>
+                            <select id="broadcastGrade" class="w-full px-3 py-2 border rounded-lg bg-white">
+                                <option value="الكل">جميع الصفوف (كل المدرسة)</option>
+                                <option value="الأول الابتدائي">الأول الابتدائي</option>
+                                <option value="الثاني الابتدائي">الثاني الابتدائي</option>
+                                <option value="الثالث الابتدائي">الثالث الابتدائي</option>
+                                <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                                <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                                <option value="السادس الابتدائي">السادس الابتدائي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold mb-1">اختر الشعبة المستهدفة:</label>
+                            <select id="broadcastSection" class="w-full px-3 py-2 border rounded-lg bg-white">
+                                <option value="الكل">جميع الشعب (أ، ب، ج)</option>
+                                <option value="أ">الشعبة (أ)</option>
+                                <option value="ب">الشعبة (ب)</option>
+                                <option value="ج">الشعبة (ج)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- خانة النص مع زر الحذف الخاص به -->
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <label class="block font-semibold">محتوى الرسالة النصية:</label>
+                            <button type="button" onclick="clearBroadcastText()" class="text-red-600 hover:text-red-800 font-bold text-[11px] flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                                🗑️ مسح النص
+                            </button>
+                        </div>
+                        <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="اكتب نص الإشعار هنا..."></textarea>
+                    </div>
+
+                    <!-- أزرار الميكروفون والتحكم بالتسجيل ومعاينة وحذف الصوت -->
+                    <div class="space-y-2 text-xs pt-1">
+                        <label class="block font-semibold">التسجيل الصوتي:</label>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button type="button" id="startRecordBtn" onclick="startAdminRecording()" class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold hover:bg-red-700 flex items-center gap-1 shadow-sm">
+                                🔴 بدء تسجيل صوتي
+                            </button>
+                            <button type="button" id="stopRecordBtn" onclick="stopAdminRecording()" disabled class="bg-gray-400 text-white px-3 py-2 rounded-lg font-bold flex items-center gap-1 cursor-not-allowed">
+                                ⏹️ إيقاف التسجيل
+                            </button>
+                            <span id="recordingStatus" class="text-gray-500 font-semibold">الميكروفون متوقف</span>
+                        </div>
+                        
+                        <!-- معاينة الصوت وزر حذف التسجيل -->
+                        <div id="audioPreviewContainer" class="hidden pt-2 p-3 bg-gray-50 border rounded-lg space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-700">معاينة الصوت المسجل:</span>
+                                <button type="button" onclick="deleteRecordedAudio()" class="text-red-600 hover:text-red-800 font-bold text-[11px] flex items-center gap-1 bg-white px-2 py-1 rounded border border-red-200 shadow-sm">
+                                    🗑️ حذف التسجيل الصوتي
+                                </button>
+                            </div>
+                            <audio id="adminAudioPlayback" controls class="w-full h-9"></audio>
+                        </div>
+                    </div>
+
+                    <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 text-xs w-full shadow-sm">
+                        إرسال التعميم (نص أو صوت) للجهات المستهدفة 🚀
+                    </button>
+                </div>
             </div>
 
             <!-- استفسارات أولياء الأمور الواردة -->
@@ -239,7 +267,6 @@
     </div>
 
     <script>
-        // استرجاع البيانات المحفوظة بدقة لضمان استمراريتها حتى بعد التحديث والخروج والدخول
         let adminUser = localStorage.getItem('school_admin_user') || 'admin';
         let adminPass = localStorage.getItem('school_admin_pass') || '123456';
         let principalName = localStorage.getItem('school_principal_name') || 'د. أمل عبد الله';
@@ -269,6 +296,32 @@
             }
         };
 
+        function toggleBroadcastSection() {
+            const body = document.getElementById('broadcastContentBody');
+            const icon = document.getElementById('broadcastToggleIcon');
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.innerText = '▲';
+            } else {
+                body.classList.add('hidden');
+                icon.innerText = '▼';
+            }
+        }
+
+        // دالة مسح النص
+        function clearBroadcastText() {
+            document.getElementById('broadcastText').value = '';
+        }
+
+        // دالة حذف التسجيل الصوتي
+        function deleteRecordedAudio() {
+            recordedAudioBase64 = null;
+            audioChunks = [];
+            document.getElementById('adminAudioPlayback').src = '';
+            document.getElementById('audioPreviewContainer').classList.add('hidden');
+            document.getElementById('recordingStatus').innerText = "الميكروفون متوقف";
+        }
+
         function loginAdmin() {
             const u = document.getElementById('adminUserInput').value.trim();
             const p = document.getElementById('adminPassInput').value.trim();
@@ -296,7 +349,6 @@
             }
         }
 
-        // دالة الحفظ الآمن والمستمر للبيانات (تستوعب حتى 1000 طالب فصاعداً)
         function saveData() {
             localStorage.setItem('school_pending', JSON.stringify(pendingRequests));
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
@@ -314,7 +366,6 @@
             }
         }
 
-        // الحذف مقصور فقط على رغبة المشرف عند الضغط صراحة هنا
         function clearAllSystemData() {
             if (confirm("⚠️ تحذير شديد: هل أنت متأكد تماماً من رغبتك في حذف كافة بيانات النظام والملفات؟ لن يتم استرجاعها إلا بإعادة إدخالها.")) {
                 localStorage.clear();
@@ -413,9 +464,7 @@
 
             saveData();
             document.getElementById('broadcastText').value = '';
-            recordedAudioBase64 = null;
-            document.getElementById('audioPreviewContainer').classList.add('hidden');
-            document.getElementById('recordingStatus').innerText = "الميكروفون متوقف";
+            deleteRecordedAudio();
             alert(`✓ تم إرسال التعميم بنجاح إلى (${recipientCount}) طالبة مستهدفة وحفظه في سجلات النظام!`);
         }
 
