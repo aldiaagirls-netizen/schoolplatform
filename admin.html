@@ -28,11 +28,16 @@
 
         <!-- لوحة الإدارة -->
         <div id="adminDashboardView" class="hidden space-y-6">
+            <!-- شريط الأزرار والأيقونات العليا -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center flex-wrap gap-2">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <!-- الأيقونة الخاصة المخفية التي تفتح سجل الطالبات ومتابعة المشاهدات -->
+                    <!-- الأيقونة الجانبية الجديدة المرتبطة تلقائياً بالموافقة والترتيب -->
+                    <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1 shadow-sm">
+                        📂 دليل الطالبات المقبولات (حسب الصف والشعبة)
+                    </button>
+                    
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition flex items-center gap-1 shadow-sm">
-                        📁 سجل الطّالبات ومتابعة المشاهدات
+                        🎯 متابعة مشاهدات الرسائل
                     </button>
                     <button onclick="openAdminSettingsModal()" class="bg-purple-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-700 transition flex items-center gap-1 shadow-sm">
                         🔐 تغيير بيانات الدخول
@@ -44,26 +49,10 @@
                 <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">تسجيل الخروج 🚪</button>
             </div>
 
-            <!-- قسم إرسال واتساب المباشر الجديد -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-green-200 space-y-4">
-                <h2 class="text-base font-bold text-green-700 border-b pb-2">📱 الإرسال السريع لولي الأمر عبر الواتساب</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">اسم الطالبة / الطالب:</label>
-                        <input type="text" id="quickStudentName" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="أدخل اسم الطالب أو الطالبة">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">رقم هاتف ولي الأمر (مع رمز الدولة):</label>
-                        <input type="text" id="quickParentPhone" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: 9647800000000">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">نص الرسالة:</label>
-                    <textarea id="quickMsgText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب الرسالة المراد إرسالها لولي الأمر..."></textarea>
-                </div>
-                <button onclick="sendDirectWhatsApp()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 text-xs w-full transition shadow-sm">
-                    حفظ وإرسال عبر واتساب مباشرة 🚀
-                </button>
+            <!-- طلبات أولياء الأمور المعلقة -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
+                <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
             <!-- إعدادات أسماء الإدارة -->
@@ -83,15 +72,9 @@
                 </div>
             </div>
 
-            <!-- طلبات أولياء الأمور المعلقة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
-                <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
-            </div>
-
-            <!-- إدارة جدول الحصص والدروس -->
+            <!-- إدارة جدول الحصص والدروس والإشعارات العامة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات (الدرس الحالي)</h2>
+                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات العامة</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
@@ -134,14 +117,29 @@
 
             <!-- استفسارات أولياء الأمور الواردة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر)</h2>
+                <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور (الرد المباشر الآمن)</h2>
                 <div id="adminInquiriesContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد استفسارات جديدة حالياً.</p></div>
             </div>
         </div>
 
     </div>
 
-    <!-- نافذة منبثقة (Modal) لسجل الطالبات ومتابعة المشاهدات -->
+    <!-- نافذة الأيقونة الجانبية: دليل الطالبات المقبولات المنظم بصفوف وشعب -->
+    <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات (مقسم تلقائياً)</h3>
+                <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 hover:text-red-600 font-bold text-xl">✕</button>
+            </div>
+            <div>
+                <input type="text" id="acceptedSearchInput" onkeyup="filterAcceptedStudents()" class="w-full px-3 py-2 border rounded-lg text-xs focus:ring-1 focus:ring-emerald-400 focus:outline-none" placeholder="🔍 ابحث باسم الطالبة داخل الدليل...">
+            </div>
+            <div id="acceptedStudentsContainer" class="space-y-4 text-xs"></div>
+            <button onclick="closeAcceptedStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold text-xs hover:bg-gray-600">إغلاق الدليل</button>
+        </div>
+    </div>
+
+    <!-- نافذة متابعة مشاهدات الرسائل -->
     <div id="studentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
@@ -156,7 +154,7 @@
         </div>
     </div>
 
-    <!-- نافذة منبثقة لتغيير بيانات الدخول -->
+    <!-- نافذة لتغيير بيانات الدخول -->
     <div id="adminSettingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
@@ -231,12 +229,6 @@
             }
         }
 
-        window.onbeforeunload = function() {
-            if (adminLoggedIn) {
-                localStorage.setItem('school_admin_logged', 'true');
-            }
-        };
-
         function saveData() {
             localStorage.setItem('school_pending', JSON.stringify(pendingRequests));
             localStorage.setItem('school_approved', JSON.stringify(approvedStudents));
@@ -254,24 +246,90 @@
             }
         }
 
-        // دالة الإرسال المباشر للواتساب مع الحفظ
-        function sendDirectWhatsApp() {
-            const studentName = document.getElementById('quickStudentName').value.trim();
-            const parentPhone = document.getElementById('quickParentPhone').value.trim();
-            const msgText = document.getElementById('quickMsgText').value.trim();
+        function renderRequests() {
+            const container = document.getElementById('requestsContainer');
+            if (pendingRequests.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; return; }
+            container.innerHTML = '';
+            pendingRequests.forEach((req, index) => {
+                container.innerHTML += `
+                    <div class="p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm">
+                        <div><p class="font-bold text-pink-900">الطّالبة: ${req.student}</p><p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p></div>
+                        <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700">✓ موافقة وتوجيه تلقائي</button>
+                    </div>`;
+            });
+        }
 
-            if (!parentPhone) {
-                alert("الرجاء إدخال رقم هاتف ولي الأمر على الأقل.");
+        // الربط التلقائي عند الضغط على موافقة
+        function approveStudent(index) {
+            const student = pendingRequests.splice(index, 1)[0];
+            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
+            approvedStudents.push(student);
+            saveData();
+            alert(`✓ تمت الموافقة على الطّالبة (${student.student}) وتنظيمها تلقائياً بصف (${student.grade} - شعبة ${student.section}) داخل الأيقونة الجانبية!`);
+            renderRequests();
+        }
+
+        // فتح وإغلاق وعرض دليل الطالبات المقبولات المنظم تلقائياً
+        function openAcceptedStudentsModal() {
+            renderAcceptedStudentsContent();
+            document.getElementById('acceptedStudentsModal').classList.remove('hidden');
+        }
+
+        function closeAcceptedStudentsModal() {
+            document.getElementById('acceptedStudentsModal').classList.add('hidden');
+        }
+
+        function renderAcceptedStudentsContent() {
+            const container = document.getElementById('acceptedStudentsContainer');
+            if (approvedStudents.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-6">لم يتم قبول أي طالبة حتى الآن.</p>`;
                 return;
             }
 
-            // تنسيق الرسالة بشكل احترافي
-            const formattedMessage = `عزيزي ولي أمر الطالب(ة) (${studentName || 'المحترم'}):\n\n${msgText}`;
-            const encodedUrlMessage = encodeURIComponent(formattedMessage);
+            container.innerHTML = '';
+            const grades = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
 
-            // فتح رابط الواتساب مباشرة بالرقم والنص
-            const whatsappUrl = `https://wa.me/${parentPhone}?text=${encodedUrlMessage}`;
-            window.open(whatsappUrl, '_blank');
+            grades.forEach(grade => {
+                ["أ", "ب", "ج"].forEach(section => {
+                    const filtered = approvedStudents.filter(st => st.grade === grade && st.section === section);
+                    if (filtered.length > 0) {
+                        let studentsListHTML = '';
+                        filtered.forEach(st => {
+                            studentsListHTML += `
+                                <div class="accepted-item p-2.5 bg-white border border-emerald-200 rounded-lg flex justify-between items-center my-1 shadow-sm" data-name="${st.student.toLowerCase()}">
+                                    <div>
+                                        <span class="font-bold text-emerald-900 text-xs">👧 ${st.student}</span>
+                                        <span class="text-gray-500 text-[11px] mr-2">(ولية الأمر: ${st.mother})</span>
+                                    </div>
+                                    <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-semibold">مقبولة ومفعلة</span>
+                                </div>
+                            `;
+                        });
+
+                        container.innerHTML += `
+                            <div class="border border-emerald-300 rounded-xl p-3 bg-emerald-50/40 space-y-2 mb-3">
+                                <h3 class="font-bold text-emerald-800 text-xs bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg inline-block">📚 ${grade} - الشعبة (${section}) (${filtered.length} طالبة)</h3>
+                                <div class="space-y-1">
+                                    ${studentsListHTML}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            });
+        }
+
+        function filterAcceptedStudents() {
+            const query = document.getElementById('acceptedSearchInput').value.toLowerCase().trim();
+            const items = document.querySelectorAll('.accepted-item');
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                if (name.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
 
         function openStudentsModal() {
@@ -333,28 +391,6 @@
             saveData();
             document.getElementById('lessonContent').value = '';
             alert(`✓ تم إرسال الدرس واستبدال القديم لمادة (${subject}) في ${grade} - شعبة (${section})!`);
-        }
-
-        function renderRequests() {
-            const container = document.getElementById('requestsContainer');
-            if (pendingRequests.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; return; }
-            container.innerHTML = '';
-            pendingRequests.forEach((req, index) => {
-                container.innerHTML += `
-                    <div class="p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm">
-                        <div><p class="font-bold text-pink-900">الطّالبة: ${req.student}</p><p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p></div>
-                        <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs">✓ موافقة</button>
-                    </div>`;
-            });
-        }
-
-        function approveStudent(index) {
-            const student = pendingRequests.splice(index, 1)[0];
-            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
-            approvedStudents.push(student);
-            saveData();
-            alert(`تمت الموافقة على دخول الطّالبة (${student.student}) وتوجيهها إلى صفها.`);
-            renderRequests();
         }
 
         function renderModalStudentsContent(studentsList) {
