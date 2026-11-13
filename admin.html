@@ -187,7 +187,7 @@
         </div>
     </div>
 
-    <!-- نافذة دليل الطالبات التفاعلية (الصفوف -> الشعب -> الطالبات مع الصور) -->
+    <!-- نافذة دليل الطالبات التفاعلية -->
     <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-2">
@@ -339,7 +339,6 @@
             if (pendingRequests.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; return; }
             container.innerHTML = '';
             pendingRequests.forEach((req, index) => {
-                // إظهار صورة الطالبة في الطلبات المعلقة أيضاً إن وجدت
                 const reqImg = req.image 
                     ? `<img src="${req.image}" class="w-10 h-10 rounded-full object-cover border border-pink-300">`
                     : `<div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold">👧</div>`;
@@ -353,7 +352,10 @@
                                 <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>
                             </div>
                         </div>
-                        <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold shrink-0">✓ موافقة وتفعيل</button>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700">✓ موافقة</button>
+                            <button onclick="rejectStudent(${index})" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700">✕ رفض</button>
+                        </div>
                     </div>`;
             });
         }
@@ -364,6 +366,16 @@
             approvedStudents.push(student);
             saveData();
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
+        }
+
+        // --- دالة رفض طلب الطالبة ---
+        function rejectStudent(index) {
+            const student = pendingRequests[index];
+            if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
+                pendingRequests.splice(index, 1);
+                saveData();
+                alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
+            }
         }
 
         // --- نظام التصفح الهرمي للطالبات مع الصور ---
@@ -419,7 +431,6 @@
             
             container.innerHTML = '';
             filteredStudents.forEach((st) => {
-                // عرض صورة الطالبة الشخصية أو أيقونة افتراضية
                 const imgTag = st.image 
                     ? `<img src="${st.image}" class="w-10 h-10 rounded-full object-cover border border-emerald-500 shadow-sm">`
                     : `<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">👧</div>`;
