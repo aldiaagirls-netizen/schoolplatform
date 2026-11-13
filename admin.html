@@ -63,6 +63,14 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
+            <!-- 🔔 قسم تتبع خروج ونشاط أولياء الأمور الذكي -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-100 space-y-4">
+                <h2 class="text-base font-bold text-purple-700 border-b pb-2">🔔 تتبع نشاط وخروج أولياء الأمور (مباشر)</h2>
+                <div id="parentsActivityContainer" class="space-y-2 text-xs">
+                    <p class="text-gray-500">لا توجد تنبيهات نشاط حالياً.</p>
+                </div>
+            </div>
+
             <!-- إعدادات أسماء الإدارة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
                 <h2 class="text-base font-bold text-pink-600 border-b pb-2">👩‍💼 إعدادات المدرسة والأسماء</h2>
@@ -80,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- إدارة جدول الحصص والدروس + عرض وحذف الدروس السابقة -->
+            <!-- إدارة جدول الحصص والدروس -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
                 <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات العامة</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -122,7 +130,7 @@
                 </div>
                 <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition">إرسال الدرس سحابياً</button>
 
-                <!-- قائمة الدروس المنشورة سابقاً مع إمكانية الحذف -->
+                <!-- قائمة الدروس المنشورة سابقاً -->
                 <div class="pt-4 border-t border-pink-100 space-y-2">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-gray-700">📖 الدروس والواجبات المنشورة حالياً:</h3>
@@ -179,7 +187,7 @@
         </div>
     </div>
 
-    <!-- نافذة دليل الطالبات التفاعلية (الصفوف -> الشعب -> الطالبات) -->
+    <!-- نافذة دليل الطالبات التفاعلية -->
     <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-2">
@@ -202,7 +210,6 @@
     </div>
 
     <script>
-        // --- ⚙️ إعدادات وتكوين FIREBASE الخاص بك ---
         const firebaseConfig = {
             apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0nI",
             authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
@@ -225,6 +232,7 @@
         let approvedStudents = [];
         let parentInquiries = [];
         let schoolSchedule = {};
+        let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
         window.onload = function() {
@@ -234,6 +242,7 @@
                 approvedStudents = data.approvedStudents || [];
                 parentInquiries = data.parentInquiries || [];
                 schoolSchedule = data.schoolSchedule || {};
+                parentActivities = data.parentActivities || [];
                 if(data.principalName) principalName = data.principalName;
                 if(data.supervisorName) supervisorName = data.supervisorName;
 
@@ -244,7 +253,8 @@
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
-                    renderPublishedLessons(); // تحديث قائمة الدروس المنشورة
+                    renderPublishedLessons();
+                    renderParentActivities();
                 }
             });
 
@@ -261,7 +271,8 @@
                 parentInquiries: parentInquiries,
                 schoolSchedule: schoolSchedule,
                 principalName: principalName,
-                supervisorName: supervisorName
+                supervisorName: supervisorName,
+                parentActivities: parentActivities
             });
         }
 
@@ -277,6 +288,7 @@
                 renderAdminInquiries();
                 updateTotalCountBadge();
                 renderPublishedLessons();
+                renderParentActivities();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
             }
@@ -291,6 +303,37 @@
 
         function updateTotalCountBadge() {
             document.getElementById('totalSavedCount').innerText = approvedStudents.length;
+        }
+
+        // --- عرض تنبيهات نشاط وخروج أولياء الأمور ---
+        function renderParentActivities() {
+            const container = document.getElementById('parentsActivityContainer');
+            if (!parentActivities || parentActivities.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-xs">لا توجد تنبيهات نشاط حالياً.</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            // عرض أحدث التنبيهات في الأعلى
+            const sortedActivities = [...parentActivities].reverse();
+            sortedActivities.forEach((act, idx) => {
+                const bg = act.type === 'logout' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900';
+                container.innerHTML += `
+                    <div class="p-2.5 border rounded-lg flex justify-between items-center ${bg}">
+                        <div>
+                            <span class="font-bold">${act.message}</span>
+                            <span class="text-[10px] opacity-70 block">${act.time}</span>
+                        </div>
+                        <button onclick="removeActivity(${parentActivities.length - 1 - idx})" class="text-gray-400 hover:text-red-600 text-xs px-1">✕</button>
+                    </div>
+                `;
+            });
+        }
+
+        function removeActivity(index) {
+            parentActivities.splice(index, 1);
+            saveData();
+            renderParentActivities();
         }
 
         function renderRequests() {
@@ -314,31 +357,21 @@
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
         }
 
-        // --- نظام التصفح الهرمي التفاعلي (الصفوف -> الشعب -> الطالبات) ---
-        const gradesList = [
-            "الأول الابتدائي",
-            "الثاني الابتدائي",
-            "الثالث الابتدائي",
-            "الرابع الابتدائي",
-            "الخامس الابتدائي",
-            "السادس الابتدائي"
-        ];
+        // --- دليل الطالبات التفاعلي ---
+        const gradesList = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
         const sectionsList = ["أ", "ب", "ج"];
 
         function openAcceptedStudentsModal() {
             document.getElementById('acceptedStudentsModal').classList.remove('hidden');
             renderGradesView();
         }
-
         function closeAcceptedStudentsModal() {
             document.getElementById('acceptedStudentsModal').classList.add('hidden');
         }
-
         function renderGradesView() {
             document.getElementById('modalTitle').innerText = "📂 دليل الطالبات - اختر الصف الدراسي";
             document.getElementById('modalBackBtnContainer').classList.add('hidden');
             const container = document.getElementById('acceptedStudentsContent');
-            
             container.innerHTML = '';
             gradesList.forEach(grade => {
                 const count = approvedStudents.filter(s => s.grade === grade).length;
@@ -350,12 +383,10 @@
                 `;
             });
         }
-
         function renderSectionsView(grade) {
             document.getElementById('modalTitle').innerText = `📂 ${grade} - اختر الشعبة`;
             document.getElementById('modalBackBtnContainer').classList.remove('hidden');
             const container = document.getElementById('acceptedStudentsContent');
-
             container.innerHTML = '';
             sectionsList.forEach(sec => {
                 const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
@@ -367,19 +398,14 @@
                 `;
             });
         }
-
         function renderStudentsView(grade, section) {
             document.getElementById('modalTitle').innerText = `👧 طالبات ${grade} - شعبة (${section})`;
             const container = document.getElementById('acceptedStudentsContent');
-
-            const filteredStudents = approvedStudents.map((st, idx) => ({ ...st, originalIndex: idx }))
-                                                     .filter(s => s.grade === grade && s.section === section);
-
+            const filteredStudents = approvedStudents.map((st, idx) => ({ ...st, originalIndex: idx })).filter(s => s.grade === grade && s.section === section);
             if (filteredStudents.length === 0) {
                 container.innerHTML = `<p class="text-gray-500 text-center py-6">لا توجد طالبات مسجلات في هذه الشعبة حالياً.</p>`;
                 return;
             }
-
             container.innerHTML = '';
             filteredStudents.forEach((st) => {
                 container.innerHTML += `
@@ -393,11 +419,7 @@
                 `;
             });
         }
-
-        function backToGradesView() {
-            renderGradesView();
-        }
-
+        function backToGradesView() { renderGradesView(); }
         function removeStudentFromAccepted(index, grade, section) {
             if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من المقبولات؟")) {
                 approvedStudents.splice(index, 1);
@@ -414,7 +436,6 @@
             saveData();
             alert("✓ تم حفظ اسم المديرة سحابياً.");
         }
-
         function updateSupervisorName() {
             const val = document.getElementById('newSupervisorName').value.trim();
             if(!val) return;
@@ -423,33 +444,27 @@
             alert("✓ تم حفظ اسم المشرف سحابياً.");
         }
 
-        // --- إدارة الدروس: إرسال، عرض، وحذف الدروس السابقة ---
         function sendLessonToSchedule() {
             const subject = document.getElementById('lessonSubject').value;
             const grade = document.getElementById('lessonGrade').value;
             const section = document.getElementById('lessonSection').value;
             const content = document.getElementById('lessonContent').value.trim();
             if (!content) return;
-
             const key = `${grade}_${section}`;
             if (!schoolSchedule[key]) schoolSchedule[key] = {};
             schoolSchedule[key][subject] = content;
-
             saveData();
             renderPublishedLessons();
             document.getElementById('lessonContent').value = '';
             alert(`✓ تم نشر الدرس سحابياً للجميع!`);
         }
-
         function renderPublishedLessons() {
             const container = document.getElementById('publishedLessonsContainer');
             let html = '';
             let hasLessons = false;
-
             for (const [classKey, subjects] of Object.entries(schoolSchedule)) {
                 if (!subjects) continue;
                 const [gradeName, sectionName] = classKey.split('_');
-                
                 for (const [subjectName, lessonText] of Object.entries(subjects)) {
                     hasLessons = true;
                     html += `
@@ -463,38 +478,24 @@
                     `;
                 }
             }
-
-            if (!hasLessons) {
-                container.innerHTML = `<p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>`;
-            } else {
-                container.innerHTML = html;
-            }
+            container.innerHTML = hasLessons ? html : `<p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>`;
         }
-
         function deleteLesson(classKey, subjectName) {
             if (confirm(`⚠️ هل أنت متأكد من حذف درس (${subjectName})؟`)) {
                 if (schoolSchedule[classKey] && schoolSchedule[classKey][subjectName]) {
                     delete schoolSchedule[classKey][subjectName];
-                    // إذا أصبحت الشعبة فارغة من الدروس نحذف المفتاح بالكامل
-                    if (Object.keys(schoolSchedule[classKey]).length === 0) {
-                        delete schoolSchedule[classKey];
-                    }
+                    if (Object.keys(schoolSchedule[classKey]).length === 0) delete schoolSchedule[classKey];
                     saveData();
                     renderPublishedLessons();
                 }
             }
         }
-
         function clearAllLessons() {
-            if (Object.keys(schoolSchedule).length === 0) {
-                alert("لا توجد دروس لحذفها.");
-                return;
-            }
-            if (confirm("⚠️ هل أنت متأكد من حذف جميع الدروس المنشورة لكافة الصفوف؟")) {
+            if (Object.keys(schoolSchedule).length === 0) return;
+            if (confirm("⚠️ هل أنت متأكد من حذف جميع الدروس المنشورة؟")) {
                 schoolSchedule = {};
                 saveData();
                 renderPublishedLessons();
-                alert("✓ تم مسح جميع الدروس السابقة.");
             }
         }
 
@@ -503,14 +504,12 @@
             const targetSection = document.getElementById('broadcastSection').value;
             const textContent = document.getElementById('broadcastText').value.trim();
             if (!textContent) return;
-
             approvedStudents.forEach(st => {
                 if ((targetGrade === 'الكل' || st.grade === targetGrade) && (targetSection === 'الكل' || st.section === targetSection)) {
                     if(!st.notifications) st.notifications = [];
                     st.notifications.unshift({ type: 'text', title: `📢 تعميم إداري عام`, body: textContent, unread: true });
                 }
             });
-
             saveData();
             document.getElementById('broadcastText').value = '';
             alert("✓ تم إرسال التعميم للجميع بالسحاب!");
@@ -533,7 +532,6 @@
                     </div>`;
             });
         }
-
         function replyInquiry(id) {
             const replyText = document.getElementById(`reply_${id}`).value.trim();
             if (!replyText) return;
@@ -550,7 +548,6 @@
                 }
             }
         }
-
         function deleteInquiry(id) {
             if (confirm("⚠️ هل أنت متأكد من حذف هذا الاستفسار؟")) {
                 const idx = parentInquiries.findIndex(q => q.id === id);
@@ -558,18 +555,15 @@
                     parentInquiries.splice(idx, 1);
                     saveData();
                     renderAdminInquiries();
-                    alert("✓ تم حذف الاستفسار بنجاح.");
                 }
             }
         }
-
         function clearAllSystemData() {
             if (confirm("⚠️ هل أنت متأكد من مسح كافة بيانات النظام سحابياً؟")) {
                 db.ref('school_data').remove();
                 alert("✓ تم تفريغ قاعدة البيانات السحابية بالكامل.");
             }
         }
-
         function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
         function closeStudentsModal() { document.getElementById('studentsModal').classList.add('hidden'); }
         function toggleBroadcastSection() { document.getElementById('broadcastContentBody').classList.toggle('hidden'); }
