@@ -57,6 +57,16 @@
                 </div>
             </div>
 
+            <!-- 🔍 مربع البحث الذكي عن اسم الطالبة داخل النظام -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
+                <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة (في النظام)</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="searchStudentInput" class="flex-1 px-3 py-2 border rounded-lg text-xs" placeholder="أدخل اسم الطالبة للبحث عنها...">
+                    <button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">بحث 🔍</button>
+                </div>
+                <div id="searchResultContainer" class="hidden p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs space-y-1"></div>
+            </div>
+
             <!-- طلبات أولياء الأمور المعلقة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
                 <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
@@ -298,11 +308,46 @@
             adminLoggedIn = false;
             localStorage.removeItem('school_admin_logged');
             document.getElementById('adminDashboardView').classList.add('hidden');
+            document.getElementById('adminAuthView').classList.add('hidden');
             document.getElementById('adminAuthView').classList.remove('hidden');
         }
 
         function updateTotalCountBadge() {
             document.getElementById('totalSavedCount').innerText = approvedStudents.length;
+        }
+
+        // --- 🔍 خاصية البحث الذكي عن الطالبة في النظام ---
+        function searchStudentInSystem() {
+            const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
+            const resultBox = document.getElementById('searchResultContainer');
+
+            if (!query) {
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            // البحث في المقبولات
+            const foundInApproved = approvedStudents.find(s => s.student.toLowerCase().includes(query));
+            // البحث في المعلقة
+            const foundInPending = pendingRequests.find(s => s.student.toLowerCase().includes(query));
+
+            resultBox.classList.remove('hidden');
+
+            if (foundInApproved) {
+                resultBox.innerHTML = `
+                    <p class="font-bold text-emerald-800">✅ الطالبة موجودة في (دليل الطالبات المقبولات):</p>
+                    <p>الاسم: <strong>${foundInApproved.student}</strong> | الصف: ${foundInApproved.grade} - شعبة (${foundInApproved.section})</p>
+                    <p>ولي الأمر: ${foundInApproved.mother}</p>
+                `;
+            } else if (foundInPending) {
+                resultBox.innerHTML = `
+                    <p class="font-bold text-amber-800">⏳ الطالبة موجودة في (الطلبات المعلقة بانتظار الموافقة):</p>
+                    <p>الاسم: <strong>${foundInPending.student}</strong> | الصف: ${foundInPending.grade} - شعبة (${foundInPending.section})</p>
+                    <p>ولي الأمر: ${foundInPending.mother}</p>
+                `;
+            } else {
+                resultBox.innerHTML = `<p class="text-red-600 font-bold">❌ عذراً، لا توجد طالبة بهذا الاسم مسجلة في النظام حالياً.</p>`;
+            }
         }
 
         function renderParentActivities() {
@@ -360,15 +405,26 @@
             });
         }
 
+        // --- خاصية ذكية لمنع تكرار قبول طالبة موجودة مسبقاً ---
         function approveStudent(index) {
-            const student = pendingRequests.splice(index, 1)[0];
+            const student = pendingRequests[index];
+
+            // التأكد من عدم وجود الطالبة في المقبولات مسبقاً لمنع التكرار
+            const alreadyApproved = approvedStudents.some(s => s.student.toLowerCase() === student.student.toLowerCase());
+            if (alreadyApproved) {
+                alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة ومقبولة مسبقاً في الدليل! سيتم حذف الطلب المعكر فقط.`);
+                pendingRequests.splice(index, 1);
+                saveData();
+                return;
+            }
+
+            pendingRequests.splice(index, 1);
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
         }
 
-        // --- دالة رفض طلب الطالبة ---
         function rejectStudent(index) {
             const student = pendingRequests[index];
             if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
