@@ -39,8 +39,9 @@
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
+                    <!-- 🔄 زر استرجاع وتحديث البيانات المضمون -->
                     <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm">
-                        🔄 تحديث ومزامنة البيانات
+                        🔄 استرجاع ومزامنة البيانات
                     </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm">
                         🗑️ مسح السحابة
@@ -247,7 +248,7 @@
         let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
-        // --- المزامنة الحية المباشرة مع Firebase ---
+        // --- المزامنة الحية واسترجاع البيانات الفوري ---
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
@@ -287,29 +288,57 @@
                 supervisorName: supervisorName,
                 parentActivities: parentActivities
             };
+            // حفظ نسخة احتياطية محلياً في المتصفح لضمان الأمان
             localStorage.setItem('school_backup_data', JSON.stringify(dataToSave));
             db.ref('school_data').set(dataToSave);
         }
 
+        // --- 🔄 خاصية استرجاع البيانات المضمونة (من السحابة أو الذاكرة المحلية) ---
         function restoreOldData() {
             db.ref('school_data').once('value').then((snapshot) => {
                 const cloudData = snapshot.val();
-                if (cloudData) {
+
+                if (cloudData && (
+                    (cloudData.approvedStudents && cloudData.approvedStudents.length > 0) || 
+                    (cloudData.pendingRequests && cloudData.pendingRequests.length > 0) ||
+                    (cloudData.schoolSchedule && Object.keys(cloudData.schoolSchedule).length > 0)
+                )) {
                     pendingRequests = cloudData.pendingRequests || [];
                     approvedStudents = cloudData.approvedStudents || [];
                     parentInquiries = cloudData.parentInquiries || [];
                     schoolSchedule = cloudData.schoolSchedule || {};
                     parentActivities = cloudData.parentActivities || [];
                     
+                    if(cloudData.principalName) principalName = cloudData.principalName;
+                    if(cloudData.supervisorName) supervisorName = cloudData.supervisorName;
+
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
                     renderPublishedLessons();
                     renderParentActivities();
-                    alert("✓ تم تحديث ومزامنة البيانات من السحابة بنجاح!");
+
+                    alert("✓ تم بنجاح استرجاع كافة البيانات ومزامنتها مع السحابة!");
                 } else {
-                    alert("⚠️ لا توجد بيانات سحابية مسجلة حالياً.");
+                    const localBackup = localStorage.getItem('school_backup_data');
+                    if (localBackup) {
+                        const parsedData = JSON.parse(localBackup);
+                        if (confirm("⚠️ سحابة Firebase فارغة. هل تريد استعادة البيانات من النسخة المحلية الاحتياطية ورفعها للسحابة؟")) {
+                            pendingRequests = parsedData.pendingRequests || [];
+                            approvedStudents = parsedData.approvedStudents || [];
+                            parentInquiries = parsedData.parentInquiries || [];
+                            schoolSchedule = parsedData.schoolSchedule || {};
+                            parentActivities = parsedData.parentActivities || [];
+                            
+                            saveData();
+                            alert("✓ تم استرجاع البيانات من المتصفح ورفعها للسحابة بنجاح!");
+                        }
+                    } else {
+                        alert("❌ عذراً، لا توجد أي بيانات قديمة مخزنة في السحابة أو في الذاكرة المحلية.");
+                    }
                 }
+            }).catch(error => {
+                alert("❌ خطأ في الاتصال: " + error.message);
             });
         }
 
@@ -337,6 +366,7 @@
             document.getElementById('totalSavedCount').innerText = approvedStudents.length;
         }
 
+        // --- 🔍 البحث الذكي عن الطالبة ---
         function searchStudentInSystem() {
             const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
             const resultBox = document.getElementById('searchResultContainer');
