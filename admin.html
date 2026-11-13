@@ -57,7 +57,7 @@
                 </div>
             </div>
 
-            <!-- 🔍 مربع البحث الذكي عن اسم الطالبة داخل النظام -->
+            <!-- 🔍 مربع البحث الذكي عن اسم الطالبة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة (في النظام)</h2>
                 <div class="flex gap-2">
@@ -245,27 +245,30 @@
         let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
+        // --- استرجاع وتحديث البيانات فورياً من سحابة Firebase ---
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
+                
+                // جلب البيانات القديمة والمحفوظة سحابياً لمنع فقدانها
                 pendingRequests = data.pendingRequests || [];
                 approvedStudents = data.approvedStudents || [];
                 parentInquiries = data.parentInquiries || [];
                 schoolSchedule = data.schoolSchedule || {};
                 parentActivities = data.parentActivities || [];
+                
                 if(data.principalName) principalName = data.principalName;
                 if(data.supervisorName) supervisorName = data.supervisorName;
 
                 document.getElementById('newPrincipalName').value = principalName;
                 document.getElementById('newSupervisorName').value = supervisorName;
 
-                if (adminLoggedIn) {
-                    renderRequests();
-                    renderAdminInquiries();
-                    updateTotalCountBadge();
-                    renderPublishedLessons();
-                    renderParentActivities();
-                }
+                // تحديث واجهة لوحة الإدارة تلقائياً عند أي تغيير أو تحديث للصفحة
+                renderRequests();
+                renderAdminInquiries();
+                updateTotalCountBadge();
+                renderPublishedLessons();
+                renderParentActivities();
             });
 
             if (adminLoggedIn) {
@@ -294,11 +297,6 @@
                 localStorage.setItem('school_admin_logged', 'true');
                 document.getElementById('adminAuthView').classList.add('hidden');
                 document.getElementById('adminDashboardView').classList.remove('hidden');
-                renderRequests();
-                renderAdminInquiries();
-                updateTotalCountBadge();
-                renderPublishedLessons();
-                renderParentActivities();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
             }
@@ -308,7 +306,6 @@
             adminLoggedIn = false;
             localStorage.removeItem('school_admin_logged');
             document.getElementById('adminDashboardView').classList.add('hidden');
-            document.getElementById('adminAuthView').classList.add('hidden');
             document.getElementById('adminAuthView').classList.remove('hidden');
         }
 
@@ -326,9 +323,7 @@
                 return;
             }
 
-            // البحث في المقبولات
             const foundInApproved = approvedStudents.find(s => s.student.toLowerCase().includes(query));
-            // البحث في المعلقة
             const foundInPending = pendingRequests.find(s => s.student.toLowerCase().includes(query));
 
             resultBox.classList.remove('hidden');
@@ -405,14 +400,12 @@
             });
         }
 
-        // --- خاصية ذكية لمنع تكرار قبول طالبة موجودة مسبقاً ---
         function approveStudent(index) {
             const student = pendingRequests[index];
-
-            // التأكد من عدم وجود الطالبة في المقبولات مسبقاً لمنع التكرار
             const alreadyApproved = approvedStudents.some(s => s.student.toLowerCase() === student.student.toLowerCase());
+            
             if (alreadyApproved) {
-                alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة ومقبولة مسبقاً في الدليل! سيتم حذف الطلب المعكر فقط.`);
+                alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة ومقبولة مسبقاً في الدليل! سيتم إزالة الطلب المعلق فقط.`);
                 pendingRequests.splice(index, 1);
                 saveData();
                 return;
