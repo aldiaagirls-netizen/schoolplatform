@@ -15,12 +15,24 @@
 
     <div class="max-w-xl mx-auto space-y-4">
         
-        <!-- شاشة تسجيل الدخول أو إرسال طلب الانضمام -->
+        <!-- شاشة تسجيل الدخول وإرسال طلب الانضمام مع رفع الصورة -->
         <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
             <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجیل دخول طالبة جديدة</h2>
-            <p class="text-xs text-gray-500 text-center">أدخل بيانات الطالبة بدقة ليتم إرسالها إلى لوحة إدارة المدرسة للموافقة.</p>
+            <p class="text-xs text-gray-500 text-center">أدخل بيانات الطالبة وصورتها الشخصية بدقة ليتم إرسالها إلى لوحة إدارة المدرسة للموافقة.</p>
             
             <div class="space-y-3 text-xs">
+                <!-- رفع صورة الطالبة -->
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-pink-200 p-4 rounded-xl bg-pink-50/50">
+                    <div id="imagePreviewContainer" class="mb-2 hidden">
+                        <img id="studentImagePreview" class="w-20 h-20 rounded-full object-cover border-2 border-pink-600 shadow-sm" alt="صورة الطالبة">
+                    </div>
+                    <label class="cursor-pointer bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-pink-700 transition shadow-sm">
+                        📷 اختر صورة الطالبة
+                        <input type="file" id="studentImageInput" accept="image/*" class="hidden" onchange="previewStudentImage(event)">
+                    </label>
+                    <span class="text-[10px] text-gray-400 mt-1">اختياري (صورة شخصية واضحة)</span>
+                </div>
+
                 <div>
                     <label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
                     <input type="text" id="parentStudentName" class="w-full px-3 py-2 border rounded-lg" placeholder="مثال: فاطمة أحمد علي">
@@ -62,17 +74,22 @@
             <button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold">تحديث الحالة 🔄</button>
         </div>
 
-        <!-- البوابة الرئيسية لولي الأمر (بعد الموافقة) -->
+        <!-- البوابة الرئيسية لولي الأمر -->
         <div id="parentDashboardView" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
-                <div>
-                    <h3 id="welcomeStudentTitle" class="font-bold text-pink-700 text-sm">مرحباً بك</h3>
-                    <p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
+                <div class="flex items-center gap-3">
+                    <div id="dashboardImageContainer">
+                        <!-- صورة الطالبة الدائرية هنا -->
+                    </div>
+                    <div>
+                        <h3 id="welcomeStudentTitle" class="font-bold text-pink-700 text-sm">مرحباً بك</h3>
+                        <p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
+                    </div>
                 </div>
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600">خروج 🚪</button>
             </div>
 
-            <!-- لوحة الإشعارات والتعاميم -->
+            <!-- الإشعارات والتعاميم -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
                 <h4 class="font-bold text-indigo-700 text-xs border-b pb-2">📢 الإشعارات والتعاميم المدرسية</h4>
                 <div id="parentNotificationsContainer" class="space-y-2 text-xs">
@@ -80,7 +97,7 @@
                 </div>
             </div>
 
-            <!-- الجدول اليومي والدروس -->
+            <!-- جدول الدروس -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
                 <h4 class="font-bold text-pink-700 text-xs border-b pb-2">📚 جدول الدروس والواجبات اليومية</h4>
                 <div id="parentScheduleContainer" class="space-y-2 text-xs">
@@ -88,7 +105,7 @@
                 </div>
             </div>
 
-            <!-- إرسال استفسار للإدارة -->
+            <!-- إرسال استفسار -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100 space-y-3">
                 <h4 class="font-bold text-blue-700 text-xs border-b pb-2">💬 إرسال استفسار أو ملاحظة للإدارة</h4>
                 <textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب استفسارك هنا..."></textarea>
@@ -98,7 +115,6 @@
     </div>
 
     <script>
-        // --- ⚙️ إعدادات وتكوين FIREBASE الخاص بك ---
         const firebaseConfig = {
             apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0nI",
             authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
@@ -115,16 +131,30 @@
         let currentStudentId = localStorage.getItem('school_parent_student_id');
         let currentStudentData = null;
         let globalSchoolData = {};
+        let base64StudentImage = '';
 
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 globalSchoolData = snapshot.val() || {};
-                
                 if (currentStudentId) {
                     checkAndSyncSession();
                 }
             });
         };
+
+        // معاينة الصورة المرفوعة وتحويلها لـ Base64
+        function previewStudentImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64StudentImage = e.target.result;
+                    document.getElementById('studentImagePreview').src = base64StudentImage;
+                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
         function submitParentRequest() {
             const student = document.getElementById('parentStudentName').value.trim();
@@ -138,7 +168,14 @@
             }
 
             const studentId = 'st_' + Date.now();
-            const newReq = { id: studentId, student, mother, grade, section };
+            const newReq = { 
+                id: studentId, 
+                student, 
+                mother, 
+                grade, 
+                section, 
+                image: base64StudentImage || '' 
+            };
 
             if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
             globalSchoolData.pendingRequests.push(newReq);
@@ -147,7 +184,7 @@
                 localStorage.setItem('school_parent_student_id', studentId);
                 currentStudentId = studentId;
                 showWaitingScreen();
-                alert("✓ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة.");
+                alert("✓ تم إرسال الطلب مع الصورة بنجاح، بانتظار موافقة الإدارة.");
             });
         }
 
@@ -165,7 +202,6 @@
             } else if (foundPending) {
                 showWaitingScreen();
             } else {
-                // إذا تم حذف الطالبة أو مسح البيانات من السحابة
                 logoutParent();
             }
         }
@@ -192,10 +228,17 @@
 
             document.getElementById('welcomeStudentTitle').innerText = `👧 الطالبة: ${student.student}`;
             document.getElementById('studentClassInfo').innerText = `${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
+
+            // عرض الصورة الشخصية في البوابة إذا وجدت
+            const imgContainer = document.getElementById('dashboardImageContainer');
+            if (student.image) {
+                imgContainer.innerHTML = `<img src="${student.image}" class="w-12 h-12 rounded-full object-cover border-2 border-pink-600 shadow-sm">`;
+            } else {
+                imgContainer.innerHTML = `<div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold text-base">👧</div>`;
+            }
         }
 
         function renderParentContent(student) {
-            // عرض الإشعارات
             const notifContainer = document.getElementById('parentNotificationsContainer');
             if (!student.notifications || student.notifications.length === 0) {
                 notifContainer.innerHTML = `<p class="text-gray-500">لا توجد إشعارات جديدة حالياً.</p>`;
@@ -211,7 +254,6 @@
                 });
             }
 
-            // عرض جدول الدروس الخاصة بصفها وشعبتها
             const scheduleContainer = document.getElementById('parentScheduleContainer');
             const classKey = `${student.grade}_${student.section}`;
             const schedule = (globalSchoolData.schoolSchedule && globalSchoolData.schoolSchedule[classKey]) || {};
@@ -254,6 +296,16 @@
         }
 
         function logoutParent() {
+            if (currentStudentData) {
+                if (!globalSchoolData.parentActivities) globalSchoolData.parentActivities = [];
+                globalSchoolData.parentActivities.push({
+                    type: 'logout',
+                    message: `🚪 ولي أمر الطالبة (${currentStudentData.student}) قام بتسجيل الخروج.`,
+                    time: new Date().toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })
+                });
+                db.ref('school_data').set(globalSchoolData);
+            }
+
             localStorage.removeItem('school_parent_student_id');
             currentStudentId = null;
             currentStudentData = null;
