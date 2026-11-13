@@ -15,7 +15,7 @@
 
     <div class="max-w-xl mx-auto space-y-4">
         
-        <!-- شاشة تسجيل الدخول وإرسال طلب الانضمام مع رفع الصورة -->
+        <!-- شاشة تسجيل الدخول وإرسال طلب الانضمام مع منع التكرار الذكي -->
         <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
             <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجیل دخول طالبة جديدة</h2>
             <p class="text-xs text-gray-500 text-center">أدخل بيانات الطالبة وصورتها الشخصية بدقة ليتم إرسالها إلى لوحة إدارة المدرسة للموافقة.</p>
@@ -78,9 +78,7 @@
         <div id="parentDashboardView" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div id="dashboardImageContainer">
-                        <!-- صورة الطالبة الدائرية هنا -->
-                    </div>
+                    <div id="dashboardImageContainer"></div>
                     <div>
                         <h3 id="welcomeStudentTitle" class="font-bold text-pink-700 text-sm">مرحباً بك</h3>
                         <p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
@@ -142,7 +140,6 @@
             });
         };
 
-        // معاينة الصورة المرفوعة وتحويلها لـ Base64
         function previewStudentImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -156,6 +153,7 @@
             }
         }
 
+        // --- خاصية ذكية لمنع تكرار إرسال الطلب أكثر من مرة ---
         function submitParentRequest() {
             const student = document.getElementById('parentStudentName').value.trim();
             const mother = document.getElementById('parentMotherName').value.trim();
@@ -164,6 +162,23 @@
 
             if (!student || !mother) {
                 alert("⚠️ يرجى ملء كافة الحقول المطلوبة.");
+                return;
+            }
+
+            const pending = globalSchoolData.pendingRequests || [];
+            const approved = globalSchoolData.approvedStudents || [];
+
+            // التحقق عما إذا كانت الطالبة موجودة مسبقاً في الطلبات المعلقة أو المقبولات
+            const existsInPending = pending.some(s => s.student.toLowerCase() === student.toLowerCase());
+            const existsInApproved = approved.some(s => s.student.toLowerCase() === student.toLowerCase());
+
+            if (existsInPending) {
+                alert("⚠️ تنبيه ذكي: اسم هذه الطالبة موجود مسبقاً في قائمة الطلبات المعلقة بانتظار موافقة الإدارة ولا يمكن تكرار الطلب!");
+                return;
+            }
+
+            if (existsInApproved) {
+                alert("⚠️ تنبيه ذكي: هذه الطالبة مقبولة ومسجلة بالفعل في المنصة!");
                 return;
             }
 
@@ -184,7 +199,7 @@
                 localStorage.setItem('school_parent_student_id', studentId);
                 currentStudentId = studentId;
                 showWaitingScreen();
-                alert("✓ تم إرسال الطلب مع الصورة بنجاح، بانتظار موافقة الإدارة.");
+                alert("✓ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة.");
             });
         }
 
@@ -229,7 +244,6 @@
             document.getElementById('welcomeStudentTitle').innerText = `👧 الطالبة: ${student.student}`;
             document.getElementById('studentClassInfo').innerText = `${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
 
-            // عرض الصورة الشخصية في البوابة إذا وجدت
             const imgContainer = document.getElementById('dashboardImageContainer');
             if (student.image) {
                 imgContainer.innerHTML = `<img src="${student.image}" class="w-12 h-12 rounded-full object-cover border-2 border-pink-600 shadow-sm">`;
