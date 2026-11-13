@@ -39,9 +39,8 @@
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
-                    <!-- 🔄 زر استرجاع البيانات القديمة -->
                     <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm">
-                        🔄 استرجاع البيانات القديمة
+                        🔄 تحديث ومزامنة البيانات
                     </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm">
                         🗑️ مسح السحابة
@@ -53,7 +52,7 @@
             <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl shadow-sm flex justify-between items-center text-xs">
                 <div>
                     <p class="font-bold text-sm">☁️ ربط سحابي مباشر (Firebase)</p>
-                    <p class="opacity-90">النظام يتصل ويستقبل طلبات جميع الأجهزة والهواتف مباشرة.</p>
+                    <p class="opacity-90">النظام يستقبل طلبات أولياء الأمور وصور الطالبات فوراً.</p>
                 </div>
                 <div class="bg-white/20 px-3 py-2 rounded-lg text-center">
                     <span id="totalSavedCount" class="block font-bold text-base">0</span>
@@ -61,7 +60,7 @@
                 </div>
             </div>
 
-            <!-- 🔍 مربع البحث الذكي عن اسم الطالبة -->
+            <!-- 🔍 البحث السريع عن طالبة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة (في النظام)</h2>
                 <div class="flex gap-2">
@@ -77,7 +76,7 @@
                 <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
             </div>
 
-            <!-- 🔔 قسم تتبع خروج ونشاط أولياء الأمور الذكي -->
+            <!-- 🔔 تتبع نشاط وخروج أولياء الأمور -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-100 space-y-4">
                 <h2 class="text-base font-bold text-purple-700 border-b pb-2">🔔 تتبع نشاط وخروج أولياء الأمور (مباشر)</h2>
                 <div id="parentsActivityContainer" class="space-y-2 text-xs">
@@ -144,7 +143,6 @@
                 </div>
                 <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition">إرسال الدرس سحابياً</button>
 
-                <!-- قائمة الدروس المنشورة سابقاً -->
                 <div class="pt-4 border-t border-pink-100 space-y-2">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-gray-700">📖 الدروس والواجبات المنشورة حالياً:</h3>
@@ -249,6 +247,7 @@
         let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
+        // --- المزامنة الحية المباشرة مع Firebase ---
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
@@ -288,42 +287,28 @@
                 supervisorName: supervisorName,
                 parentActivities: parentActivities
             };
-
-            // حفظ نسخة احتياطية محلياً أيضاً لضمان الأمان الفائق
             localStorage.setItem('school_backup_data', JSON.stringify(dataToSave));
-
-            // الحفظ السحابي
             db.ref('school_data').set(dataToSave);
         }
 
-        // --- 🔄 خاصية استرجاع البيانات القديمة ---
         function restoreOldData() {
-            const localBackup = localStorage.getItem('school_backup_data');
-            
             db.ref('school_data').once('value').then((snapshot) => {
                 const cloudData = snapshot.val();
-
-                if (cloudData && (cloudData.approvedStudents?.length > 0 || cloudData.pendingRequests?.length > 0)) {
-                    alert("✓ البيانات متوفرة ومحفوظة سحابياً بالفعل وتم تحديث الشاشة بنجاح!");
-                    return;
-                }
-
-                if (localBackup) {
-                    if (confirm("⚠️ هل تريد استعادة البيانات القديمة من النسخة الاحتياطية المخزنة على هذا الجهاز؟")) {
-                        const parsedData = JSON.parse(localBackup);
-                        pendingRequests = parsedData.pendingRequests || [];
-                        approvedStudents = parsedData.approvedStudents || [];
-                        parentInquiries = parsedData.parentInquiries || [];
-                        schoolSchedule = parsedData.schoolSchedule || {};
-                        parentActivities = parsedData.parentActivities || [];
-                        if(parsedData.principalName) principalName = parsedData.principalName;
-                        if(parsedData.supervisorName) supervisorName = parsedData.supervisorName;
-
-                        saveData(); // إعادة إرسالها للسحابة
-                        alert("✓ تم استرجاع البيانات القديمة بنجاح وإعادة مزامنتها مع السحابة!");
-                    }
+                if (cloudData) {
+                    pendingRequests = cloudData.pendingRequests || [];
+                    approvedStudents = cloudData.approvedStudents || [];
+                    parentInquiries = cloudData.parentInquiries || [];
+                    schoolSchedule = cloudData.schoolSchedule || {};
+                    parentActivities = cloudData.parentActivities || [];
+                    
+                    renderRequests();
+                    renderAdminInquiries();
+                    updateTotalCountBadge();
+                    renderPublishedLessons();
+                    renderParentActivities();
+                    alert("✓ تم تحديث ومزامنة البيانات من السحابة بنجاح!");
                 } else {
-                    alert("❌ عذراً، لا توجد نسخة احتياطية محلية قديمة على هذا المتصفح.");
+                    alert("⚠️ لا توجد بيانات سحابية مسجلة حالياً.");
                 }
             });
         }
@@ -414,7 +399,10 @@
 
         function renderRequests() {
             const container = document.getElementById('requestsContainer');
-            if (pendingRequests.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; return; }
+            if (!pendingRequests || pendingRequests.length === 0) { 
+                container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; 
+                return; 
+            }
             container.innerHTML = '';
             pendingRequests.forEach((req, index) => {
                 const reqImg = req.image 
@@ -633,7 +621,10 @@
 
         function renderAdminInquiries() {
             const container = document.getElementById('adminInquiriesContainer');
-            if (parentInquiries.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p>`; return; }
+            if (!parentInquiries || parentInquiries.length === 0) { 
+                container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p>`; 
+                return; 
+            }
             container.innerHTML = '';
             parentInquiries.forEach((q) => {
                 container.innerHTML += `
