@@ -80,7 +80,7 @@
                 </div>
             </div>
 
-            <!-- إدارة جدول الحصص والدروس -->
+            <!-- إدارة جدول الحصص والدروس + عرض وحذف الدروس السابقة -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
                 <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات العامة</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -120,7 +120,18 @@
                     <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
                     <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: حفظ سورة الفاتحة..."></textarea>
                 </div>
-                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs">إرسال الدرس سحابياً</button>
+                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition">إرسال الدرس سحابياً</button>
+
+                <!-- قائمة الدروس المنشورة سابقاً مع إمكانية الحذف -->
+                <div class="pt-4 border-t border-pink-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-gray-700">📖 الدروس والواجبات المنشورة حالياً:</h3>
+                        <button onclick="clearAllLessons()" class="text-[11px] text-red-600 hover:underline font-semibold">حذف جميع الدروس 🗑️</button>
+                    </div>
+                    <div id="publishedLessonsContainer" class="space-y-2 max-h-60 overflow-y-auto">
+                        <p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- التعميم العام -->
@@ -175,12 +186,7 @@
                 <h3 id="modalTitle" class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات - اختر الصف</h3>
                 <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg hover:text-red-600">✕</button>
             </div>
-            
-            <!-- محتوى النافذة المتغير ديناميكياً -->
-            <div id="acceptedStudentsContent" class="space-y-3 text-xs">
-                <!-- يتم تعبئته تلقائياً بواسطة الجافاسكريبت -->
-            </div>
-
+            <div id="acceptedStudentsContent" class="space-y-3 text-xs"></div>
             <div id="modalBackBtnContainer" class="hidden pt-2 border-t">
                 <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-700">← العودة لقائمة الصفوف</button>
             </div>
@@ -238,6 +244,7 @@
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
+                    renderPublishedLessons(); // تحديث قائمة الدروس المنشورة
                 }
             });
 
@@ -269,6 +276,7 @@
                 renderRequests();
                 renderAdminInquiries();
                 updateTotalCountBadge();
+                renderPublishedLessons();
             } else {
                 alert("❌ بيانات الدخول غير صحيحة!");
             }
@@ -326,7 +334,6 @@
             document.getElementById('acceptedStudentsModal').classList.add('hidden');
         }
 
-        // 1. عرض الصفوف من الأول إلى السادس
         function renderGradesView() {
             document.getElementById('modalTitle').innerText = "📂 دليل الطالبات - اختر الصف الدراسي";
             document.getElementById('modalBackBtnContainer').classList.add('hidden');
@@ -334,7 +341,6 @@
             
             container.innerHTML = '';
             gradesList.forEach(grade => {
-                // حساب عدد الطالبات في هذا الصف
                 const count = approvedStudents.filter(s => s.grade === grade).length;
                 container.innerHTML += `
                     <button onclick="renderSectionsView('${grade}')" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
@@ -345,7 +351,6 @@
             });
         }
 
-        // 2. عرض الشعب (أ، ب، ج) عند الضغط على الصف
         function renderSectionsView(grade) {
             document.getElementById('modalTitle').innerText = `📂 ${grade} - اختر الشعبة`;
             document.getElementById('modalBackBtnContainer').classList.remove('hidden');
@@ -353,7 +358,6 @@
 
             container.innerHTML = '';
             sectionsList.forEach(sec => {
-                // حساب عدد الطالبات في هذه الشعبة لهذا الصف
                 const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
                 container.innerHTML += `
                     <button onclick="renderStudentsView('${grade}', '${sec}')" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
@@ -364,7 +368,6 @@
             });
         }
 
-        // 3. عرض الطالبات المقبولات في الصف والشعبة المحددة مع زر حذف
         function renderStudentsView(grade, section) {
             document.getElementById('modalTitle').innerText = `👧 طالبات ${grade} - شعبة (${section})`;
             const container = document.getElementById('acceptedStudentsContent');
@@ -420,6 +423,7 @@
             alert("✓ تم حفظ اسم المشرف سحابياً.");
         }
 
+        // --- إدارة الدروس: إرسال، عرض، وحذف الدروس السابقة ---
         function sendLessonToSchedule() {
             const subject = document.getElementById('lessonSubject').value;
             const grade = document.getElementById('lessonGrade').value;
@@ -432,8 +436,66 @@
             schoolSchedule[key][subject] = content;
 
             saveData();
+            renderPublishedLessons();
             document.getElementById('lessonContent').value = '';
             alert(`✓ تم نشر الدرس سحابياً للجميع!`);
+        }
+
+        function renderPublishedLessons() {
+            const container = document.getElementById('publishedLessonsContainer');
+            let html = '';
+            let hasLessons = false;
+
+            for (const [classKey, subjects] of Object.entries(schoolSchedule)) {
+                if (!subjects) continue;
+                const [gradeName, sectionName] = classKey.split('_');
+                
+                for (const [subjectName, lessonText] of Object.entries(subjects)) {
+                    hasLessons = true;
+                    html += `
+                        <div class="p-2.5 bg-pink-50 border border-pink-100 rounded-lg flex justify-between items-center gap-2 text-xs">
+                            <div class="flex-1">
+                                <span class="font-bold text-pink-800">${gradeName} (شعبة ${sectionName}) - مادة ${subjectName}:</span>
+                                <p class="text-gray-700 mt-0.5">${lessonText}</p>
+                            </div>
+                            <button onclick="deleteLesson('${classKey}', '${subjectName}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] font-bold hover:bg-red-600 shrink-0">🗑️ حذف</button>
+                        </div>
+                    `;
+                }
+            }
+
+            if (!hasLessons) {
+                container.innerHTML = `<p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>`;
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        function deleteLesson(classKey, subjectName) {
+            if (confirm(`⚠️ هل أنت متأكد من حذف درس (${subjectName})؟`)) {
+                if (schoolSchedule[classKey] && schoolSchedule[classKey][subjectName]) {
+                    delete schoolSchedule[classKey][subjectName];
+                    // إذا أصبحت الشعبة فارغة من الدروس نحذف المفتاح بالكامل
+                    if (Object.keys(schoolSchedule[classKey]).length === 0) {
+                        delete schoolSchedule[classKey];
+                    }
+                    saveData();
+                    renderPublishedLessons();
+                }
+            }
+        }
+
+        function clearAllLessons() {
+            if (Object.keys(schoolSchedule).length === 0) {
+                alert("لا توجد دروس لحذفها.");
+                return;
+            }
+            if (confirm("⚠️ هل أنت متأكد من حذف جميع الدروس المنشورة لكافة الصفوف؟")) {
+                schoolSchedule = {};
+                saveData();
+                renderPublishedLessons();
+                alert("✓ تم مسح جميع الدروس السابقة.");
+            }
         }
 
         function sendBroadcastMessage() {
