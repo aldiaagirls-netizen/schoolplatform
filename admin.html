@@ -39,6 +39,10 @@
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
+                    <!-- 🔄 زر استرجاع البيانات القديمة -->
+                    <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm">
+                        🔄 استرجاع البيانات القديمة
+                    </button>
                     <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm">
                         🗑️ مسح السحابة
                     </button>
@@ -245,12 +249,10 @@
         let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
-        // --- استرجاع وتحديث البيانات فورياً من سحابة Firebase ---
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 
-                // جلب البيانات القديمة والمحفوظة سحابياً لمنع فقدانها
                 pendingRequests = data.pendingRequests || [];
                 approvedStudents = data.approvedStudents || [];
                 parentInquiries = data.parentInquiries || [];
@@ -263,7 +265,6 @@
                 document.getElementById('newPrincipalName').value = principalName;
                 document.getElementById('newSupervisorName').value = supervisorName;
 
-                // تحديث واجهة لوحة الإدارة تلقائياً عند أي تغيير أو تحديث للصفحة
                 renderRequests();
                 renderAdminInquiries();
                 updateTotalCountBadge();
@@ -278,7 +279,7 @@
         };
 
         function saveData() {
-            db.ref('school_data').set({
+            const dataToSave = {
                 pendingRequests: pendingRequests,
                 approvedStudents: approvedStudents,
                 parentInquiries: parentInquiries,
@@ -286,6 +287,44 @@
                 principalName: principalName,
                 supervisorName: supervisorName,
                 parentActivities: parentActivities
+            };
+
+            // حفظ نسخة احتياطية محلياً أيضاً لضمان الأمان الفائق
+            localStorage.setItem('school_backup_data', JSON.stringify(dataToSave));
+
+            // الحفظ السحابي
+            db.ref('school_data').set(dataToSave);
+        }
+
+        // --- 🔄 خاصية استرجاع البيانات القديمة ---
+        function restoreOldData() {
+            const localBackup = localStorage.getItem('school_backup_data');
+            
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val();
+
+                if (cloudData && (cloudData.approvedStudents?.length > 0 || cloudData.pendingRequests?.length > 0)) {
+                    alert("✓ البيانات متوفرة ومحفوظة سحابياً بالفعل وتم تحديث الشاشة بنجاح!");
+                    return;
+                }
+
+                if (localBackup) {
+                    if (confirm("⚠️ هل تريد استعادة البيانات القديمة من النسخة الاحتياطية المخزنة على هذا الجهاز؟")) {
+                        const parsedData = JSON.parse(localBackup);
+                        pendingRequests = parsedData.pendingRequests || [];
+                        approvedStudents = parsedData.approvedStudents || [];
+                        parentInquiries = parsedData.parentInquiries || [];
+                        schoolSchedule = parsedData.schoolSchedule || {};
+                        parentActivities = parsedData.parentActivities || [];
+                        if(parsedData.principalName) principalName = parsedData.principalName;
+                        if(parsedData.supervisorName) supervisorName = parsedData.supervisorName;
+
+                        saveData(); // إعادة إرسالها للسحابة
+                        alert("✓ تم استرجاع البيانات القديمة بنجاح وإعادة مزامنتها مع السحابة!");
+                    }
+                } else {
+                    alert("❌ عذراً، لا توجد نسخة احتياطية محلية قديمة على هذا المتصفح.");
+                }
             });
         }
 
@@ -313,7 +352,6 @@
             document.getElementById('totalSavedCount').innerText = approvedStudents.length;
         }
 
-        // --- 🔍 خاصية البحث الذكي عن الطالبة في النظام ---
         function searchStudentInSystem() {
             const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
             const resultBox = document.getElementById('searchResultContainer');
@@ -427,7 +465,6 @@
             }
         }
 
-        // --- نظام التصفح الهرمي للطالبات مع الصور ---
         const gradesList = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
         const sectionsList = ["أ", "ب", "ج"];
 
@@ -640,7 +677,8 @@
         function clearAllSystemData() {
             if (confirm("⚠️ هل أنت متأكد من مسح كافة بيانات النظام سحابياً؟")) {
                 db.ref('school_data').remove();
-                alert("✓ تم تفريغ قاعدة البيانات السحابية بالكامل.");
+                localStorage.removeItem('school_backup_data');
+                alert("✓ تم تفريغ قاعدة البيانات السحابية والمحلية بالكامل.");
             }
         }
         function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
