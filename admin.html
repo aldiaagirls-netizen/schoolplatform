@@ -26,27 +26,27 @@
                 <label class="block text-xs font-semibold mb-1">كلمة المرور:</label>
                 <input type="password" id="adminPassInput" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="123456">
             </div>
-            <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm">دخول اللوحة</button>
+            <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm cursor-pointer">دخول اللوحة</button>
         </div>
 
         <!-- لوحة الإدارة -->
         <div id="adminDashboardView" class="hidden space-y-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center flex-wrap gap-2">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-sm">
+                    <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-sm cursor-pointer">
                         📂 دليل الطالبات المقبولات
                     </button>
-                    <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
+                    <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm cursor-pointer">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
-                    <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm">
+                    <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm cursor-pointer">
                         🔄 استرجاع ومزامنة البيانات
                     </button>
-                    <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm">
+                    <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm cursor-pointer">
                         🗑️ مسح السحابة
                     </button>
                 </div>
-                <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">تسجيل الخروج 🚪</button>
+                <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">تسجيل الخروج 🚪</button>
             </div>
 
             <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl shadow-sm flex justify-between items-center text-xs">
@@ -64,8 +64,8 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
                 <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة (في النظام)</h2>
                 <div class="flex gap-2">
-                    <input type="text" id="searchStudentInput" class="flex-1 px-3 py-2 border rounded-lg text-xs" placeholder="أدخل اسم الطالبة للبحث عنها...">
-                    <button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700">بحث 🔍</button>
+                    <input type="text" id="searchStudentInput" class="flex-1 px-3 py-2 border rounded-lg text-xs bg-white" placeholder="أدخل اسم الطالبة للبحث عنها...">
+                    <button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 cursor-pointer">بحث 🔍</button>
                 </div>
                 <div id="searchResultContainer" class="hidden p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs space-y-1"></div>
             </div>
@@ -90,13 +90,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold mb-1">اسم مديرة المدرسة:</label>
-                        <input type="text" id="newPrincipalName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="أدخل اسم المديرة">
-                        <button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">حفظ اسم المديرة</button>
+                        <input type="text" id="newPrincipalName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2 bg-white" placeholder="أدخل اسم المديرة">
+                        <button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">حفظ اسم المديرة</button>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold mb-1">اسم مشرف المنصة:</label>
-                        <input type="text" id="newSupervisorName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2" placeholder="أدخل اسم المشرف">
-                        <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">حفظ اسم المشرف</button>
+                        <input type="text" id="newSupervisorName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2 bg-white" placeholder="أدخل اسم المشرف">
+                        <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">حفظ اسم المشرف</button>
                     </div>
                 </div>
             </div>
@@ -139,14 +139,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
-                    <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: حفظ سورة الفاتحة..."></textarea>
+                    <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs bg-white" placeholder="مثال: حفظ سورة الفاتحة..."></textarea>
                 </div>
-                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition">إرسال الدرس سحابياً</button>
+                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition cursor-pointer">إرسال الدرس سحابياً</button>
 
                 <div class="pt-4 border-t border-pink-100 space-y-2">
                     <div class="flex justify-between items-center">
                         <h3 class="text-xs font-bold text-gray-700">📖 الدروس والواجبات المنشورة حالياً:</h3>
-                        <button onclick="clearAllLessons()" class="text-[11px] text-red-600 hover:underline font-semibold">حذف جميع الدروس 🗑️</button>
+                        <button onclick="clearAllLessons()" class="text-[11px] text-red-600 hover:underline font-semibold cursor-pointer">حذف جميع الدروس 🗑️</button>
                     </div>
                     <div id="publishedLessonsContainer" class="space-y-2 max-h-60 overflow-y-auto">
                         <p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>
@@ -156,7 +156,7 @@
 
             <!-- التعميم العام -->
             <div class="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden">
-                <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 hover:bg-indigo-100 p-4 flex justify-between items-center transition text-right">
+                <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 hover:bg-indigo-100 p-4 flex justify-between items-center transition text-right cursor-pointer">
                     <span class="font-bold text-indigo-700 text-sm">🎙️ لوحة الإرسال العام (نص أو صوت) لجميع أولياء الأمور</span>
                     <span id="broadcastToggleIcon" class="text-indigo-700 font-bold text-lg">▼</span>
                 </button>
@@ -185,9 +185,9 @@
                         </div>
                     </div>
                     <div class="space-y-2 text-xs">
-                        <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="اكتب نص التعميم الإداري..."></textarea>
+                        <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="اكتب نص التعميم الإداري..."></textarea>
                     </div>
-                    <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold text-xs w-full">إرسال تعميم سحابي 🚀</button>
+                    <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold text-xs w-full cursor-pointer">إرسال تعميم سحابي 🚀</button>
                 </div>
             </div>
 
@@ -204,11 +204,11 @@
         <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 id="modalTitle" class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات - اختر الصف</h3>
-                <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg hover:text-red-600">✕</button>
+                <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg hover:text-red-600 cursor-pointer">✕</button>
             </div>
             <div id="acceptedStudentsContent" class="space-y-3 text-xs"></div>
             <div id="modalBackBtnContainer" class="hidden pt-2 border-t">
-                <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-700">← العودة لقائمة الصفوف</button>
+                <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-700 cursor-pointer">← العودة لقائمة الصفوف</button>
             </div>
         </div>
     </div>
@@ -217,7 +217,7 @@
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
             <h3 class="font-bold text-pink-700 text-base border-b pb-2">🎯 سجل الطالبات المباشر</h3>
             <div id="modalStudentsList" class="space-y-4 text-xs"></div>
-            <button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs">إغلاق</button>
+            <button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs cursor-pointer">إغلاق</button>
         </div>
     </div>
 
@@ -275,25 +275,6 @@
                 document.getElementById('adminDashboardView').classList.remove('hidden');
             }
         };
-
-        // --- التحديث الآمن الذي يضمن عدم ضياع أي بيانات سابقة ---
-        function saveData(customData = null) {
-            db.ref('school_data').once('value').then((snapshot) => {
-                const currentCloudData = snapshot.val() || {};
-
-                const dataToSave = {
-                    pendingRequests: customData?.pendingRequests !== undefined ? customData.pendingRequests : (currentCloudData.pendingRequests || pendingRequests),
-                    approvedStudents: customData?.approvedStudents !== undefined ? customData.approvedStudents : (currentCloudData.approvedStudents || approvedStudents),
-                    parentInquiries: currentCloudData.parentInquiries || parentInquiries,
-                    schoolSchedule: currentCloudData.schoolSchedule || schoolSchedule,
-                    principalName: currentCloudData.principalName || principalName,
-                    supervisorName: currentCloudData.supervisorName || supervisorName,
-                    parentActivities: currentCloudData.parentActivities || parentActivities
-                };
-
-                db.ref('school_data').set(dataToSave);
-            });
-        }
 
         function restoreOldData() {
             db.ref('school_data').once('value').then((snapshot) => {
@@ -389,7 +370,7 @@
                             <span class="font-bold">${act.message}</span>
                             <span class="text-[10px] opacity-70 block">${act.time}</span>
                         </div>
-                        <button onclick="removeActivity(${parentActivities.length - 1 - idx})" class="text-gray-400 hover:text-red-600 text-xs px-1">✕</button>
+                        <button onclick="removeActivity(${parentActivities.length - 1 - idx})" class="text-gray-400 hover:text-red-600 text-xs px-1 cursor-pointer">✕</button>
                     </div>
                 `;
             });
@@ -397,7 +378,7 @@
 
         function removeActivity(index) {
             parentActivities.splice(index, 1);
-            saveData();
+            db.ref('school_data').update({ parentActivities: parentActivities });
             renderParentActivities();
         }
 
@@ -429,7 +410,7 @@
                 }
                 
                 const textDiv = document.createElement('div');
-                textDiv.innerHTML = `<p class="font-bold text-pink-900">الطالبة: ${req.student}</p><p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>`;
+                textDiv.innerHTML = `<p class="font-bold text-pink-900">الطالبة: ${req.student}</p><p class="text-xs text-gray-600">ولي الأمر: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>`;
                 infoDiv.appendChild(textDiv);
                 
                 const actionsDiv = document.createElement('div');
@@ -456,7 +437,7 @@
             });
         }
 
-        // --- دالة الموافقة الذكية التي تحافظ على البيانات القديمة وتحدث السحابة فوراً ---
+        // --- الدالة المحدثة والآمنة 100% التي تجلب أحدث نسخة سحابية وتدمج البيانات دون ضياع أي طالبة ---
         function approveStudent(studentId) {
             db.ref('school_data').once('value').then((snapshot) => {
                 const cloudData = snapshot.val() || {};
@@ -470,26 +451,25 @@
                 }
 
                 const student = currentPending[index];
+                
+                // التأكد من عدم تكرار إضافة نفس الطالبة إذا كانت موجودة مسبقاً في المقبولات
                 const alreadyApproved = currentApproved.some(s => s.student.toLowerCase() === student.student.toLowerCase());
 
                 // حذف الطلب من المعلقات
                 currentPending.splice(index, 1);
 
                 if (!alreadyApproved) {
-                    student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
+                    if (!student.notifications) student.notifications = [];
+                    student.notifications.unshift({ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true });
                     currentApproved.push(student);
                 }
 
-                // حفظ التحديثات في السحابة مع الحفاظ على البيانات القديمة كاملة
+                // حفظ التحديثات في السحابة مع الحفاظ الكامل على المقبولات السابقات
                 db.ref('school_data').update({
                     pendingRequests: currentPending,
                     approvedStudents: currentApproved
                 }).then(() => {
-                    pendingRequests = currentPending;
-                    approvedStudents = currentApproved;
-                    renderRequests();
-                    updateTotalCountBadge();
-                    alert(`✓ تمت الموافقة على الطالبة (${student.student}) بنجاح وإزالتها من القائمة المعلقة!`);
+                    alert(`✓ تمت الموافقة على الطالبة (${student.student}) بنجاح وبقيت كافة الطالبات المقبولات محفوظات في النظام!`);
                 });
             });
         }
@@ -508,8 +488,6 @@
                     db.ref('school_data').update({
                         pendingRequests: currentPending
                     }).then(() => {
-                        pendingRequests = currentPending;
-                        renderRequests();
                         alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
                     });
                 }
@@ -534,7 +512,7 @@
             gradesList.forEach(grade => {
                 const count = approvedStudents.filter(s => s.grade === grade).length;
                 container.innerHTML += `
-                    <button onclick="renderSectionsView('${grade}')" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
+                    <button onclick="renderSectionsView('${grade}')" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm cursor-pointer">
                         <span>📚 ${grade}</span>
                         <span class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
                     </button>
@@ -549,7 +527,7 @@
             sectionsList.forEach(sec => {
                 const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
                 container.innerHTML += `
-                    <button onclick="renderStudentsView('${grade}', '${sec}')" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm">
+                    <button onclick="renderStudentsView('${grade}', '${sec}')" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm cursor-pointer">
                         <span>🏫 الشعبة (${sec})</span>
                         <span class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
                     </button>
@@ -578,10 +556,10 @@
                             ${imgTag}
                             <div>
                                 <p class="font-bold text-gray-800 text-sm">👧 ${st.student}</p>
-                                <p class="text-[11px] text-gray-500">ولي الأمر / الأم: ${st.mother}</p>
+                                <p class="text-[11px] text-gray-500">ولي الأمر: ${st.mother}</p>
                             </div>
                         </div>
-                        <button onclick="removeStudentFromAccepted(${st.originalIndex}, '${grade}', '${section}')" class="bg-red-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-red-600 shadow-sm">حذف</button>
+                        <button onclick="removeStudentFromAccepted(${st.originalIndex}, '${grade}', '${section}')" class="bg-red-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-red-600 shadow-sm cursor-pointer">حذف</button>
                     </div>
                 `;
             });
@@ -626,10 +604,9 @@
                 currentSchedule[key][subject] = content;
 
                 db.ref('school_data').update({ schoolSchedule: currentSchedule }).then(() => {
-                    schoolSchedule = currentSchedule;
                     renderPublishedLessons();
                     document.getElementById('lessonContent').value = '';
-                    alert(`✓ تم نشر الدرس سحابياً للجميع!`);
+                    alert(`✓ تم نشر الدرس سحابياً للصف ${grade} - شعبة (${section}) فقط!`);
                 });
             });
         }
@@ -649,7 +626,7 @@
                                 <span class="font-bold text-pink-800">${gradeName} (شعبة ${sectionName}) - مادة ${subjectName}:</span>
                                 <p class="text-gray-700 mt-0.5">${lessonText}</p>
                             </div>
-                            <button onclick="deleteLesson('${classKey}', '${subjectName}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] font-bold hover:bg-red-600 shrink-0">🗑️ حذف</button>
+                            <button onclick="deleteLesson('${classKey}', '${subjectName}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] font-bold hover:bg-red-600 shrink-0 cursor-pointer">🗑️ حذف</button>
                         </div>
                     `;
                 }
@@ -693,7 +670,6 @@
                 });
 
                 db.ref('school_data').update({ approvedStudents: currentApproved }).then(() => {
-                    approvedStudents = currentApproved;
                     document.getElementById('broadcastText').value = '';
                     alert("✓ تم إرسال التعميم للجميع بالسحاب!");
                 });
@@ -713,9 +689,9 @@
                         <p class="font-bold text-blue-900">👧 الطالبة: ${q.studentName} (${q.grade} - شعبة ${q.section})</p>
                         <p class="bg-white p-2 rounded border"><strong>النص:</strong> ${q.content}</p>
                         <div class="flex gap-2 flex-wrap items-center">
-                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs min-w-[150px]" placeholder="اكتب الرد هنا...">
-                            <button onclick="replyInquiry(${q.id})" class="bg-blue-600 text-white px-3 py-1 rounded">إرسال الرد</button>
-                            <button onclick="deleteInquiry(${q.id})" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">🗑️ حذف الاستفسار</button>
+                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs min-w-[150px] bg-white" placeholder="اكتب الرد هنا...">
+                            <button onclick="replyInquiry(${q.id})" class="bg-blue-600 text-white px-3 py-1 rounded cursor-pointer">إرسال الرد</button>
+                            <button onclick="deleteInquiry(${q.id})" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 cursor-pointer">🗑️ حذف الاستفسار</button>
                         </div>
                     </div>`;
             });
@@ -723,39 +699,48 @@
         function replyInquiry(id) {
             const replyText = document.getElementById(`reply_${id}`).value.trim();
             if (!replyText) return;
-            const idx = parentInquiries.findIndex(q => q.id === id);
-            if (idx !== -1) {
-                const inquiry = parentInquiries[idx];
-                const student = approvedStudents.find(s => s.id === inquiry.studentId);
-                if (student) {
-                    if(!student.notifications) student.notifications = [];
-                    student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
-                    parentInquiries.splice(idx, 1);
-                    db.ref('school_data').update({
-                        parentInquiries: parentInquiries,
-                        approvedStudents: approvedStudents
-                    }).then(() => {
-                        renderAdminInquiries();
-                        alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
-                    });
+            
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val() || {};
+                let curInquiries = cloudData.parentInquiries || [];
+                let curApproved = cloudData.approvedStudents || [];
+
+                const idx = curInquiries.findIndex(q => q.id === id);
+                if (idx !== -1) {
+                    const inquiry = curInquiries[idx];
+                    const student = curApproved.find(s => s.id === inquiry.studentId);
+                    if (student) {
+                        if(!student.notifications) student.notifications = [];
+                        student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
+                        curInquiries.splice(idx, 1);
+                        
+                        db.ref('school_data').update({
+                            parentInquiries: curInquiries,
+                            approvedStudents: curApproved
+                        }).then(() => {
+                            alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
+                        });
+                    }
                 }
-            }
+            });
         }
         function deleteInquiry(id) {
             if (confirm("⚠️ هل أنت متأكد من حذف هذا الاستفسار؟")) {
-                const idx = parentInquiries.findIndex(q => q.id === id);
-                if (idx !== -1) {
-                    parentInquiries.splice(idx, 1);
-                    db.ref('school_data').update({ parentInquiries: parentInquiries });
-                    renderAdminInquiries();
-                }
+                db.ref('school_data').once('value').then((snapshot) => {
+                    const cloudData = snapshot.val() || {};
+                    let curInquiries = cloudData.parentInquiries || [];
+                    const idx = curInquiries.findIndex(q => q.id === id);
+                    if (idx !== -1) {
+                        curInquiries.splice(idx, 1);
+                        db.ref('school_data').update({ parentInquiries: curInquiries });
+                    }
+                });
             }
         }
         function clearAllSystemData() {
             if (confirm("⚠️ هل أنت متأكد من مسح كافة بيانات النظام سحابياً؟")) {
                 db.ref('school_data').remove();
-                localStorage.removeItem('school_backup_data');
-                alert("✓ تم تفريغ قاعدة البيانات السحابية والمحلية بالكامل.");
+                alert("✓ تم تفريغ قاعدة البيانات السحابية بالكامل.");
             }
         }
         function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
