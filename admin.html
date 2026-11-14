@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,120 +7,153 @@
     <title>لوحة التحكم والإدارة - مدرسة الضياء</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- مكتبات Firebase السحابية -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style> body { font-family: 'Cairo', sans-serif; } </style>
+    <style>body{font-family:'Cairo',sans-serif}</style>
 </head>
 <body class="bg-pink-50 text-gray-800 min-h-screen p-6">
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        
-        <!-- شاشة تسجيل دخول الإدارة -->
-        <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow-sm border border-pink-100 max-w-md mx-auto space-y-4">
-            <h2 class="text-xl font-bold text-pink-700 text-center">🔒 دخول لوحة إدارة المدرسة (السحابية)</h2>
-            <div>
-                <label class="block text-xs font-semibold mb-1">اسم المستخدم:</label>
-                <input type="text" id="adminUserInput" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="admin">
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- تسجيل الدخول -->
+    <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow-sm border border-pink-100 max-w-md mx-auto space-y-4">
+        <h2 class="text-xl font-bold text-pink-700 text-center">🔒 دخول لوحة إدارة المدرسة السحابية</h2>
+        <div>
+            <label class="block text-xs font-semibold mb-1">اسم المستخدم:</label>
+            <input type="text" id="adminUserInput" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="admin">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold mb-1">كلمة المرور:</label>
+            <input type="password" id="adminPassInput" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="كلمة المرور">
+        </div>
+        <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold text-sm">دخول اللوحة</button>
+        <p id="loginError" class="text-red-600 text-xs text-center"></p>
+    </div>
+
+    <!-- لوحة الإدارة -->
+    <div id="adminDashboardView" class="hidden space-y-6">
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center flex-wrap gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold">📂 دليل الطالبات المقبولات</button>
+                <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold">🎯 متابعة مشاهدات الرسائل</button>
+                <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold">🔄 مزامنة البيانات</button>
+                <button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold">⬇️ تنزيل نسخة احتياطية</button>
+                <button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-xl text-xs font-bold">🛡️ حماية البيانات</button>
             </div>
-            <div>
-                <label class="block text-xs font-semibold mb-1">كلمة المرور:</label>
-                <input type="password" id="adminPassInput" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="123456">
-            </div>
-            <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-semibold hover:bg-pink-700 text-sm cursor-pointer">دخول اللوحة</button>
+            <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs">تسجيل الخروج 🚪</button>
         </div>
 
-        <!-- لوحة الإدارة -->
-        <div id="adminDashboardView" class="hidden space-y-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center flex-wrap gap-2">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-sm cursor-pointer">
-                        📂 دليل الطالبات المقبولات
-                    </button>
-                    <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm cursor-pointer">
-                        🎯 متابعة مشاهدات الرسائل
-                    </button>
-                    <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm cursor-pointer">
-                        🔄 استرجاع ومزامنة البيانات
-                    </button>
-                    <button onclick="clearAllSystemData()" class="bg-red-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-red-700 transition shadow-sm cursor-pointer">
-                        🗑️ مسح السحابة
-                    </button>
-                </div>
-                <button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">تسجيل الخروج 🚪</button>
+        <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl shadow-sm flex justify-between items-center text-xs">
+            <div>
+                <p class="font-bold text-sm">☁️ ربط سحابي مباشر (Firebase)</p>
+                <p class="opacity-90">النظام يستقبل طلبات أولياء الأمور وصور الطالبات.</p>
+                <p id="connectionStatus" class="mt-2 font-bold">جارٍ فحص الاتصال...</p>
             </div>
+            <div class="bg-white/20 px-3 py-2 rounded-lg text-center">
+                <span id="totalSavedCount" class="block font-bold text-base">0</span>
+                <span class="text-[10px]">طالبة مسجلة بالسحاب</span>
+            </div>
+        </div>
 
-            <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl shadow-sm flex justify-between items-center text-xs">
+        <!-- البحث -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
+            <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة</h2>
+            <div class="flex gap-2">
+                <input type="text" id="searchStudentInput" class="flex-1 px-3 py-2 border rounded-lg text-xs" placeholder="أدخل اسم الطالبة...">
+                <button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">بحث 🔍</button>
+            </div>
+            <div id="searchResultContainer" class="hidden p-3 bg-blue-50 border rounded-lg text-xs space-y-1"></div>
+        </div>
+
+        <!-- الطلبات -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+            <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة</h2>
+            <div id="requestsContainer" class="space-y-3">لا توجد طلبات معلقة حالياً.</div>
+        </div>
+
+        <!-- النشاط -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-100 space-y-4">
+            <h2 class="text-base font-bold text-purple-700 border-b pb-2">🔔 تتبع نشاط وخروج أولياء الأمور</h2>
+            <div id="parentsActivityContainer" class="space-y-2 text-xs">لا توجد تنبيهات نشاط حالياً.</div>
+        </div>
+
+        <!-- الأسماء -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
+            <h2 class="text-base font-bold text-pink-600 border-b pb-2">👩‍💼 إعدادات المدرسة والأسماء</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                    <p class="font-bold text-sm">☁️ ربط سحابي مباشر (Firebase)</p>
-                    <p class="opacity-90">النظام يستقبل طلبات أولياء الأمور وصور الطالبات فوراً.</p>
+                    <label class="block text-xs font-semibold mb-1">اسم مديرة المدرسة:</label>
+                    <input type="text" id="newPrincipalName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2">
+                    <button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs">حفظ اسم المديرة</button>
                 </div>
-                <div class="bg-white/20 px-3 py-2 rounded-lg text-center">
-                    <span id="totalSavedCount" class="block font-bold text-base">0</span>
-                    <span class="text-[10px]">طالبة مسجلة بالسحاب</span>
-                </div>
-            </div>
-
-            <!-- 🔍 البحث السريع عن طالبة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-blue-200 space-y-3">
-                <h2 class="text-base font-bold text-blue-700 border-b pb-2">🔍 البحث السريع عن طالبة (في النظام)</h2>
-                <div class="flex gap-2">
-                    <input type="text" id="searchStudentInput" class="flex-1 px-3 py-2 border rounded-lg text-xs bg-white" placeholder="أدخل اسم الطالبة للبحث عنها...">
-                    <button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 cursor-pointer">بحث 🔍</button>
-                </div>
-                <div id="searchResultContainer" class="hidden p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs space-y-1"></div>
-            </div>
-
-            <!-- طلبات أولياء الأمور المعلقة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة لأولياء الأمور</h2>
-                <div id="requestsContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p></div>
-            </div>
-
-            <!-- 🔔 تتبع نشاط وخروج أولياء الأمور -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-purple-100 space-y-4">
-                <h2 class="text-base font-bold text-purple-700 border-b pb-2">🔔 تتبع نشاط وخروج أولياء الأمور (مباشر)</h2>
-                <div id="parentsActivityContainer" class="space-y-2 text-xs">
-                    <p class="text-gray-500">لا توجد تنبيهات نشاط حالياً.</p>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">اسم مشرف المنصة:</label>
+                    <input type="text" id="newSupervisorName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2">
+                    <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs">حفظ اسم المشرف</button>
                 </div>
             </div>
+        </div>
 
-            <!-- إعدادات أسماء الإدارة -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
-                <h2 class="text-base font-bold text-pink-600 border-b pb-2">👩‍💼 إعدادات المدرسة والأسماء</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- الدروس -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
+            <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">المادة:</label>
+                    <select id="lessonSubject" class="w-full px-3 py-2 border rounded-lg text-xs">
+                        <option value="القرآن الكريم">القرآن الكريم</option>
+                        <option value="اللغة العربية">اللغة العربية</option>
+                        <option value="الرياضيات">الرياضيات</option>
+                        <option value="الاجتماعيات">الاجتماعيات</option>
+                        <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                        <option value="الأخلاقية">الأخلاقية</option>
+                        <option value="العلوم">العلوم</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">الصف:</label>
+                    <select id="lessonGrade" class="w-full px-3 py-2 border rounded-lg text-xs">
+                        <option value="الأول الابتدائي">الأول الابتدائي</option>
+                        <option value="الثاني الابتدائي">الثاني الابتدائي</option>
+                        <option value="الثالث الابتدائي">الثالث الابتدائي</option>
+                        <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                        <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                        <option value="السادس الابتدائي">السادس الابتدائي</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">الشعبة:</label>
+                    <select id="lessonSection" class="w-full px-3 py-2 border rounded-lg text-xs">
+                        <option value="أ">الشعبة (أ)</option>
+                        <option value="ب">الشعبة (ب)</option>
+                        <option value="ج">الشعبة (ج)</option>
+                    </select>
+                </div>
+            </div>
+            <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="تفاصيل الدرس أو الواجب..."></textarea>
+            <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs">إرسال الدرس سحابياً</button>
+            <div class="pt-4 border-t space-y-2">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold">📖 الدروس والواجبات المنشورة:</h3>
+                    <button onclick="clearAllLessons()" class="text-[11px] text-red-600 font-semibold">حذف جميع الدروس 🗑️</button>
+                </div>
+                <div id="publishedLessonsContainer" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <!-- التعميم -->
+        <div class="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden">
+            <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 flex justify-between items-center text-right">
+                <span class="font-bold text-indigo-700 text-sm">🎙️ لوحة الإرسال العام لجميع أولياء الأمور</span>
+                <span id="broadcastToggleIcon">▼</span>
+            </button>
+            <div id="broadcastContentBody" class="hidden p-6 space-y-4 border-t">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <div>
-                        <label class="block text-xs font-semibold mb-1">اسم مديرة المدرسة:</label>
-                        <input type="text" id="newPrincipalName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2 bg-white" placeholder="أدخل اسم المديرة">
-                        <button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">حفظ اسم المديرة</button>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">اسم مشرف المنصة:</label>
-                        <input type="text" id="newSupervisorName" class="w-full px-3 py-2 border rounded-lg text-xs mb-2 bg-white" placeholder="أدخل اسم المشرف">
-                        <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">حفظ اسم المشرف</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- إدارة جدول الحصص والدروس -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-200 space-y-4">
-                <h2 class="text-base font-bold text-pink-700 border-b pb-2">📅 جدول الحصص اليومي وإرسال الواجبات العامة</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">اختر المادة الدراسية:</label>
-                        <select id="lessonSubject" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
-                            <option value="القرآن الكريم">القرآن الكريم</option>
-                            <option value="اللغة العربية">اللغة العربية</option>
-                            <option value="الرياضيات">الرياضيات</option>
-                            <option value="الاجتماعيات">الاجتماعيات</option>
-                            <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
-                            <option value="الأخلاقية">الأخلاقية</option>
-                            <option value="العلوم">العلوم</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold mb-1">الصف المستهدف:</label>
-                        <select id="lessonGrade" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                        <label class="block font-semibold mb-1">الصف:</label>
+                        <select id="broadcastGrade" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="الكل">جميع الصفوف</option>
                             <option value="الأول الابتدائي">الأول الابتدائي</option>
                             <option value="الثاني الابتدائي">الثاني الابتدائي</option>
                             <option value="الثالث الابتدائي">الثالث الابتدائي</option>
@@ -129,623 +163,653 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold mb-1">الشعبة المستهدفة:</label>
-                        <select id="lessonSection" class="w-full px-3 py-2 border rounded-lg bg-white text-xs">
+                        <label class="block font-semibold mb-1">الشعبة:</label>
+                        <select id="broadcastSection" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="الكل">جميع الشعب</option>
                             <option value="أ">الشعبة (أ)</option>
                             <option value="ب">الشعبة (ب)</option>
                             <option value="ج">الشعبة (ج)</option>
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
-                    <textarea id="lessonContent" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs bg-white" placeholder="مثال: حفظ سورة الفاتحة..."></textarea>
-                </div>
-                <button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-pink-700 transition cursor-pointer">إرسال الدرس سحابياً</button>
-
-                <div class="pt-4 border-t border-pink-100 space-y-2">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold text-gray-700">📖 الدروس والواجبات المنشورة حالياً:</h3>
-                        <button onclick="clearAllLessons()" class="text-[11px] text-red-600 hover:underline font-semibold cursor-pointer">حذف جميع الدروس 🗑️</button>
-                    </div>
-                    <div id="publishedLessonsContainer" class="space-y-2 max-h-60 overflow-y-auto">
-                        <p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- التعميم العام -->
-            <div class="bg-white rounded-xl shadow-sm border border-indigo-200 overflow-hidden">
-                <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 hover:bg-indigo-100 p-4 flex justify-between items-center transition text-right cursor-pointer">
-                    <span class="font-bold text-indigo-700 text-sm">🎙️ لوحة الإرسال العام (نص أو صوت) لجميع أولياء الأمور</span>
-                    <span id="broadcastToggleIcon" class="text-indigo-700 font-bold text-lg">▼</span>
-                </button>
-                <div id="broadcastContentBody" class="hidden p-6 space-y-4 border-t border-indigo-100">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <label class="block font-semibold mb-1">الصف المستهدف:</label>
-                            <select id="broadcastGrade" class="w-full px-3 py-2 border rounded-lg bg-white">
-                                <option value="الكل">جميع الصفوف (كل المدرسة)</option>
-                                <option value="الأول الابتدائي">الأول الابتدائي</option>
-                                <option value="الثاني الابتدائي">الثاني الابتدائي</option>
-                                <option value="الثالث الابتدائي">الثالث الابتدائي</option>
-                                <option value="الرابع الابتدائي">الرابع الابتدائي</option>
-                                <option value="الخامس الابتدائي">الخامس الابتدائي</option>
-                                <option value="السادس الابتدائي">السادس الابتدائي</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold mb-1">الشعبة المستهدفة:</label>
-                            <select id="broadcastSection" class="w-full px-3 py-2 border rounded-lg bg-white">
-                                <option value="الكل">جميع الشعب (أ، ب، ج)</option>
-                                <option value="أ">الشعبة (أ)</option>
-                                <option value="ب">الشعبة (ب)</option>
-                                <option value="ج">الشعبة (ج)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="space-y-2 text-xs">
-                        <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="اكتب نص التعميم الإداري..."></textarea>
-                    </div>
-                    <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold text-xs w-full cursor-pointer">إرسال تعميم سحابي 🚀</button>
-                </div>
-            </div>
-
-            <!-- استفسارات أولياء الأمور -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
-                <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 أسئلة واستفسارات أولياء الأمور الواردة</h2>
-                <div id="adminInquiriesContainer" class="space-y-3"><p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p></div>
+                <textarea id="broadcastText" rows="3" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب نص التعميم..."></textarea>
+                <button onclick="sendBroadcastMessage()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs w-full">إرسال تعميم سحابي 🚀</button>
             </div>
         </div>
-    </div>
 
-    <!-- نافذة دليل الطالبات التفاعلية -->
-    <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 id="modalTitle" class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات - اختر الصف</h3>
-                <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg hover:text-red-600 cursor-pointer">✕</button>
-            </div>
-            <div id="acceptedStudentsContent" class="space-y-3 text-xs"></div>
-            <div id="modalBackBtnContainer" class="hidden pt-2 border-t">
-                <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-gray-700 cursor-pointer">← العودة لقائمة الصفوف</button>
-            </div>
+        <!-- الاستفسارات -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-pink-100 space-y-4">
+            <h2 class="text-base font-bold text-blue-700 border-b pb-2">💬 استفسارات أولياء الأمور</h2>
+            <div id="adminInquiriesContainer" class="space-y-3">لا توجد استفسارات جديدة.</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- نافذة دليل الطالبات -->
+<div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-2">
+            <h3 id="modalTitle" class="font-bold text-emerald-700 text-base">📂 دليل الطالبات المقبولات</h3>
+            <button onclick="closeAcceptedStudentsModal()" class="text-gray-500 font-bold text-lg">✕</button>
+        </div>
+        <div id="acceptedStudentsContent" class="space-y-3 text-xs"></div>
+        <div id="modalBackBtnContainer" class="hidden pt-2 border-t">
+            <button onclick="backToGradesView()" class="w-full bg-gray-600 text-white py-2 rounded-lg text-xs">← العودة لقائمة الصفوف</button>
         </div>
     </div>
+</div>
 
-    <div id="studentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
-            <h3 class="font-bold text-pink-700 text-base border-b pb-2">🎯 سجل الطالبات المباشر</h3>
-            <div id="modalStudentsList" class="space-y-4 text-xs"></div>
-            <button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs cursor-pointer">إغلاق</button>
-        </div>
+<!-- نافذة المتابعة -->
+<div id="studentsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-xl max-h-[85vh] overflow-y-auto">
+        <h3 class="font-bold text-pink-700 text-base border-b pb-2">🎯 سجل الطالبات المباشر</h3>
+        <div id="modalStudentsList" class="space-y-4 text-xs"></div>
+        <button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white py-2 rounded-lg text-xs">إغلاق</button>
     </div>
+</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0nI",
-            authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
-            databaseURL: "https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
-            projectId: "aldiyaaschool-af7e1",
-            storageBucket: "aldiyaaschool-af7e1.firebasestorage.app",
-            messagingSenderId: "322321446203",
-            appId: "1:322321446203:web:6bfbfc082076982e68b31e",
-            measurementId: "G-2GW91EKFN0"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0I",
+    authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
+    databaseURL: "https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
+    projectId: "aldiyaaschool-af7e1",
+    storageBucket: "aldiyaaschool-af7e1.firebasestorage.app",
+    messagingSenderId: "322321446203",
+    appId: "1:322321446203:web:6bfbfc082076982e68b31e",
+    measurementId: "G-2GW91EKFN0"
+};
 
-        let adminUser = 'admin';
-        let adminPass = '123456';
-        let principalName = 'د. أمل عبد الله';
-        let supervisorName = 'الأستاذ أحمد علي';
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ROOT = 'school_data';
 
-        let pendingRequests = [];
-        let approvedStudents = [];
-        let parentInquiries = [];
-        let schoolSchedule = {};
-        let parentActivities = [];
-        let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
+let adminUser = 'admin';
+let adminPass = '123456';
+let principalName = 'د. أمل عبد الله';
+let supervisorName = 'الأستاذ أحمد علي';
 
-        window.onload = function() {
-            db.ref('school_data').on('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                
-                pendingRequests = data.pendingRequests || [];
-                approvedStudents = data.approvedStudents || [];
-                parentInquiries = data.parentInquiries || [];
-                schoolSchedule = data.schoolSchedule || {};
-                parentActivities = data.parentActivities || [];
-                
-                if(data.principalName) principalName = data.principalName;
-                if(data.supervisorName) supervisorName = data.supervisorName;
+let pendingRequests = [];
+let approvedStudents = [];
+let parentInquiries = [];
+let schoolSchedule = {};
+let parentActivities = [];
+let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
+let firebaseConnected = false;
+let dataLoaded = false;
 
-                document.getElementById('newPrincipalName').value = principalName;
-                document.getElementById('newSupervisorName').value = supervisorName;
+function asArray(value) {
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === 'object') return Object.values(value);
+    return [];
+}
 
-                renderRequests();
-                renderAdminInquiries();
-                updateTotalCountBadge();
-                renderPublishedLessons();
-                renderParentActivities();
-            });
+function safeText(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[ch]));
+}
 
-            if (adminLoggedIn) {
-                document.getElementById('adminAuthView').classList.add('hidden');
-                document.getElementById('adminDashboardView').classList.remove('hidden');
-            }
-        };
+function requireConnection() {
+    if (!firebaseConnected) {
+        alert('⚠️ لا يوجد اتصال بالسحابة حالياً. لم يتم حفظ أي تغيير.');
+        return false;
+    }
+    return true;
+}
 
-        function restoreOldData() {
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val();
-                if (cloudData) {
-                    pendingRequests = cloudData.pendingRequests || [];
-                    approvedStudents = cloudData.approvedStudents || [];
-                    parentInquiries = cloudData.parentInquiries || [];
-                    schoolSchedule = cloudData.schoolSchedule || {};
-                    parentActivities = cloudData.parentActivities || [];
-                    
-                    renderRequests();
-                    renderAdminInquiries();
-                    updateTotalCountBadge();
-                    renderPublishedLessons();
-                    renderParentActivities();
-                    alert("✓ تمت مزامنة واسترجاع كافة البيانات بنجاح!");
-                } else {
-                    alert("⚠️ لا توجد بيانات سحابية مسجلة حالياً.");
-                }
-            });
+// تنفيذ التعديل داخل Firebase على أحدث قيمة محفوظة
+async function safeTransaction(path, updater) {
+    if (!requireConnection()) throw new Error('لا يوجد اتصال بالسحابة');
+    const result = await db.ref(path).transaction(current => updater(current));
+    if (!result.committed) throw new Error('لم يتم اعتماد التعديل في قاعدة البيانات');
+    return result.snapshot.val();
+}
+
+function showError(error) {
+    console.error(error);
+    alert('⚠️ لم يكتمل الحفظ. تحقق من الاتصال وصلاحيات قاعدة البيانات ثم حاول مرة أخرى.');
+}
+
+window.onload = function() {
+    db.ref('.info/connected').on('value', snap => {
+        firebaseConnected = snap.val() === true;
+        const status = document.getElementById('connectionStatus');
+        status.textContent = firebaseConnected ? '🟢 متصل بالسحابة' : '🔴 غير متصل بالسحابة';
+    });
+
+    db.ref(ROOT).on('value', snapshot => {
+        dataLoaded = true;
+        const data = snapshot.val() || {};
+
+        pendingRequests = asArray(data.pendingRequests);
+        approvedStudents = asArray(data.approvedStudents);
+        parentInquiries = asArray(data.parentInquiries);
+        schoolSchedule = data.schoolSchedule || {};
+        parentActivities = asArray(data.parentActivities);
+
+        if (data.principalName) principalName = data.principalName;
+        if (data.supervisorName) supervisorName = data.supervisorName;
+
+        document.getElementById('newPrincipalName').value = principalName;
+        document.getElementById('newSupervisorName').value = supervisorName;
+
+        renderRequests();
+        renderAdminInquiries();
+        updateTotalCountBadge();
+        renderPublishedLessons();
+        renderParentActivities();
+    }, error => {
+        console.error('Firebase read error:', error);
+        document.getElementById('connectionStatus').textContent = '⚠️ تعذر قراءة البيانات';
+    });
+
+    if (adminLoggedIn) {
+        document.getElementById('adminAuthView').classList.add('hidden');
+        document.getElementById('adminDashboardView').classList.remove('hidden');
+    }
+};
+
+async function restoreOldData() {
+    if (!requireConnection()) return;
+    try {
+        const snapshot = await db.ref(ROOT).once('value');
+        if (!snapshot.exists()) {
+            alert('لا توجد بيانات سحابية مسجلة حالياً.');
+            return;
+        }
+        const data = snapshot.val() || {};
+        pendingRequests = asArray(data.pendingRequests);
+        approvedStudents = asArray(data.approvedStudents);
+        parentInquiries = asArray(data.parentInquiries);
+        schoolSchedule = data.schoolSchedule || {};
+        parentActivities = asArray(data.parentActivities);
+        renderRequests();
+        renderAdminInquiries();
+        updateTotalCountBadge();
+        renderPublishedLessons();
+        renderParentActivities();
+        alert('✓ تمت قراءة أحدث البيانات من السحابة. لم يتم استبدال أو حذف أي بيانات.');
+    } catch (error) { showError(error); }
+}
+
+// تنزيل نسخة احتياطية كاملة بصيغة JSON
+async function exportBackup() {
+    if (!requireConnection()) return;
+    try {
+        const snapshot = await db.ref(ROOT).once('value');
+        if (!snapshot.exists()) {
+            alert('لا توجد بيانات لإنشاء نسخة احتياطية.');
+            return;
+        }
+        const data = snapshot.val();
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Al-Diyaa-School-Backup-' + new Date().toISOString().slice(0,10) + '.json';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        alert('✓ تم تنزيل النسخة الاحتياطية على جهازك.');
+    } catch (error) { showError(error); }
+}
+
+function loginAdmin() {
+    const u = document.getElementById('adminUserInput').value.trim();
+    const p = document.getElementById('adminPassInput').value.trim();
+    if (u === adminUser && p === adminPass) {
+        adminLoggedIn = true;
+        localStorage.setItem('school_admin_logged', 'true');
+        document.getElementById('adminAuthView').classList.add('hidden');
+        document.getElementById('adminDashboardView').classList.remove('hidden');
+    } else {
+        document.getElementById('loginError').textContent = '❌ بيانات الدخول غير صحيحة';
+    }
+}
+
+function logoutAdmin() {
+    adminLoggedIn = false;
+    localStorage.removeItem('school_admin_logged');
+    document.getElementById('adminDashboardView').classList.add('hidden');
+    document.getElementById('adminAuthView').classList.remove('hidden');
+}
+
+function updateTotalCountBadge() {
+    document.getElementById('totalSavedCount').innerText = approvedStudents.length;
+}
+
+function searchStudentInSystem() {
+    const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
+    const resultBox = document.getElementById('searchResultContainer');
+    if (!query) { resultBox.classList.add('hidden'); return; }
+
+    const approved = approvedStudents.find(s => String(s.student || '').toLowerCase().includes(query));
+    const pending = pendingRequests.find(s => String(s.student || '').toLowerCase().includes(query));
+    resultBox.classList.remove('hidden');
+
+    if (approved) {
+        resultBox.innerHTML = `<p class="font-bold text-emerald-800">✅ الطالبة موجودة في المقبولات</p>
+        <p>الاسم: <strong>${safeText(approved.student)}</strong> | الصف: ${safeText(approved.grade)} - شعبة (${safeText(approved.section)})</p>
+        <p>ولي الأمر: ${safeText(approved.mother)}</p>`;
+    } else if (pending) {
+        resultBox.innerHTML = `<p class="font-bold text-amber-800">⏳ الطالبة بانتظار الموافقة</p>
+        <p>الاسم: <strong>${safeText(pending.student)}</strong> | الصف: ${safeText(pending.grade)} - شعبة (${safeText(pending.section)})</p>
+        <p>ولي الأمر: ${safeText(pending.mother)}</p>`;
+    } else {
+        resultBox.innerHTML = '<p class="text-red-600 font-bold">❌ لا توجد طالبة بهذا الاسم.</p>';
+    }
+}
+
+function renderParentActivities() {
+    const container = document.getElementById('parentsActivityContainer');
+    if (!parentActivities.length) {
+        container.innerHTML = '<p class="text-gray-400 text-xs">لا توجد تنبيهات نشاط حالياً.</p>';
+        return;
+    }
+    container.innerHTML = '';
+    parentActivities.forEach((act, idx) => {
+        const bg = act.type === 'logout' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900';
+        container.innerHTML += `<div class="p-2.5 border rounded-lg flex justify-between items-center ${bg}">
+            <div><span class="font-bold">${safeText(act.message)}</span>
+            <span class="text-[10px] opacity-70 block">${safeText(act.time)}</span></div>
+            <button onclick="removeActivity(${idx})" class="text-gray-400 hover:text-red-600 px-1">✕</button>
+        </div>`;
+    });
+}
+
+async function removeActivity(index) {
+    if (!confirm('هل تريد حذف هذا التنبيه؟')) return;
+    try {
+        await safeTransaction(ROOT + '/parentActivities', current => {
+            const list = asArray(current);
+            if (index < 0 || index >= list.length) return list;
+            list.splice(index, 1);
+            return list;
+        });
+    } catch (error) { showError(error); }
+}
+
+function renderRequests() {
+    const container = document.getElementById('requestsContainer');
+    if (!pendingRequests.length) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>';
+        return;
+    }
+    container.innerHTML = '';
+    pendingRequests.forEach(req => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm gap-2';
+
+        const info = document.createElement('div');
+        info.className = 'flex items-center gap-3';
+        if (req.image) {
+            const img = document.createElement('img');
+            img.src = req.image;
+            img.className = 'w-10 h-10 rounded-full object-cover border border-pink-300';
+            info.appendChild(img);
+        } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center';
+            placeholder.innerText = '👧';
+            info.appendChild(placeholder);
         }
 
-        function loginAdmin() {
-            const u = document.getElementById('adminUserInput').value.trim();
-            const p = document.getElementById('adminPassInput').value.trim();
-            if (u === adminUser && p === adminPass) {
-                adminLoggedIn = true;
-                localStorage.setItem('school_admin_logged', 'true');
-                document.getElementById('adminAuthView').classList.add('hidden');
-                document.getElementById('adminDashboardView').classList.remove('hidden');
-            } else {
-                alert("❌ بيانات الدخول غير صحيحة!");
-            }
-        }
+        const details = document.createElement('div');
+        details.innerHTML = `<p class="font-bold text-pink-900">الطالبة: ${safeText(req.student)}</p>
+        <p class="text-xs text-gray-600">ولي الأمر: ${safeText(req.mother)} | ${safeText(req.grade)} - شعبة (${safeText(req.section)})</p>`;
+        info.appendChild(details);
 
-        function logoutAdmin() {
-            adminLoggedIn = false;
-            localStorage.removeItem('school_admin_logged');
-            document.getElementById('adminDashboardView').classList.add('hidden');
-            document.getElementById('adminAuthView').classList.remove('hidden');
-        }
+        const actions = document.createElement('div');
+        actions.className = 'flex items-center gap-1.5 shrink-0';
 
-        function updateTotalCountBadge() {
-            document.getElementById('totalSavedCount').innerText = approvedStudents.length;
-        }
+        const approve = document.createElement('button');
+        approve.className = 'bg-green-600 text-white px-3 py-1 rounded text-xs font-bold';
+        approve.innerText = '✓ موافقة';
+        approve.onclick = () => approveStudent(req.id);
 
-        function searchStudentInSystem() {
-            const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
-            const resultBox = document.getElementById('searchResultContainer');
+        const reject = document.createElement('button');
+        reject.className = 'bg-red-600 text-white px-3 py-1 rounded text-xs font-bold';
+        reject.innerText = '✕ رفض';
+        reject.onclick = () => rejectStudent(req.id);
 
-            if (!query) {
-                resultBox.classList.add('hidden');
-                return;
-            }
+        actions.append(approve, reject);
+        item.append(info, actions);
+        container.appendChild(item);
+    });
+}
 
-            const foundInApproved = approvedStudents.find(s => s.student.toLowerCase().includes(query));
-            const foundInPending = pendingRequests.find(s => s.student.toLowerCase().includes(query));
+// نقل الطلب إلى المقبولات في معاملة واحدة للحفاظ على تزامن القائمتين
+async function approveStudent(studentId) {
+    if (!confirm('هل تريد الموافقة على هذا الطلب؟')) return;
+    try {
+        const updated = await safeTransaction(ROOT, current => {
+            const data = current || {};
+            const pending = asArray(data.pendingRequests);
+            const approved = asArray(data.approvedStudents);
+            const index = pending.findIndex(s => String(s.id) === String(studentId));
+            if (index === -1) return;
+            const student = pending[index];
+            pending.splice(index, 1);
 
-            resultBox.classList.remove('hidden');
+            const exists = approved.some(s =>
+                String(s.id) === String(studentId) ||
+                (String(s.student || '').trim().toLowerCase() === String(student.student || '').trim().toLowerCase()
+                 && String(s.grade || '') === String(student.grade || '')
+                 && String(s.section || '') === String(student.section || ''))
+            );
 
-            if (foundInApproved) {
-                resultBox.innerHTML = `
-                    <p class="font-bold text-emerald-800">✅ الطالبة موجودة في (دليل الطالبات المقبولات):</p>
-                    <p>الاسم: <strong>${foundInApproved.student}</strong> | الصف: ${foundInApproved.grade} - شعبة (${foundInApproved.section})</p>
-                    <p>ولي الأمر: ${foundInApproved.mother}</p>
-                `;
-            } else if (foundInPending) {
-                resultBox.innerHTML = `
-                    <p class="font-bold text-amber-800">⏳ الطالبة موجودة في (الطلبات المعلقة بانتظار الموافقة):</p>
-                    <p>الاسم: <strong>${foundInPending.student}</strong> | الصف: ${foundInPending.grade} - شعبة (${foundInPending.section})</p>
-                    <p>ولي الأمر: ${foundInPending.mother}</p>
-                `;
-            } else {
-                resultBox.innerHTML = `<p class="text-red-600 font-bold">❌ عذراً، لا توجد طالبة بهذا الاسم مسجلة في النظام حالياً.</p>`;
-            }
-        }
-
-        function renderParentActivities() {
-            const container = document.getElementById('parentsActivityContainer');
-            if (!parentActivities || parentActivities.length === 0) {
-                container.innerHTML = `<p class="text-gray-400 text-xs">لا توجد تنبيهات نشاط حالياً.</p>`;
-                return;
-            }
-
-            container.innerHTML = '';
-            const sortedActivities = [...parentActivities].reverse();
-            sortedActivities.forEach((act, idx) => {
-                const bg = act.type === 'logout' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900';
-                container.innerHTML += `
-                    <div class="p-2.5 border rounded-lg flex justify-between items-center ${bg}">
-                        <div>
-                            <span class="font-bold">${act.message}</span>
-                            <span class="text-[10px] opacity-70 block">${act.time}</span>
-                        </div>
-                        <button onclick="removeActivity(${parentActivities.length - 1 - idx})" class="text-gray-400 hover:text-red-600 text-xs px-1 cursor-pointer">✕</button>
-                    </div>
-                `;
-            });
-        }
-
-        function removeActivity(index) {
-            parentActivities.splice(index, 1);
-            db.ref('school_data').update({ parentActivities: parentActivities });
-            renderParentActivities();
-        }
-
-        function renderRequests() {
-            const container = document.getElementById('requestsContainer');
-            if (!pendingRequests || pendingRequests.length === 0) { 
-                container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>`; 
-                return; 
-            }
-            container.innerHTML = '';
-            
-            pendingRequests.forEach((req) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = "p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm gap-2";
-                
-                const infoDiv = document.createElement('div');
-                infoDiv.className = "flex items-center gap-3";
-                
-                if (req.image) {
-                    const img = document.createElement('img');
-                    img.src = req.image;
-                    img.className = "w-10 h-10 rounded-full object-cover border border-pink-300";
-                    infoDiv.appendChild(img);
-                } else {
-                    const placeholder = document.createElement('div');
-                    placeholder.className = "w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold";
-                    placeholder.innerText = "👧";
-                    infoDiv.appendChild(placeholder);
-                }
-                
-                const textDiv = document.createElement('div');
-                textDiv.innerHTML = `<p class="font-bold text-pink-900">الطالبة: ${req.student}</p><p class="text-xs text-gray-600">ولي الأمر: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>`;
-                infoDiv.appendChild(textDiv);
-                
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = "flex items-center gap-1.5 shrink-0";
-                
-                const approveBtn = document.createElement('button');
-                approveBtn.type = "button";
-                approveBtn.className = "bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 cursor-pointer";
-                approveBtn.innerText = "✓ موافقة";
-                approveBtn.onclick = function() { approveStudent(req.id); };
-                
-                const rejectBtn = document.createElement('button');
-                rejectBtn.type = "button";
-                rejectBtn.className = "bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 cursor-pointer";
-                rejectBtn.innerText = "✕ رفض";
-                rejectBtn.onclick = function() { rejectStudent(req.id); };
-                
-                actionsDiv.appendChild(approveBtn);
-                actionsDiv.appendChild(rejectBtn);
-                
-                itemDiv.appendChild(infoDiv);
-                itemDiv.appendChild(actionsDiv);
-                container.appendChild(itemDiv);
-            });
-        }
-
-        // --- الدالة المحدثة والآمنة 100% التي تجلب أحدث نسخة سحابية وتدمج البيانات دون ضياع أي طالبة ---
-        function approveStudent(studentId) {
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val() || {};
-                let currentPending = cloudData.pendingRequests || [];
-                let currentApproved = cloudData.approvedStudents || [];
-
-                const index = currentPending.findIndex(s => s.id === studentId);
-                if (index === -1) {
-                    alert("⚠️ عذراً، هذا الطلب غير موجود أو تم التعامل معه مسبقاً.");
-                    return;
-                }
-
-                const student = currentPending[index];
-                
-                // التأكد من عدم تكرار إضافة نفس الطالبة إذا كانت موجودة مسبقاً في المقبولات
-                const alreadyApproved = currentApproved.some(s => s.student.toLowerCase() === student.student.toLowerCase());
-
-                // حذف الطلب من المعلقات
-                currentPending.splice(index, 1);
-
-                if (!alreadyApproved) {
-                    if (!student.notifications) student.notifications = [];
-                    student.notifications.unshift({ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true });
-                    currentApproved.push(student);
-                }
-
-                // حفظ التحديثات في السحابة مع الحفاظ الكامل على المقبولات السابقات
-                db.ref('school_data').update({
-                    pendingRequests: currentPending,
-                    approvedStudents: currentApproved
-                }).then(() => {
-                    alert(`✓ تمت الموافقة على الطالبة (${student.student}) بنجاح وبقيت كافة الطالبات المقبولات محفوظات في النظام!`);
+            if (!exists) {
+                const newStudent = {...student};
+                if (!Array.isArray(newStudent.notifications)) newStudent.notifications = [];
+                newStudent.notifications.unshift({
+                    type:'text',
+                    title:'حالة الدخول',
+                    body:'✓ تمت الموافقة على دخولك المنصة.',
+                    unread:true
                 });
-            });
+                approved.push(newStudent);
+            }
+
+            return {...data, pendingRequests:pending, approvedStudents:approved};
+        });
+        if (updated) alert('✓ تمت الموافقة وحفظ التغيير في السحابة.');
+        else alert('⚠️ لم يتم العثور على الطلب، ربما تم التعامل معه مسبقاً.');
+    } catch (error) { showError(error); }
+}
+
+async function rejectStudent(studentId) {
+    const req = pendingRequests.find(s => String(s.id) === String(studentId));
+    if (!req) return;
+    if (!confirm(`هل أنت متأكد من رفض طلب الطالبة (${req.student})؟`)) return;
+    try {
+        const updated = await safeTransaction(ROOT + '/pendingRequests', current => {
+            const list = asArray(current);
+            const index = list.findIndex(s => String(s.id) === String(studentId));
+            if (index === -1) return;
+            list.splice(index, 1);
+            return list;
+        });
+        alert(updated ? '✓ تم رفض الطلب.' : 'لم يتم العثور على الطلب.');
+    } catch (error) { showError(error); }
+}
+
+const gradesList = ['الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي','الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي'];
+const sectionsList = ['أ','ب','ج'];
+
+function openAcceptedStudentsModal() {
+    document.getElementById('acceptedStudentsModal').classList.remove('hidden');
+    renderGradesView();
+}
+function closeAcceptedStudentsModal() {
+    document.getElementById('acceptedStudentsModal').classList.add('hidden');
+}
+function renderGradesView() {
+    document.getElementById('modalTitle').innerText = '📂 دليل الطالبات - اختر الصف الدراسي';
+    document.getElementById('modalBackBtnContainer').classList.add('hidden');
+    const container = document.getElementById('acceptedStudentsContent');
+    container.innerHTML = '';
+    gradesList.forEach(grade => {
+        const count = approvedStudents.filter(s => s.grade === grade).length;
+        const button = document.createElement('button');
+        button.className = 'w-full bg-emerald-50 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center mb-2';
+        button.innerHTML = `<span>📚 ${safeText(grade)}</span><span class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>`;
+        button.onclick = () => renderSectionsView(grade);
+        container.appendChild(button);
+    });
+}
+function renderSectionsView(grade) {
+    document.getElementById('modalTitle').innerText = `${grade} - اختر الشعبة`;
+    document.getElementById('modalBackBtnContainer').classList.remove('hidden');
+    const container = document.getElementById('acceptedStudentsContent');
+    container.innerHTML = '';
+    sectionsList.forEach(sec => {
+        const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
+        const button = document.createElement('button');
+        button.className = 'w-full bg-blue-50 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center mb-2';
+        button.innerHTML = `<span>🏫 الشعبة (${sec})</span><span class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>`;
+        button.onclick = () => renderStudentsView(grade, sec);
+        container.appendChild(button);
+    });
+}
+function renderStudentsView(grade, section) {
+    document.getElementById('modalTitle').innerText = `👧 طالبات ${grade} - شعبة (${section})`;
+    document.getElementById('modalBackBtnContainer').classList.remove('hidden');
+    const container = document.getElementById('acceptedStudentsContent');
+    const filtered = approvedStudents.filter(s => s.grade === grade && s.section === section);
+
+    if (!filtered.length) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-6">لا توجد طالبات في هذه الشعبة.</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach(st => {
+        const row = document.createElement('div');
+        row.className = 'flex justify-between items-center bg-white p-3 border border-pink-100 rounded-lg shadow-sm mb-2';
+        const image = st.image
+            ? `<img src="${safeText(st.image)}" class="w-10 h-10 rounded-full object-cover border">`
+            : '<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">👧</div>';
+        row.innerHTML = `<div class="flex items-center gap-3">${image}<div>
+            <p class="font-bold text-gray-800 text-sm">👧 ${safeText(st.student)}</p>
+            <p class="text-[11px] text-gray-500">ولي الأمر: ${safeText(st.mother)}</p>
+        </div></div>`;
+        const button = document.createElement('button');
+        button.className = 'bg-red-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold';
+        button.innerText = 'حذف';
+        button.onclick = () => removeStudentFromAccepted(st.id, grade, section);
+        row.appendChild(button);
+        container.appendChild(row);
+    });
+}
+function backToGradesView() { renderGradesView(); }
+
+async function removeStudentFromAccepted(studentId, grade, section) {
+    if (!confirm('هل أنت متأكد من حذف هذه الطالبة من المقبولات؟')) return;
+    try {
+        const updated = await safeTransaction(ROOT + '/approvedStudents', current => {
+            const list = asArray(current);
+            const index = list.findIndex(s => String(s.id) === String(studentId));
+            if (index === -1) return;
+            list.splice(index, 1);
+            return list;
+        });
+        if (updated) alert('✓ تم حذف الطالبة من الدليل.');
+        renderStudentsView(grade, section);
+    } catch (error) { showError(error); }
+}
+
+async function updatePrincipalName() {
+    const val = document.getElementById('newPrincipalName').value.trim();
+    if (!val) return alert('يرجى إدخال اسم المديرة.');
+    try {
+        await db.ref(ROOT + '/principalName').set(val);
+        principalName = val;
+        alert('✓ تم حفظ اسم المديرة سحابياً.');
+    } catch (error) { showError(error); }
+}
+async function updateSupervisorName() {
+    const val = document.getElementById('newSupervisorName').value.trim();
+    if (!val) return alert('يرجى إدخال اسم المشرف.');
+    try {
+        await db.ref(ROOT + '/supervisorName').set(val);
+        supervisorName = val;
+        alert('✓ تم حفظ اسم المشرف سحابياً.');
+    } catch (error) { showError(error); }
+}
+
+async function sendLessonToSchedule() {
+    const subject = document.getElementById('lessonSubject').value;
+    const grade = document.getElementById('lessonGrade').value;
+    const section = document.getElementById('lessonSection').value;
+    const content = document.getElementById('lessonContent').value.trim();
+    if (!content) return alert('يرجى كتابة تفاصيل الدرس.');
+
+    const classKey = `${grade}_${section}`;
+    try {
+        await safeTransaction(`${ROOT}/schoolSchedule/${classKey}/${subject}`, () => content);
+        document.getElementById('lessonContent').value = '';
+        alert(`✓ تم نشر الدرس للصف ${grade} - شعبة (${section}).`);
+    } catch (error) { showError(error); }
+}
+
+function renderPublishedLessons() {
+    const container = document.getElementById('publishedLessonsContainer');
+    let html = '';
+    let hasLessons = false;
+    for (const [classKey, subjects] of Object.entries(schoolSchedule || {})) {
+        if (!subjects || typeof subjects !== 'object') continue;
+        const [gradeName, sectionName] = classKey.split('_');
+        for (const [subjectName, lessonText] of Object.entries(subjects)) {
+            hasLessons = true;
+            html += `<div class="p-2.5 bg-pink-50 border border-pink-100 rounded-lg flex justify-between items-center gap-2 text-xs">
+                <div class="flex-1">
+                    <span class="font-bold text-pink-800">${safeText(gradeName)} (شعبة ${safeText(sectionName)}) - مادة ${safeText(subjectName)}:</span>
+                    <p class="text-gray-700 mt-0.5">${safeText(lessonText)}</p>
+                </div>
+                <button onclick="deleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subjectName)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px]">🗑️ حذف</button>
+            </div>`;
         }
+    }
+    container.innerHTML = hasLessons ? html : '<p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>';
+}
 
-        function rejectStudent(studentId) {
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val() || {};
-                let currentPending = cloudData.pendingRequests || [];
+async function deleteLesson(classKeyEncoded, subjectEncoded) {
+    const classKey = decodeURIComponent(classKeyEncoded);
+    const subject = decodeURIComponent(subjectEncoded);
+    if (!confirm(`هل تريد حذف درس (${subject})؟`)) return;
+    try {
+        await safeTransaction(`${ROOT}/schoolSchedule/${classKey}/${subject}`, () => null);
+        alert('✓ تم حذف الدرس.');
+    } catch (error) { showError(error); }
+}
 
-                const index = currentPending.findIndex(s => s.id === studentId);
-                if (index === -1) return;
+async function clearAllLessons() {
+    if (!Object.keys(schoolSchedule || {}).length) return;
+    if (!confirm('هل أنت متأكد من حذف جميع الدروس المنشورة فقط؟ بقية بيانات المدرسة لن تتأثر.')) return;
+    try {
+        await safeTransaction(ROOT + '/schoolSchedule', () => null);
+        alert('✓ تم حذف الدروس المنشورة.');
+    } catch (error) { showError(error); }
+}
 
-                const student = currentPending[index];
-                if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
-                    currentPending.splice(index, 1);
-                    db.ref('school_data').update({
-                        pendingRequests: currentPending
-                    }).then(() => {
-                        alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
+async function sendBroadcastMessage() {
+    const targetGrade = document.getElementById('broadcastGrade').value;
+    const targetSection = document.getElementById('broadcastSection').value;
+    const textContent = document.getElementById('broadcastText').value.trim();
+    if (!textContent) return alert('يرجى كتابة نص التعميم.');
+
+    try {
+        await safeTransaction(ROOT + '/approvedStudents', current => {
+            const list = asArray(current);
+            list.forEach(st => {
+                if ((targetGrade === 'الكل' || st.grade === targetGrade) &&
+                    (targetSection === 'الكل' || st.section === targetSection)) {
+                    if (!Array.isArray(st.notifications)) st.notifications = [];
+                    st.notifications.unshift({
+                        type:'text',
+                        title:'📢 تعميم إداري عام',
+                        body:textContent,
+                        unread:true
                     });
                 }
             });
-        }
+            return list;
+        });
+        document.getElementById('broadcastText').value = '';
+        alert('✓ تم إرسال التعميم وحفظه سحابياً.');
+    } catch (error) { showError(error); }
+}
 
-        const gradesList = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
-        const sectionsList = ["أ", "ب", "ج"];
+function renderAdminInquiries() {
+    const container = document.getElementById('adminInquiriesContainer');
+    if (!parentInquiries.length) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p>';
+        return;
+    }
+    container.innerHTML = '';
+    parentInquiries.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-blue-50 border rounded-lg space-y-2 text-xs';
+        div.innerHTML = `<p class="font-bold text-blue-900">👧 الطالبة: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
+            <p class="bg-white p-2 rounded border"><strong>النص:</strong> ${safeText(q.content)}</p>
+            <div class="flex gap-2 flex-wrap items-center">
+                <input type="text" id="reply_${safeText(q.id)}" class="flex-1 p-1 border rounded text-xs min-w-[150px]" placeholder="اكتب الرد هنا...">
+                <button class="bg-blue-600 text-white px-3 py-1 rounded" data-action="reply">إرسال الرد</button>
+                <button class="bg-red-600 text-white px-3 py-1 rounded" data-action="delete">🗑️ حذف الاستفسار</button>
+            </div>`;
+        div.querySelector('[data-action="reply"]').onclick = () => replyInquiry(q.id);
+        div.querySelector('[data-action="delete"]').onclick = () => deleteInquiry(q.id);
+        container.appendChild(div);
+    });
+}
 
-        function openAcceptedStudentsModal() {
-            document.getElementById('acceptedStudentsModal').classList.remove('hidden');
-            renderGradesView();
-        }
-        function closeAcceptedStudentsModal() {
-            document.getElementById('acceptedStudentsModal').classList.add('hidden');
-        }
-        function renderGradesView() {
-            document.getElementById('modalTitle').innerText = "📂 دليل الطالبات - اختر الصف الدراسي";
-            document.getElementById('modalBackBtnContainer').classList.add('hidden');
-            const container = document.getElementById('acceptedStudentsContent');
-            container.innerHTML = '';
-            gradesList.forEach(grade => {
-                const count = approvedStudents.filter(s => s.grade === grade).length;
-                container.innerHTML += `
-                    <button onclick="renderSectionsView('${grade}')" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm cursor-pointer">
-                        <span>📚 ${grade}</span>
-                        <span class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
-                    </button>
-                `;
+// الرد وتحديث الاستفسار وإشعار الطالبة معاً في معاملة واحدة
+async function replyInquiry(id) {
+    const input = document.getElementById(`reply_${id}`);
+    const replyText = input ? input.value.trim() : '';
+    if (!replyText) return alert('اكتب الرد أولاً.');
+
+    try {
+        const updated = await safeTransaction(ROOT, current => {
+            const data = current || {};
+            const inquiries = asArray(data.parentInquiries);
+            const students = asArray(data.approvedStudents);
+            const idx = inquiries.findIndex(q => String(q.id) === String(id));
+            if (idx === -1) return;
+
+            const inquiry = inquiries[idx];
+            const student = students.find(s => String(s.id) === String(inquiry.studentId));
+            if (!student) return;
+
+            if (!Array.isArray(student.notifications)) student.notifications = [];
+            student.notifications.unshift({
+                type:'text',
+                title:'💬 رد الإدارة على استفساركم',
+                body:replyText,
+                unread:true
             });
-        }
-        function renderSectionsView(grade) {
-            document.getElementById('modalTitle').innerText = `📂 ${grade} - اختر الشعبة`;
-            document.getElementById('modalBackBtnContainer').classList.remove('hidden');
-            const container = document.getElementById('acceptedStudentsContent');
-            container.innerHTML = '';
-            sectionsList.forEach(sec => {
-                const count = approvedStudents.filter(s => s.grade === grade && s.section === sec).length;
-                container.innerHTML += `
-                    <button onclick="renderStudentsView('${grade}', '${sec}')" class="w-full bg-blue-50 hover:bg-blue-100 border border-blue-300 text-blue-900 p-3 rounded-xl font-bold flex justify-between items-center transition shadow-sm cursor-pointer">
-                        <span>🏫 الشعبة (${sec})</span>
-                        <span class="bg-blue-600 text-white px-2.5 py-1 rounded-lg text-[10px]">${count} طالبة</span>
-                    </button>
-                `;
-            });
-        }
-        function renderStudentsView(grade, section) {
-            document.getElementById('modalTitle').innerText = `👧 طالبات ${grade} - شعبة (${section})`;
-            const container = document.getElementById('acceptedStudentsContent');
-            const filteredStudents = approvedStudents.map((st, idx) => ({ ...st, originalIndex: idx })).filter(s => s.grade === grade && s.section === section);
-            
-            if (filteredStudents.length === 0) {
-                container.innerHTML = `<p class="text-gray-500 text-center py-6">لا توجد طالبات مسجلات في هذه الشعبة حالياً.</p>`;
-                return;
-            }
-            
-            container.innerHTML = '';
-            filteredStudents.forEach((st) => {
-                const imgTag = st.image 
-                    ? `<img src="${st.image}" class="w-10 h-10 rounded-full object-cover border border-emerald-500 shadow-sm">`
-                    : `<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">👧</div>`;
+            inquiries.splice(idx, 1);
+            return {...data, parentInquiries:inquiries, approvedStudents:students};
+        });
 
-                container.innerHTML += `
-                    <div class="flex justify-between items-center bg-white p-3 border border-pink-100 rounded-lg shadow-sm">
-                        <div class="flex items-center gap-3">
-                            ${imgTag}
-                            <div>
-                                <p class="font-bold text-gray-800 text-sm">👧 ${st.student}</p>
-                                <p class="text-[11px] text-gray-500">ولي الأمر: ${st.mother}</p>
-                            </div>
-                        </div>
-                        <button onclick="removeStudentFromAccepted(${st.originalIndex}, '${grade}', '${section}')" class="bg-red-500 text-white px-2.5 py-1 rounded-md text-[11px] font-bold hover:bg-red-600 shadow-sm cursor-pointer">حذف</button>
-                    </div>
-                `;
-            });
-        }
-        function backToGradesView() { renderGradesView(); }
-        function removeStudentFromAccepted(index, grade, section) {
-            if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من المقبولات؟")) {
-                approvedStudents.splice(index, 1);
-                db.ref('school_data').update({ approvedStudents: approvedStudents });
-                renderStudentsView(grade, section);
-                updateTotalCountBadge();
-            }
-        }
+        if (updated) alert('✓ تم إرسال الرد لولي الأمر وحذف الاستفسار من الوارد.');
+        else alert('⚠️ لم يتم العثور على الاستفسار أو الطالبة المقبولة.');
+    } catch (error) { showError(error); }
+}
 
-        function updatePrincipalName() {
-            const val = document.getElementById('newPrincipalName').value.trim();
-            if(!val) return;
-            principalName = val;
-            db.ref('school_data').update({ principalName: principalName });
-            alert("✓ تم حفظ اسم المديرة سحابياً.");
-        }
-        function updateSupervisorName() {
-            const val = document.getElementById('newSupervisorName').value.trim();
-            if(!val) return;
-            supervisorName = val;
-            db.ref('school_data').update({ supervisorName: supervisorName });
-            alert("✓ تم حفظ اسم المشرف سحابياً.");
-        }
+async function deleteInquiry(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الاستفسار؟')) return;
+    try {
+        const updated = await safeTransaction(ROOT + '/parentInquiries', current => {
+            const list = asArray(current);
+            const index = list.findIndex(q => String(q.id) === String(id));
+            if (index === -1) return;
+            list.splice(index, 1);
+            return list;
+        });
+        if (updated) alert('✓ تم حذف الاستفسار.');
+    } catch (error) { showError(error); }
+}
 
-        function sendLessonToSchedule() {
-            const subject = document.getElementById('lessonSubject').value;
-            const grade = document.getElementById('lessonGrade').value;
-            const section = document.getElementById('lessonSection').value;
-            const content = document.getElementById('lessonContent').value.trim();
-            if (!content) return;
-            
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val() || {};
-                let currentSchedule = cloudData.schoolSchedule || {};
-                const key = `${grade}_${section}`;
-                if (!currentSchedule[key]) currentSchedule[key] = {};
-                currentSchedule[key][subject] = content;
+// زر حماية البيانات لا ينفذ أي حذف
+function clearAllSystemData() {
+    alert('🛡️ حماية البيانات مفعّلة.\nهذا الزر لا يحذف أي بيانات من السحابة.\nلإنشاء نسخة احتياطية استخدمي زر تنزيل نسخة احتياطية.');
+}
 
-                db.ref('school_data').update({ schoolSchedule: currentSchedule }).then(() => {
-                    renderPublishedLessons();
-                    document.getElementById('lessonContent').value = '';
-                    alert(`✓ تم نشر الدرس سحابياً للصف ${grade} - شعبة (${section}) فقط!`);
-                });
-            });
-        }
-
-        function renderPublishedLessons() {
-            const container = document.getElementById('publishedLessonsContainer');
-            let html = '';
-            let hasLessons = false;
-            for (const [classKey, subjects] of Object.entries(schoolSchedule)) {
-                if (!subjects) continue;
-                const [gradeName, sectionName] = classKey.split('_');
-                for (const [subjectName, lessonText] of Object.entries(subjects)) {
-                    hasLessons = true;
-                    html += `
-                        <div class="p-2.5 bg-pink-50 border border-pink-100 rounded-lg flex justify-between items-center gap-2 text-xs">
-                            <div class="flex-1">
-                                <span class="font-bold text-pink-800">${gradeName} (شعبة ${sectionName}) - مادة ${subjectName}:</span>
-                                <p class="text-gray-700 mt-0.5">${lessonText}</p>
-                            </div>
-                            <button onclick="deleteLesson('${classKey}', '${subjectName}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] font-bold hover:bg-red-600 shrink-0 cursor-pointer">🗑️ حذف</button>
-                        </div>
-                    `;
-                }
-            }
-            container.innerHTML = hasLessons ? html : `<p class="text-gray-400 text-xs">لا توجد دروس منشورة حالياً.</p>`;
-        }
-        function deleteLesson(classKey, subjectName) {
-            if (confirm(`⚠️ هل أنت متأكد من حذف درس (${subjectName})؟`)) {
-                if (schoolSchedule[classKey] && schoolSchedule[classKey][subjectName]) {
-                    delete schoolSchedule[classKey][subjectName];
-                    if (Object.keys(schoolSchedule[classKey]).length === 0) delete schoolSchedule[classKey];
-                    db.ref('school_data').update({ schoolSchedule: schoolSchedule });
-                    renderPublishedLessons();
-                }
-            }
-        }
-        function clearAllLessons() {
-            if (Object.keys(schoolSchedule).length === 0) return;
-            if (confirm("⚠️ هل أنت متأكد من حذف جميع الدروس المنشورة؟")) {
-                schoolSchedule = {};
-                db.ref('school_data').update({ schoolSchedule: schoolSchedule });
-                renderPublishedLessons();
-            }
-        }
-
-        function sendBroadcastMessage() {
-            const targetGrade = document.getElementById('broadcastGrade').value;
-            const targetSection = document.getElementById('broadcastSection').value;
-            const textContent = document.getElementById('broadcastText').value.trim();
-            if (!textContent) return;
-
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val() || {};
-                let currentApproved = cloudData.approvedStudents || [];
-
-                currentApproved.forEach(st => {
-                    if ((targetGrade === 'الكل' || st.grade === targetGrade) && (targetSection === 'الكل' || st.section === targetSection)) {
-                        if(!st.notifications) st.notifications = [];
-                        st.notifications.unshift({ type: 'text', title: `📢 تعميم إداري عام`, body: textContent, unread: true });
-                    }
-                });
-
-                db.ref('school_data').update({ approvedStudents: currentApproved }).then(() => {
-                    document.getElementById('broadcastText').value = '';
-                    alert("✓ تم إرسال التعميم للجميع بالسحاب!");
-                });
-            });
-        }
-
-        function renderAdminInquiries() {
-            const container = document.getElementById('adminInquiriesContainer');
-            if (!parentInquiries || parentInquiries.length === 0) { 
-                container.innerHTML = `<p class="text-gray-500 text-sm">لا توجد استفسارات جديدة.</p>`; 
-                return; 
-            }
-            container.innerHTML = '';
-            parentInquiries.forEach((q) => {
-                container.innerHTML += `
-                    <div class="p-3 bg-blue-50 border rounded-lg space-y-2 text-xs">
-                        <p class="font-bold text-blue-900">👧 الطالبة: ${q.studentName} (${q.grade} - شعبة ${q.section})</p>
-                        <p class="bg-white p-2 rounded border"><strong>النص:</strong> ${q.content}</p>
-                        <div class="flex gap-2 flex-wrap items-center">
-                            <input type="text" id="reply_${q.id}" class="flex-1 p-1 border rounded text-xs min-w-[150px] bg-white" placeholder="اكتب الرد هنا...">
-                            <button onclick="replyInquiry(${q.id})" class="bg-blue-600 text-white px-3 py-1 rounded cursor-pointer">إرسال الرد</button>
-                            <button onclick="deleteInquiry(${q.id})" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 cursor-pointer">🗑️ حذف الاستفسار</button>
-                        </div>
-                    </div>`;
-            });
-        }
-        function replyInquiry(id) {
-            const replyText = document.getElementById(`reply_${id}`).value.trim();
-            if (!replyText) return;
-            
-            db.ref('school_data').once('value').then((snapshot) => {
-                const cloudData = snapshot.val() || {};
-                let curInquiries = cloudData.parentInquiries || [];
-                let curApproved = cloudData.approvedStudents || [];
-
-                const idx = curInquiries.findIndex(q => q.id === id);
-                if (idx !== -1) {
-                    const inquiry = curInquiries[idx];
-                    const student = curApproved.find(s => s.id === inquiry.studentId);
-                    if (student) {
-                        if(!student.notifications) student.notifications = [];
-                        student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
-                        curInquiries.splice(idx, 1);
-                        
-                        db.ref('school_data').update({
-                            parentInquiries: curInquiries,
-                            approvedStudents: curApproved
-                        }).then(() => {
-                            alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
-                        });
-                    }
-                }
-            });
-        }
-        function deleteInquiry(id) {
-            if (confirm("⚠️ هل أنت متأكد من حذف هذا الاستفسار؟")) {
-                db.ref('school_data').once('value').then((snapshot) => {
-                    const cloudData = snapshot.val() || {};
-                    let curInquiries = cloudData.parentInquiries || [];
-                    const idx = curInquiries.findIndex(q => q.id === id);
-                    if (idx !== -1) {
-                        curInquiries.splice(idx, 1);
-                        db.ref('school_data').update({ parentInquiries: curInquiries });
-                    }
-                });
-            }
-        }
-        function clearAllSystemData() {
-            if (confirm("⚠️ هل أنت متأكد من مسح كافة بيانات النظام سحابياً؟")) {
-                db.ref('school_data').remove();
-                alert("✓ تم تفريغ قاعدة البيانات السحابية بالكامل.");
-            }
-        }
-        function openStudentsModal() { document.getElementById('studentsModal').classList.remove('hidden'); }
-        function closeStudentsModal() { document.getElementById('studentsModal').classList.add('hidden'); }
-        function toggleBroadcastSection() { document.getElementById('broadcastContentBody').classList.toggle('hidden'); }
-    </script>
+function openStudentsModal() {
+    document.getElementById('studentsModal').classList.remove('hidden');
+    const box = document.getElementById('modalStudentsList');
+    box.innerHTML = '<p class="text-gray-500">تُعرض سجلات النشاط هنا عند توفرها في بيانات النظام.</p>';
+}
+function closeStudentsModal() {
+    document.getElementById('studentsModal').classList.add('hidden');
+}
+function toggleBroadcastSection() {
+    document.getElementById('broadcastContentBody').classList.toggle('hidden');
+}
+</script>
 </body>
 </html>
