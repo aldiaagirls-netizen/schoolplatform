@@ -13,38 +13,43 @@
 </head>
 <body class="bg-pink-50 text-gray-800 min-h-screen p-4">
 
-    <div class="max-w-xl mx-auto space-y-4">
+    <div class="max-w-xl mx-auto space-y-6">
         
-        <!-- شاشة تسجيل الدخول وإرسال طلب الانضمام مع منع التكرار الذكي -->
-        <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
-            <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجيل دخول طالبة جديدة</h2>
-            <p class="text-xs text-gray-500 text-center">أدخل بيانات الطالبة وصورتها الشخصية بدقة ليتم إرسالها إلى لوحة إدارة المدرسة للموافقة.</p>
+        <!-- شاشة تسجيل الطالبات (ثلاثة نماذج متطابقة للطالبة الأولى والثانية والثالثة) -->
+        <div id="parentLoginView" class="space-y-6">
             
-            <div class="space-y-3 text-xs">
-                <!-- رفع صورة الطالبة -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 text-center space-y-2">
+                <h2 class="text-lg font-bold text-pink-700">👧 بوابة ولي الأمر - تسجيل دخول الطالبات</h2>
+                <p class="text-xs text-gray-500">أدخل بيانات كل طالبة وصورتها الشخصية بدقة. يمكنك تسجيل حتى 3 طالبات وإرسال طلباتهن.</p>
+            </div>
+
+            <!-- الطالبة الأولى -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4 student-card" id="card_1">
+                <h3 class="font-bold text-pink-800 text-sm border-b pb-2">📌 بيانات الطالبة الأولى</h3>
+                
                 <div class="flex flex-col items-center justify-center border-2 border-dashed border-pink-200 p-4 rounded-xl bg-pink-50/50">
-                    <div id="imagePreviewContainer" class="mb-2 hidden">
-                        <img id="studentImagePreview" class="w-20 h-20 rounded-full object-cover border-2 border-pink-600 shadow-sm" alt="صورة الطالبة">
+                    <div id="imagePreviewContainer_1" class="mb-2 hidden">
+                        <img id="studentImagePreview_1" class="w-20 h-20 rounded-full object-cover border-2 border-pink-600 shadow-sm" alt="صورة الطالبة">
                     </div>
                     <label class="cursor-pointer bg-pink-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-pink-700 transition shadow-sm">
-                        📷 اختر صورة الطالبة
-                        <input type="file" id="studentImageInput" accept="image/*" class="hidden" onchange="previewStudentImage(event)">
+                        📷 اختر صورة الطالبة الأولى
+                        <input type="file" id="studentImageInput_1" accept="image/*" class="hidden" onchange="previewStudentImage(event, 1)">
                     </label>
-                    <span class="text-[10px] text-gray-400 mt-1">اختياري (صورة شخصية واضحة)</span>
+                    <span class="text-[10px] text-gray-400 mt-1">اختياري</span>
                 </div>
 
-                <div>
+                <div class="text-xs">
                     <label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
-                    <input type="text" id="parentStudentName" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: فاطمة أحمد علي">
+                    <input type="text" id="parentStudentName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: فاطمة أحمد علي">
                 </div>
-                <div>
+                <div class="text-xs">
                     <label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
-                    <input type="text" id="parentMotherName" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم فاطمة">
+                    <input type="text" id="parentMotherName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم فاطمة">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2 text-xs">
                     <div>
                         <label class="block font-semibold mb-1">الصف الدراسي:</label>
-                        <select id="parentGrade" class="w-full px-3 py-2 border rounded-lg bg-white">
+                        <select id="parentGrade_1" class="w-full px-3 py-2 border rounded-lg bg-white">
                             <option value="الأول الابتدائي">الأول الابتدائي</option>
                             <option value="الثاني الابتدائي">الثاني الابتدائي</option>
                             <option value="الثالث الابتدائي">الثالث الابتدائي</option>
@@ -55,22 +60,117 @@
                     </div>
                     <div>
                         <label class="block font-semibold mb-1">الشعبة:</label>
-                        <select id="parentSection" class="w-full px-3 py-2 border rounded-lg bg-white">
+                        <select id="parentSection_1" class="w-full px-3 py-2 border rounded-lg bg-white">
                             <option value="أ">الشعبة (أ)</option>
                             <option value="ب">الشعبة (ب)</option>
                             <option value="ج">الشعبة (ج)</option>
                         </select>
                     </div>
                 </div>
-                <button onclick="submitParentRequest()" class="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-pink-700 transition cursor-pointer">إرسال طلب الانضمام للإدارة 🚀</button>
+                <button onclick="submitStudentRequest(1)" class="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-pink-700 transition cursor-pointer">إرسال طلب الطالبة الأولى 🚀</button>
             </div>
+
+            <!-- الطالبة الثانية -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4 student-card" id="card_2">
+                <h3 class="font-bold text-purple-800 text-sm border-b pb-2">📌 بيانات الطالبة الثانية (اختياري)</h3>
+                
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-purple-200 p-4 rounded-xl bg-purple-50/50">
+                    <div id="imagePreviewContainer_2" class="mb-2 hidden">
+                        <img id="studentImagePreview_2" class="w-20 h-20 rounded-full object-cover border-2 border-purple-600 shadow-sm" alt="صورة الطالبة">
+                    </div>
+                    <label class="cursor-pointer bg-purple-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-purple-700 transition shadow-sm">
+                        📷 اختر صورة الطالبة الثانية
+                        <input type="file" id="studentImageInput_2" accept="image/*" class="hidden" onchange="previewStudentImage(event, 2)">
+                    </label>
+                    <span class="text-[10px] text-gray-400 mt-1">اختياري</span>
+                </div>
+
+                <div class="text-xs">
+                    <label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
+                    <input type="text" id="parentStudentName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: زينب أحمد علي">
+                </div>
+                <div class="text-xs">
+                    <label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
+                    <input type="text" id="parentMotherName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم زينب">
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="block font-semibold mb-1">الصف الدراسي:</label>
+                        <select id="parentGrade_2" class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <option value="الأول الابتدائي">الأول الابتدائي</option>
+                            <option value="الثاني الابتدائي">الثاني الابتدائي</option>
+                            <option value="الثالث الابتدائي">الثالث الابتدائي</option>
+                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                            <option value="السادس الابتدائي">السادس الابتدائي</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">الشعبة:</label>
+                        <select id="parentSection_2" class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <option value="أ">الشعبة (أ)</option>
+                            <option value="ب">الشعبة (ب)</option>
+                            <option value="ج">الشعبة (ج)</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="submitStudentRequest(2)" class="w-full bg-purple-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-purple-700 transition cursor-pointer">إرسال طلب الطالبة الثانية 🚀</button>
+            </div>
+
+            <!-- الطالبة الثالثة -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 space-y-4 student-card" id="card_3">
+                <h3 class="font-bold text-indigo-800 text-sm border-b pb-2">📌 بيانات الطالبة الثالثة (اختياري)</h3>
+                
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 p-4 rounded-xl bg-indigo-50/50">
+                    <div id="imagePreviewContainer_3" class="mb-2 hidden">
+                        <img id="studentImagePreview_3" class="w-20 h-20 rounded-full object-cover border-2 border-indigo-600 shadow-sm" alt="صورة الطالبة">
+                    </div>
+                    <label class="cursor-pointer bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-indigo-700 transition shadow-sm">
+                        📷 اختر صورة الطالبة الثالثة
+                        <input type="file" id="studentImageInput_3" accept="image/*" class="hidden" onchange="previewStudentImage(event, 3)">
+                    </label>
+                    <span class="text-[10px] text-gray-400 mt-1">اختياري</span>
+                </div>
+
+                <div class="text-xs">
+                    <label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
+                    <input type="text" id="parentStudentName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: رقية أحمد علي">
+                </div>
+                <div class="text-xs">
+                    <label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
+                    <input type="text" id="parentMotherName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم رقية">
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="block font-semibold mb-1">الصف الدراسي:</label>
+                        <select id="parentGrade_3" class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <option value="الأول الابتدائي">الأول الابتدائي</option>
+                            <option value="الثاني الابتدائي">الثاني الابتدائي</option>
+                            <option value="الثالث الابتدائي">الثالث الابتدائي</option>
+                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                            <option value="السادس الابتدائي">السادس الابتدائي</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">الشعبة:</label>
+                        <select id="parentSection_3" class="w-full px-3 py-2 border rounded-lg bg-white">
+                            <option value="أ">الشعبة (أ)</option>
+                            <option value="ب">الشعبة (ب)</option>
+                            <option value="ج">الشعبة (ج)</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="submitStudentRequest(3)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-indigo-700 transition cursor-pointer">إرسال طلب الطالبة الثالثة 🚀</button>
+            </div>
+
         </div>
 
         <!-- شاشة انتظار الموافقة -->
         <div id="parentWaitingView" class="hidden bg-white p-8 rounded-2xl shadow-sm border border-yellow-200 text-center space-y-4">
             <div class="text-4xl">⏳</div>
-            <h2 class="text-base font-bold text-yellow-700">طلبك قيد المراجعة من قبل الإدارة</h2>
-            <p class="text-xs text-gray-600">تم إرسال طلب انضمام الطالبة بنجاح. يرجى الانتظار لحين موافقة الإدارة، وسيعمل النظام تلقائياً بمجرد الاعتماد.</p>
+            <h2 class="text-base font-bold text-yellow-700">طلبات الطالبات قيد المراجعة من قبل الإدارة</h2>
+            <p class="text-xs text-gray-600">تم إرسال الطلبات بنجاح. يرجى الانتظار لحين موافقة الإدارة وتفعيل الحسابات.</p>
             <button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer">تحديث الحالة 🔄</button>
         </div>
 
@@ -87,6 +187,12 @@
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 cursor-pointer">خروج 🚪</button>
             </div>
 
+            <!-- قائمة أيقونات أسماء الطالبات للاستطلاع والتنقل بين الأبناء -->
+            <div class="bg-white p-3 rounded-xl shadow-sm border border-pink-100 space-y-2">
+                <p class="font-bold text-xs text-pink-800">👧 الطالبات المقبولات (اضغط على أي اسم لعرض معلوماته وجدوله):</p>
+                <div id="siblingsButtonsList" class="flex gap-2 flex-wrap"></div>
+            </div>
+
             <!-- الإشعارات والتعاميم -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
                 <h4 class="font-bold text-indigo-700 text-xs border-b pb-2">📢 الإشعارات والتعاميم المدرسية</h4>
@@ -95,9 +201,9 @@
                 </div>
             </div>
 
-            <!-- جدول الدروس -->
+            <!-- جدول الدروس الموجه بذكاء حسب صف وشعبة الطالبة المختارة -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
-                <h4 class="font-bold text-pink-700 text-xs border-b pb-2">📚 جدول الدروس والواجبات اليومية</h4>
+                <h4 class="font-bold text-pink-700 text-xs border-b pb-2">📚 جدول الدروس والتحاضير اليومية</h4>
                 <div id="parentScheduleContainer" class="space-y-2 text-xs">
                     <p class="text-gray-500">لا توجد دروس منشورة حالياً.</p>
                 </div>
@@ -126,41 +232,42 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentStudentId = localStorage.getItem('school_parent_student_id');
-        let currentStudentData = null;
+        let parentSessionIds = JSON.parse(localStorage.getItem('school_parent_student_ids') || '[]');
+        let currentActiveStudentId = localStorage.getItem('school_parent_active_id');
         let globalSchoolData = {};
-        let base64StudentImage = '';
+        let base64Images = { 1: '', 2: '', 3: '' };
 
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 globalSchoolData = snapshot.val() || {};
-                if (currentStudentId) {
+                if (parentSessionIds.length > 0) {
                     checkAndSyncSession();
                 }
             });
         };
 
-        function previewStudentImage(event) {
+        function previewStudentImage(event, index) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    base64StudentImage = e.target.result;
-                    document.getElementById('studentImagePreview').src = base64StudentImage;
-                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                    base64Images[index] = e.target.result;
+                    document.getElementById(`studentImagePreview_${index}`).src = base64Images[index];
+                    document.getElementById(`imagePreviewContainer_${index}`).classList.remove('hidden');
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        function submitParentRequest() {
-            const student = document.getElementById('parentStudentName').value.trim();
-            const mother = document.getElementById('parentMotherName').value.trim();
-            const grade = document.getElementById('parentGrade').value;
-            const section = document.getElementById('parentSection').value;
+        // --- إرسال طلب خاص بكل طالبة على حدة عبر زرها الخاص ---
+        function submitStudentRequest(index) {
+            const student = document.getElementById(`parentStudentName_${index}`).value.trim();
+            const mother = document.getElementById(`parentMotherName_${index}`).value.trim();
+            const grade = document.getElementById(`parentGrade_${index}`).value;
+            const section = document.getElementById(`parentSection_${index}`).value;
 
             if (!student || !mother) {
-                alert("⚠️ يرجى ملء كافة الحقول المطلوبة.");
+                alert(`⚠️ يرجى ملء كافة حقول الطالبة رقم (${index}).`);
                 return;
             }
 
@@ -170,34 +277,32 @@
             const existsInPending = pending.some(s => s.student.toLowerCase() === student.toLowerCase());
             const existsInApproved = approved.some(s => s.student.toLowerCase() === student.toLowerCase());
 
-            if (existsInPending) {
-                alert("⚠️ تنبيه ذكي: اسم هذه الطالبة موجود مسبقاً في قائمة الطلبات المعلقة بانتظار موافقة الإدارة ولا يمكن تكرار الطلب!");
+            if (existsInPending || existsInApproved) {
+                alert(`⚠️ تنبيه ذكي: الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
                 return;
             }
 
-            if (existsInApproved) {
-                alert("⚠️ تنبيه ذكي: هذه الطالبة مقبولة ومسجلة بالفعل في المنصة!");
-                return;
-            }
-
-            const studentId = 'st_' + Date.now();
+            const studentId = 'st_' + Date.now() + '_' + index;
             const newReq = { 
                 id: studentId, 
                 student, 
                 mother, 
                 grade, 
                 section, 
-                image: base64StudentImage || '' 
+                image: base64Images[index] || '' 
             };
 
             if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
             globalSchoolData.pendingRequests.push(newReq);
 
             db.ref('school_data').set(globalSchoolData).then(() => {
-                localStorage.setItem('school_parent_student_id', studentId);
-                currentStudentId = studentId;
-                showWaitingScreen();
-                alert("✓ تم إرسال الطلب بنجاح، بانتظار موافقة الإدارة.");
+                parentSessionIds.push(studentId);
+                localStorage.setItem('school_parent_student_ids', JSON.stringify(parentSessionIds));
+                localStorage.setItem('school_parent_active_id', studentId);
+                currentActiveStudentId = studentId;
+
+                checkAndSyncSession();
+                alert(`✓ تم إرسال طلب الطالبة (${student}) بنجاح إلى الإدارة!`);
             });
         }
 
@@ -205,14 +310,18 @@
             const approved = globalSchoolData.approvedStudents || [];
             const pending = globalSchoolData.pendingRequests || [];
 
-            const foundApproved = approved.find(s => s.id === currentStudentId);
-            const foundPending = pending.find(s => s.id === currentStudentId);
+            let approvedSiblings = parentSessionIds.map(id => approved.find(s => s.id === id)).filter(Boolean);
+            let pendingSiblings = parentSessionIds.map(id => pending.find(s => s.id === id)).filter(Boolean);
 
-            if (foundApproved) {
-                currentStudentData = foundApproved;
-                showDashboard(foundApproved);
-                renderParentContent(foundApproved);
-            } else if (foundPending) {
+            if (approvedSiblings.length > 0) {
+                if (!approvedSiblings.some(s => s.id === currentActiveStudentId)) {
+                    currentActiveStudentId = approvedSiblings[0].id;
+                    localStorage.setItem('school_parent_active_id', currentActiveStudentId);
+                }
+                const activeStudent = approvedSiblings.find(s => s.id === currentActiveStudentId) || approvedSiblings[0];
+                showDashboard(activeStudent, approvedSiblings);
+                renderParentContent(activeStudent);
+            } else if (pendingSiblings.length > 0) {
                 showWaitingScreen();
             } else {
                 logoutParent();
@@ -220,12 +329,11 @@
         }
 
         function checkApprovalStatusAgain() {
-            if (currentStudentId) {
+            db.ref('school_data').once('value').then((snapshot) => {
+                globalSchoolData = snapshot.val() || {};
                 checkAndSyncSession();
-                alert("✓ تم فحص الحالة.");
-            } else {
-                logoutParent();
-            }
+                alert("✓ تم فحص الحالة من السحابة.");
+            });
         }
 
         function showWaitingScreen() {
@@ -234,12 +342,12 @@
             document.getElementById('parentDashboardView').classList.add('hidden');
         }
 
-        function showDashboard(student) {
+        function showDashboard(student, siblings) {
             document.getElementById('parentLoginView').classList.add('hidden');
             document.getElementById('parentWaitingView').classList.add('hidden');
             document.getElementById('parentDashboardView').classList.remove('hidden');
 
-            document.getElementById('welcomeStudentTitle').innerText = `👧 الطالبة: ${student.student}`;
+            document.getElementById('welcomeStudentTitle').innerText = `👧 الطالبة الحالية: ${student.student}`;
             document.getElementById('studentClassInfo').innerText = `${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
 
             const imgContainer = document.getElementById('dashboardImageContainer');
@@ -248,6 +356,24 @@
             } else {
                 imgContainer.innerHTML = `<div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold text-base">👧</div>`;
             }
+
+            const listDiv = document.getElementById('siblingsButtonsList');
+            listDiv.innerHTML = '';
+            siblings.forEach(sib => {
+                const isActive = sib.id === student.id;
+                const btnClass = isActive ? 'bg-pink-600 text-white font-bold shadow' : 'bg-pink-100 text-pink-800 hover:bg-pink-200';
+                listDiv.innerHTML += `
+                    <button onclick="switchActiveSibling('${sib.id}')" class="px-3 py-1.5 rounded-lg text-xs transition ${btnClass} cursor-pointer flex items-center gap-1.5">
+                        <span>👧</span> ${sib.student}
+                    </button>
+                `;
+            });
+        }
+
+        function switchActiveSibling(id) {
+            currentActiveStudentId = id;
+            localStorage.setItem('school_parent_active_id', id);
+            checkAndSyncSession();
         }
 
         function renderParentContent(student) {
@@ -287,6 +413,9 @@
 
         function sendParentInquiry() {
             const content = document.getElementById('parentInquiryText').value.trim();
+            const approved = globalSchoolData.approvedStudents || [];
+            const currentStudentData = approved.find(s => s.id === currentActiveStudentId);
+
             if (!content || !currentStudentData) return;
 
             const inquiry = {
@@ -308,19 +437,10 @@
         }
 
         function logoutParent() {
-            if (currentStudentData) {
-                if (!globalSchoolData.parentActivities) globalSchoolData.parentActivities = [];
-                globalSchoolData.parentActivities.push({
-                    type: 'logout',
-                    message: `🚪 ولي أمر الطالبة (${currentStudentData.student}) قام بتسجيل الخروج.`,
-                    time: new Date().toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })
-                });
-                db.ref('school_data').set(globalSchoolData);
-            }
-
-            localStorage.removeItem('school_parent_student_id');
-            currentStudentId = null;
-            currentStudentData = null;
+            localStorage.removeItem('school_parent_student_ids');
+            localStorage.removeItem('school_parent_active_id');
+            parentSessionIds = [];
+            currentActiveStudentId = null;
             document.getElementById('parentDashboardView').classList.add('hidden');
             document.getElementById('parentWaitingView').classList.add('hidden');
             document.getElementById('parentLoginView').classList.remove('hidden');
