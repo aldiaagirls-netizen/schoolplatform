@@ -23,7 +23,7 @@
             <div class="space-y-4">
                 <!-- حاوية الطالبات الديناميكية -->
                 <div id="studentsInputsContainer" class="space-y-4 py-2">
-                    <!-- سيتم حقن الحقول هنا فوراً عند التحميل -->
+                    <!-- سيتم حقن الحقول هنا فوراً -->
                 </div>
 
                 <!-- زر إضافة تلميذة جديدة -->
@@ -111,7 +111,7 @@
                 } else {
                     const container = document.getElementById('studentsInputsContainer');
                     if(container && container.children.length === 0) {
-                        addStudentInputRow(); // تفعيل عرض الحقول تلقائياً فور فتح الصفحة
+                        addStudentInputRow(); // ضمان إظهار حقول التلميذة الأولى فوراً عند تحميل الصفحة
                     }
                 }
             });
@@ -134,7 +134,7 @@
                     <button type="button" onclick="removeStudentInputRow('${rowId}')" class="text-red-500 font-bold text-xs hover:underline cursor-pointer">حذف ✕</button>
                 </div>
                 
-                <!-- أيقونة صغيرة لإدخال صورة الطالبة -->
+                <!-- أيقونة لإدخال صورة الطالبة -->
                 <div class="flex items-center gap-3">
                     <div class="preview_box w-10 h-10 rounded-full bg-white border border-pink-300 flex items-center justify-center text-pink-600 font-bold overflow-hidden shrink-0 shadow-inner text-xs">
                         <span>📷</span>
@@ -145,13 +145,13 @@
                     </label>
                 </div>
 
-                <!-- الحقل الأول: اسم الطالبة الثلاثي -->
+                <!-- اسم الطالبة الثلاثي -->
                 <div>
                     <label class="block text-xs font-semibold mb-1">اسم الطالبة الثلاثي:</label>
                     <input type="text" class="w-full px-3 py-2 border rounded-lg student_name_input text-xs bg-white" placeholder="مثال: فاطمة أحمد علي">
                 </div>
 
-                <!-- الحقل الثاني والثالث: قائمة منسدلة الصف وقائمة منسدلة الشعبة -->
+                <!-- الصف والشعبة -->
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-semibold mb-1">الصف:</label>
@@ -307,7 +307,6 @@
                 imgContainer.innerHTML = `<div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold text-base">👧</div>`;
             }
 
-            // عرض أيقونات بأسماء الطالبات المقبولات للاستطلاع والتبديل بينهن بنقرة زر
             const listDiv = document.getElementById('siblingsButtonsList');
             listDiv.innerHTML = '';
             siblings.forEach(sib => {
@@ -395,8 +394,11 @@
             document.getElementById('parentDashboardView').classList.add('hidden');
             document.getElementById('parentWaitingView').classList.add('hidden');
             document.getElementById('parentLoginView').classList.remove('hidden');
-            document.getElementById('studentsInputsContainer').innerHTML = '';
-            addStudentInputRow();
+            const container = document.getElementById('studentsInputsContainer');
+            if(container) {
+                container.innerHTML = '';
+                addStudentInputRow();
+            }
         }
     </script>
 </body>
