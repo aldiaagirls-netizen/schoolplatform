@@ -276,18 +276,23 @@
             }
         };
 
-        function saveData() {
-            const dataToSave = {
-                pendingRequests: pendingRequests,
-                approvedStudents: approvedStudents,
-                parentInquiries: parentInquiries,
-                schoolSchedule: schoolSchedule,
-                principalName: principalName,
-                supervisorName: supervisorName,
-                parentActivities: parentActivities
-            };
-            localStorage.setItem('school_backup_data', JSON.stringify(dataToSave));
-            db.ref('school_data').set(dataToSave);
+        // --- التحديث الآمن الذي يضمن عدم ضياع أي بيانات سابقة ---
+        function saveData(customData = null) {
+            db.ref('school_data').once('value').then((snapshot) => {
+                const currentCloudData = snapshot.val() || {};
+
+                const dataToSave = {
+                    pendingRequests: customData?.pendingRequests !== undefined ? customData.pendingRequests : (currentCloudData.pendingRequests || pendingRequests),
+                    approvedStudents: customData?.approvedStudents !== undefined ? customData.approvedStudents : (currentCloudData.approvedStudents || approvedStudents),
+                    parentInquiries: currentCloudData.parentInquiries || parentInquiries,
+                    schoolSchedule: currentCloudData.schoolSchedule || schoolSchedule,
+                    principalName: currentCloudData.principalName || principalName,
+                    supervisorName: currentCloudData.supervisorName || supervisorName,
+                    parentActivities: currentCloudData.parentActivities || parentActivities
+                };
+
+                db.ref('school_data').set(dataToSave);
+            });
         }
 
         function restoreOldData() {
@@ -305,7 +310,7 @@
                     updateTotalCountBadge();
                     renderPublishedLessons();
                     renderParentActivities();
-                    alert("✓ تم تحديث ومزامنة البيانات من السحابة بنجاح!");
+                    alert("✓ تمت مزامنة واسترجاع كافة البيانات بنجاح!");
                 } else {
                     alert("⚠️ لا توجد بيانات سحابية مسجلة حالياً.");
                 }
@@ -396,7 +401,6 @@
             renderParentActivities();
         }
 
-        // --- رسم الطلبات المعلقة مع ربط المعرف الفريد (id) لمنع تكرار بقائها ---
         function renderRequests() {
             const container = document.getElementById('requestsContainer');
             if (!pendingRequests || pendingRequests.length === 0) { 
@@ -452,43 +456,64 @@
             });
         }
 
-        // --- دالة الموافقة باستخدام المعرف الفريد (id) للحذف الفوري ---
+        // --- دالة الموافقة الذكية التي تحافظ على البيانات القديمة وتحدث السحابة فوراً ---
         function approveStudent(studentId) {
-            const index = pendingRequests.findIndex(s => s.id === studentId);
-            if (index === -1) return;
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val() || {};
+                let currentPending = cloudData.pendingRequests || [];
+                let currentApproved = cloudData.approvedStudents || [];
 
-            const student = pendingRequests[index];
-            const alreadyApproved = approvedStudents.some(s => s.student.toLowerCase() === student.student.toLowerCase());
-            
-            if (alreadyApproved) {
-                alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة ومقبولة مسبقاً في الدليل! سيتم إزالة الطلب المعلق فقط.`);
-                pendingRequests.splice(index, 1);
-                saveData();
-                renderRequests();
-                return;
-            }
+                const index = currentPending.findIndex(s => s.id === studentId);
+                if (index === -1) {
+                    alert("⚠️ عذراً، هذا الطلب غير موجود أو تم التعامل معه مسبقاً.");
+                    return;
+                }
 
-            pendingRequests.splice(index, 1);
-            student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
-            approvedStudents.push(student);
-            
-            // الحفظ الفوري ومزامنة الواجهة لمنع بقاء الطلب معلقاً
-            saveData();
-            renderRequests();
-            alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
+                const student = currentPending[index];
+                const alreadyApproved = currentApproved.some(s => s.student.toLowerCase() === student.student.toLowerCase());
+
+                // حذف الطلب من المعلقات
+                currentPending.splice(index, 1);
+
+                if (!alreadyApproved) {
+                    student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
+                    currentApproved.push(student);
+                }
+
+                // حفظ التحديثات في السحابة مع الحفاظ على البيانات القديمة كاملة
+                db.ref('school_data').update({
+                    pendingRequests: currentPending,
+                    approvedStudents: currentApproved
+                }).then(() => {
+                    pendingRequests = currentPending;
+                    approvedStudents = currentApproved;
+                    renderRequests();
+                    updateTotalCountBadge();
+                    alert(`✓ تمت الموافقة على الطالبة (${student.student}) بنجاح وإزالتها من القائمة المعلقة!`);
+                });
+            });
         }
 
         function rejectStudent(studentId) {
-            const index = pendingRequests.findIndex(s => s.id === studentId);
-            if (index === -1) return;
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val() || {};
+                let currentPending = cloudData.pendingRequests || [];
 
-            const student = pendingRequests[index];
-            if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
-                pendingRequests.splice(index, 1);
-                saveData();
-                renderRequests();
-                alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
-            }
+                const index = currentPending.findIndex(s => s.id === studentId);
+                if (index === -1) return;
+
+                const student = currentPending[index];
+                if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
+                    currentPending.splice(index, 1);
+                    db.ref('school_data').update({
+                        pendingRequests: currentPending
+                    }).then(() => {
+                        pendingRequests = currentPending;
+                        renderRequests();
+                        alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
+                    });
+                }
+            });
         }
 
         const gradesList = ["الأول الابتدائي", "الثاني الابتدائي", "الثالث الابتدائي", "الرابع الابتدائي", "الخامس الابتدائي", "السادس الابتدائي"];
@@ -565,7 +590,7 @@
         function removeStudentFromAccepted(index, grade, section) {
             if (confirm("⚠️ هل أنت متأكد من حذف هذه الطالبة من المقبولات؟")) {
                 approvedStudents.splice(index, 1);
-                saveData();
+                db.ref('school_data').update({ approvedStudents: approvedStudents });
                 renderStudentsView(grade, section);
                 updateTotalCountBadge();
             }
@@ -575,14 +600,14 @@
             const val = document.getElementById('newPrincipalName').value.trim();
             if(!val) return;
             principalName = val;
-            saveData();
+            db.ref('school_data').update({ principalName: principalName });
             alert("✓ تم حفظ اسم المديرة سحابياً.");
         }
         function updateSupervisorName() {
             const val = document.getElementById('newSupervisorName').value.trim();
             if(!val) return;
             supervisorName = val;
-            saveData();
+            db.ref('school_data').update({ supervisorName: supervisorName });
             alert("✓ تم حفظ اسم المشرف سحابياً.");
         }
 
@@ -592,14 +617,23 @@
             const section = document.getElementById('lessonSection').value;
             const content = document.getElementById('lessonContent').value.trim();
             if (!content) return;
-            const key = `${grade}_${section}`;
-            if (!schoolSchedule[key]) schoolSchedule[key] = {};
-            schoolSchedule[key][subject] = content;
-            saveData();
-            renderPublishedLessons();
-            document.getElementById('lessonContent').value = '';
-            alert(`✓ تم نشر الدرس سحابياً للجميع!`);
+            
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val() || {};
+                let currentSchedule = cloudData.schoolSchedule || {};
+                const key = `${grade}_${section}`;
+                if (!currentSchedule[key]) currentSchedule[key] = {};
+                currentSchedule[key][subject] = content;
+
+                db.ref('school_data').update({ schoolSchedule: currentSchedule }).then(() => {
+                    schoolSchedule = currentSchedule;
+                    renderPublishedLessons();
+                    document.getElementById('lessonContent').value = '';
+                    alert(`✓ تم نشر الدرس سحابياً للجميع!`);
+                });
+            });
         }
+
         function renderPublishedLessons() {
             const container = document.getElementById('publishedLessonsContainer');
             let html = '';
@@ -627,7 +661,7 @@
                 if (schoolSchedule[classKey] && schoolSchedule[classKey][subjectName]) {
                     delete schoolSchedule[classKey][subjectName];
                     if (Object.keys(schoolSchedule[classKey]).length === 0) delete schoolSchedule[classKey];
-                    saveData();
+                    db.ref('school_data').update({ schoolSchedule: schoolSchedule });
                     renderPublishedLessons();
                 }
             }
@@ -636,7 +670,7 @@
             if (Object.keys(schoolSchedule).length === 0) return;
             if (confirm("⚠️ هل أنت متأكد من حذف جميع الدروس المنشورة؟")) {
                 schoolSchedule = {};
-                saveData();
+                db.ref('school_data').update({ schoolSchedule: schoolSchedule });
                 renderPublishedLessons();
             }
         }
@@ -646,15 +680,24 @@
             const targetSection = document.getElementById('broadcastSection').value;
             const textContent = document.getElementById('broadcastText').value.trim();
             if (!textContent) return;
-            approvedStudents.forEach(st => {
-                if ((targetGrade === 'الكل' || st.grade === targetGrade) && (targetSection === 'الكل' || st.section === targetSection)) {
-                    if(!st.notifications) st.notifications = [];
-                    st.notifications.unshift({ type: 'text', title: `📢 تعميم إداري عام`, body: textContent, unread: true });
-                }
+
+            db.ref('school_data').once('value').then((snapshot) => {
+                const cloudData = snapshot.val() || {};
+                let currentApproved = cloudData.approvedStudents || [];
+
+                currentApproved.forEach(st => {
+                    if ((targetGrade === 'الكل' || st.grade === targetGrade) && (targetSection === 'الكل' || st.section === targetSection)) {
+                        if(!st.notifications) st.notifications = [];
+                        st.notifications.unshift({ type: 'text', title: `📢 تعميم إداري عام`, body: textContent, unread: true });
+                    }
+                });
+
+                db.ref('school_data').update({ approvedStudents: currentApproved }).then(() => {
+                    approvedStudents = currentApproved;
+                    document.getElementById('broadcastText').value = '';
+                    alert("✓ تم إرسال التعميم للجميع بالسحاب!");
+                });
             });
-            saveData();
-            document.getElementById('broadcastText').value = '';
-            alert("✓ تم إرسال التعميم للجميع بالسحاب!");
         }
 
         function renderAdminInquiries() {
@@ -688,8 +731,13 @@
                     if(!student.notifications) student.notifications = [];
                     student.notifications.unshift({ type: 'text', title: `💬 رد الإدارة على استفساركم`, body: replyText, unread: true });
                     parentInquiries.splice(idx, 1);
-                    saveData();
-                    alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
+                    db.ref('school_data').update({
+                        parentInquiries: parentInquiries,
+                        approvedStudents: approvedStudents
+                    }).then(() => {
+                        renderAdminInquiries();
+                        alert("✓ تم إرسال الرد لولي الأمر مباشرة!");
+                    });
                 }
             }
         }
@@ -698,7 +746,7 @@
                 const idx = parentInquiries.findIndex(q => q.id === id);
                 if (idx !== -1) {
                     parentInquiries.splice(idx, 1);
-                    saveData();
+                    db.ref('school_data').update({ parentInquiries: parentInquiries });
                     renderAdminInquiries();
                 }
             }
