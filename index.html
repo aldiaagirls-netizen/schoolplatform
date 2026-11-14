@@ -15,18 +15,18 @@
 
     <div class="max-w-xl mx-auto space-y-4">
         
-        <!-- شاشة تسجيل وإدخال الأبناء -->
+        <!-- شاشة تسجيل وإدخال الأبناء (تظهر فوراً بدون انتظار) -->
         <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
             <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجيل بيانات الطالبات</h2>
-            <p class="text-xs text-gray-500 text-center">أدخل بيانات التلميذة (الاسم الثلاثي، الصف، الشعبة، والصورة) ثم اضغط "إرسال" الخاص بها.</p>
+            <p class="text-xs text-gray-500 text-center">أدخل بيانات التلميذة (الاسم الثلاثي، الصف، الشعبة، والصورة) ثم اضغط "إرسال طلب هذه الطالبة".</p>
             
             <div class="space-y-4">
                 <!-- حاوية الطالبات الديناميكية -->
                 <div id="studentsInputsContainer" class="space-y-4 py-2">
-                    <!-- سيتم حقن الحقول هنا فوراً -->
+                    <!-- سيتم حقن البطاقة الأولى هنا فوراً -->
                 </div>
 
-                <!-- زر إضافة تلميذة جديدة -->
+                <!-- زر إضافة تلميذة أخرى -->
                 <button type="button" onclick="addStudentInputRow()" class="w-full bg-purple-100 text-purple-700 py-2.5 rounded-lg font-bold text-xs hover:bg-purple-200 transition cursor-pointer">
                     ＋ إضافة تلميذة أخرى (أخت جديدة)
                 </button>
@@ -54,7 +54,7 @@
                 <button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 cursor-pointer">خروج 🚪</button>
             </div>
 
-            <!-- قائمة أيقونات أسماء الطالبات للتنقل والاستطلاع بينهن -->
+            <!-- قائمة أيقونات أسماء الطالبات للاستطلاع والتنقل -->
             <div class="bg-white p-3 rounded-xl shadow-sm border border-pink-100 space-y-2">
                 <p class="font-bold text-xs text-pink-800">👧 الطالبات المقبولات (اضغط على أي اسم لعرض معلوماته وجدوله):</p>
                 <div id="siblingsButtonsList" class="flex gap-2 flex-wrap"></div>
@@ -103,16 +103,17 @@
         let currentActiveStudentId = localStorage.getItem('school_parent_active_id');
         let globalSchoolData = {};
 
+        // --- ضمان ظهور الحقول فور تحميل الصفحة بشكل مباشر ---
         window.onload = function() {
+            const container = document.getElementById('studentsInputsContainer');
+            if (container && container.children.length === 0) {
+                addStudentInputRow();
+            }
+
             db.ref('school_data').on('value', (snapshot) => {
                 globalSchoolData = snapshot.val() || {};
                 if (parentSessionIds.length > 0) {
                     checkAndSyncSession();
-                } else {
-                    const container = document.getElementById('studentsInputsContainer');
-                    if(container && container.children.length === 0) {
-                        addStudentInputRow(); // ضمان إظهار حقول التلميذة الأولى فوراً عند تحميل الصفحة
-                    }
                 }
             });
         };
@@ -219,39 +220,42 @@
                 return;
             }
 
-            const pending = globalSchoolData.pendingRequests || [];
-            const approved = globalSchoolData.approvedStudents || [];
+            db.ref('school_data').once('value').then((snapshot) => {
+                globalSchoolData = snapshot.val() || {};
+                const pending = globalSchoolData.pendingRequests || [];
+                const approved = globalSchoolData.approvedStudents || [];
 
-            const existsInPending = pending.some(s => s.student.toLowerCase() === studentName.toLowerCase());
-            const existsInApproved = approved.some(s => s.student.toLowerCase() === studentName.toLowerCase());
+                const existsInPending = pending.some(s => s.student.toLowerCase() === studentName.toLowerCase());
+                const existsInApproved = approved.some(s => s.student.toLowerCase() === studentName.toLowerCase());
 
-            if (existsInPending || existsInApproved) {
-                alert(`⚠️ تنبيه ذكي: الطالبة (${studentName}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
-                return;
-            }
+                if (existsInPending || existsInApproved) {
+                    alert(`⚠️ تنبيه ذكي: الطالبة (${studentName}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
+                    return;
+                }
 
-            const studentId = 'st_' + Date.now() + '_' + Math.random().toString(36.substr(2, 4));
-            
-            const newRequest = {
-                id: studentId,
-                student: studentName,
-                mother: "ولي الأمر",
-                grade: grade,
-                section: section,
-                image: imageBase64
-            };
+                const studentId = 'st_' + Date.now() + '_' + Math.random().toString(36.substr(2, 4));
+                
+                const newRequest = {
+                    id: studentId,
+                    student: studentName,
+                    mother: "ولي الأمر",
+                    grade: grade,
+                    section: section,
+                    image: imageBase64
+                };
 
-            if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
-            globalSchoolData.pendingRequests.push(newRequest);
+                if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
+                globalSchoolData.pendingRequests.push(newRequest);
 
-            db.ref('school_data').set(globalSchoolData).then(() => {
-                parentSessionIds.push(studentId);
-                localStorage.setItem('school_parent_student_ids', JSON.stringify(parentSessionIds));
-                localStorage.setItem('school_parent_active_id', studentId);
-                currentActiveStudentId = studentId;
+                db.ref('school_data').set(globalSchoolData).then(() => {
+                    parentSessionIds.push(studentId);
+                    localStorage.setItem('school_parent_student_ids', JSON.stringify(parentSessionIds));
+                    localStorage.setItem('school_parent_active_id', studentId);
+                    currentActiveStudentId = studentId;
 
-                showWaitingScreen();
-                alert(`✓ تم إرسال طلب الطالبة (${studentName}) بنجاح إلى الإدارة!`);
+                    showWaitingScreen();
+                    alert(`✓ تم إرسال طلب الطالبة (${studentName}) بنجاح إلى الإدارة!`);
+                });
             });
         }
 
@@ -278,12 +282,11 @@
         }
 
         function checkApprovalStatusAgain() {
-            if (parentSessionIds.length > 0) {
+            db.ref('school_data').once('value').then((snapshot) => {
+                globalSchoolData = snapshot.val() || {};
                 checkAndSyncSession();
-                alert("✓ تم فحص الحالة.");
-            } else {
-                logoutParent();
-            }
+                alert("✓ تم فحص الحالة من السحابة.");
+            });
         }
 
         function showWaitingScreen() {
