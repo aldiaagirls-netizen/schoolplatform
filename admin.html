@@ -396,6 +396,7 @@
             renderParentActivities();
         }
 
+        // --- إصلاح تفاعل الأزرار عبر بناء العناصر بـ DOM الآمن ---
         function renderRequests() {
             const container = document.getElementById('requestsContainer');
             if (!pendingRequests || pendingRequests.length === 0) { 
@@ -403,29 +404,54 @@
                 return; 
             }
             container.innerHTML = '';
+            
             pendingRequests.forEach((req, index) => {
-                const reqImg = req.image 
-                    ? `<img src="${req.image}" class="w-10 h-10 rounded-full object-cover border border-pink-300">`
-                    : `<div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold">👧</div>`;
-
-                container.innerHTML += `
-                    <div class="p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm gap-2">
-                        <div class="flex items-center gap-3">
-                            ${reqImg}
-                            <div>
-                                <p class="font-bold text-pink-900">الطالبة: ${req.student}</p>
-                                <p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <button type="button" onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 cursor-pointer">✓ موافقة</button>
-                            <button type="button" onclick="rejectStudent(${index})" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 cursor-pointer">✕ رفض</button>
-                        </div>
-                    </div>`;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-3 bg-pink-50 border rounded-lg flex justify-between items-center text-sm gap-2";
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = "flex items-center gap-3";
+                
+                if (req.image) {
+                    const img = document.createElement('img');
+                    img.src = req.image;
+                    img.className = "w-10 h-10 rounded-full object-cover border border-pink-300";
+                    infoDiv.appendChild(img);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = "w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 font-bold";
+                    placeholder.innerText = "👧";
+                    infoDiv.appendChild(placeholder);
+                }
+                
+                const textDiv = document.createElement('div');
+                textDiv.innerHTML = `<p class="font-bold text-pink-900">الطالبة: ${req.student}</p><p class="text-xs text-gray-600">الأم: ${req.mother} | ${req.grade} - شعبة (${req.section})</p>`;
+                infoDiv.appendChild(textDiv);
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "flex items-center gap-1.5 shrink-0";
+                
+                const approveBtn = document.createElement('button');
+                approveBtn.type = "button";
+                approveBtn.className = "bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 cursor-pointer";
+                approveBtn.innerText = "✓ موافقة";
+                approveBtn.onclick = function() { approveStudent(index); };
+                
+                const rejectBtn = document.createElement('button');
+                rejectBtn.type = "button";
+                rejectBtn.className = "bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 cursor-pointer";
+                rejectBtn.innerText = "✕ رفض";
+                rejectBtn.onclick = function() { rejectStudent(index); };
+                
+                actionsDiv.appendChild(approveBtn);
+                actionsDiv.appendChild(rejectBtn);
+                
+                itemDiv.appendChild(infoDiv);
+                itemDiv.appendChild(actionsDiv);
+                container.appendChild(itemDiv);
             });
         }
 
-        // --- إصلاح تفاعل زر الموافقة والتفعيل ---
         function approveStudent(index) {
             if (index < 0 || index >= pendingRequests.length) return;
             const student = pendingRequests[index];
