@@ -15,16 +15,16 @@
 
     <div class="max-w-xl mx-auto space-y-6">
         
-        <!-- شاشة تسجيل الطالبات (ثلاثة نماذج متطابقة للطالبة الأولى والثانية والثالثة) -->
+        <!-- شاشة تسجيل الطالبات (ثلاثة نماذج وزر إرسال واحد رئيسي) -->
         <div id="parentLoginView" class="space-y-6">
             
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 text-center space-y-2">
                 <h2 class="text-lg font-bold text-pink-700">👧 بوابة ولي الأمر - تسجيل دخول الطالبات</h2>
-                <p class="text-xs text-gray-500">أدخل بيانات كل طالبة وصورتها الشخصية بدقة. يمكنك تسجيل حتى 3 طالبات وإرسال طلباتهن.</p>
+                <p class="text-xs text-gray-500">أدخل بيانات الطالبات وصورهن الشخصية، ثم اضغط على زر الإرسال في الأسفل لإرسال كافة الطلبات للإدارة.</p>
             </div>
 
-            <!-- الطالبة الأولى -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4 student-card" id="card_1">
+            <!-- الطالبة الأولى (إجبارية) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
                 <h3 class="font-bold text-pink-800 text-sm border-b pb-2">📌 بيانات الطالبة الأولى</h3>
                 
                 <div class="flex flex-col items-center justify-center border-2 border-dashed border-pink-200 p-4 rounded-xl bg-pink-50/50">
@@ -67,12 +67,11 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="submitStudentRequest(1)" class="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-pink-700 transition cursor-pointer">إرسال طلب الطالبة الأولى 🚀</button>
             </div>
 
-            <!-- الطالبة الثانية -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4 student-card" id="card_2">
-                <h3 class="font-bold text-purple-800 text-sm border-b pb-2">📌 بيانات الطالبة الثانية (اختياري)</h3>
+            <!-- الطالبة الثانية (اختيارية) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
+                <h3 class="font-bold text-purple-800 text-sm border-b pb-2">📌 بيانات الطالبة الثانية (إن وجدت)</h3>
                 
                 <div class="flex flex-col items-center justify-center border-2 border-dashed border-purple-200 p-4 rounded-xl bg-purple-50/50">
                     <div id="imagePreviewContainer_2" class="mb-2 hidden">
@@ -114,12 +113,11 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="submitStudentRequest(2)" class="w-full bg-purple-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-purple-700 transition cursor-pointer">إرسال طلب الطالبة الثانية 🚀</button>
             </div>
 
-            <!-- الطالبة الثالثة -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 space-y-4 student-card" id="card_3">
-                <h3 class="font-bold text-indigo-800 text-sm border-b pb-2">📌 بيانات الطالبة الثالثة (اختياري)</h3>
+            <!-- الطالبة الثالثة (اختيارية) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 space-y-4">
+                <h3 class="font-bold text-indigo-800 text-sm border-b pb-2">📌 بيانات الطالبة الثالثة (إن وجدت)</h3>
                 
                 <div class="flex flex-col items-center justify-center border-2 border-dashed border-indigo-200 p-4 rounded-xl bg-indigo-50/50">
                     <div id="imagePreviewContainer_3" class="mb-2 hidden">
@@ -161,8 +159,12 @@
                         </select>
                     </div>
                 </div>
-                <button onclick="submitStudentRequest(3)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-indigo-700 transition cursor-pointer">إرسال طلب الطالبة الثالثة 🚀</button>
             </div>
+
+            <!-- زر الإرسال الرئيسي الشامل -->
+            <button onclick="submitAllStudentsRequests()" class="w-full bg-pink-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-pink-700 transition cursor-pointer shadow-md">
+                إرسال كافة الطلبات للإدارة 🚀
+            </button>
 
         </div>
 
@@ -259,50 +261,65 @@
             }
         }
 
-        // --- إرسال طلب خاص بكل طالبة على حدة عبر زرها الخاص ---
-        function submitStudentRequest(index) {
-            const student = document.getElementById(`parentStudentName_${index}`).value.trim();
-            const mother = document.getElementById(`parentMotherName_${index}`).value.trim();
-            const grade = document.getElementById(`parentGrade_${index}`).value;
-            const section = document.getElementById(`parentSection_${index}`).value;
-
-            if (!student || !mother) {
-                alert(`⚠️ يرجى ملء كافة حقول الطالبة رقم (${index}).`);
-                return;
-            }
-
-            const pending = globalSchoolData.pendingRequests || [];
+        // --- زر إرسال واحد شامل لكافة الطالبات المدخلات دفعة واحدة ---
+        function submitAllStudentsRequests() {
+            let newIds = [];
+            let newRequestsList = [...(globalSchoolData.pendingRequests || [])];
             const approved = globalSchoolData.approvedStudents || [];
+            let addedCount = 0;
 
-            const existsInPending = pending.some(s => s.student.toLowerCase() === student.toLowerCase());
-            const existsInApproved = approved.some(s => s.student.toLowerCase() === student.toLowerCase());
+            for (let i = 1; i <= 3; i++) {
+                const student = document.getElementById(`parentStudentName_${i}`).value.trim();
+                const mother = document.getElementById(`parentMotherName_${i}`).value.trim();
+                const grade = document.getElementById(`parentGrade_${i}`).value;
+                const section = document.getElementById(`parentSection_${i}`).value;
 
-            if (existsInPending || existsInApproved) {
-                alert(`⚠️ تنبيه ذكي: الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
+                // إذا ترك ولي الأمر الحقول فارغة للطالبة الثانية أو الثالثة، نتجاوزها بسلاسة
+                if (!student && !mother) continue;
+
+                if (!student || !mother) {
+                    alert(`⚠️ يرجى إكمال حقول الطالبة رقم (${i}) أو تركها فارغة تماماً إن لم تكن موجودة.`);
+                    return;
+                }
+
+                const existsInPending = newRequestsList.some(s => s.student.toLowerCase() === student.toLowerCase());
+                const existsInApproved = approved.some(s => s.student.toLowerCase() === student.toLowerCase());
+
+                if (existsInPending || existsInApproved) {
+                    alert(`⚠️ تنبيه ذكي: الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
+                    return;
+                }
+
+                const studentId = 'st_' + Date.now() + '_' + i;
+                newIds.push(studentId);
+
+                newRequestsList.push({
+                    id: studentId,
+                    student,
+                    mother,
+                    grade,
+                    section,
+                    image: base64Images[i] || ''
+                });
+
+                addedCount++;
+            }
+
+            if (addedCount === 0) {
+                alert("⚠️ يرجى إدخال بيانات طالبة واحدة على الأقل قبل الإرسال.");
                 return;
             }
 
-            const studentId = 'st_' + Date.now() + '_' + index;
-            const newReq = { 
-                id: studentId, 
-                student, 
-                mother, 
-                grade, 
-                section, 
-                image: base64Images[index] || '' 
-            };
-
-            if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
-            globalSchoolData.pendingRequests.push(newReq);
+            globalSchoolData.pendingRequests = newRequestsList;
 
             db.ref('school_data').set(globalSchoolData).then(() => {
-                parentSessionIds.push(studentId);
+                parentSessionIds = newIds;
                 localStorage.setItem('school_parent_student_ids', JSON.stringify(parentSessionIds));
-                localStorage.setItem('school_parent_active_id', studentId);
-                currentActiveStudentId = studentId;
+                localStorage.setItem('school_parent_active_id', newIds[0]);
+                currentActiveStudentId = newIds[0];
 
-                checkAndSyncSession();
-                alert(`✓ تم إرسال طلب الطالبة (${student}) بنجاح إلى الإدارة!`);
+                showWaitingScreen();
+                alert(`✓ تم إرسال طلبات (${addedCount}) طالبة بنجاح إلى الإدارة!`);
             });
         }
 
