@@ -15,7 +15,7 @@
 
     <div class="max-w-xl mx-auto space-y-4">
         
-        <!-- شاشة تسجيل وإدخال الأبناء (لكل طالبة بطاقة وزر إرسال خاص بها) -->
+        <!-- شاشة تسجيل وإدخال الأبناء -->
         <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
             <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجيل بيانات الطالبات</h2>
             <p class="text-xs text-gray-500 text-center">أدخل بيانات التلميذة (الاسم الثلاثي، الصف، الشعبة، والصورة) ثم اضغط "إرسال" الخاص بها.</p>
@@ -23,7 +23,7 @@
             <div class="space-y-4">
                 <!-- حاوية الطالبات الديناميكية -->
                 <div id="studentsInputsContainer" class="space-y-4 py-2">
-                    <!-- سيتم حقن الحقول تلقائياً هنا -->
+                    <!-- سيتم حقن الحقول هنا فوراً عند التحميل -->
                 </div>
 
                 <!-- زر إضافة تلميذة جديدة -->
@@ -41,7 +41,7 @@
             <button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer">تحديث الحالة 🔄</button>
         </div>
 
-        <!-- البوابة الرئيسية لولي الأمر (بأيقونات بأسماء الطالبات للاستطلاع والتبديل) -->
+        <!-- البوابة الرئيسية لولي الأمر -->
         <div id="parentDashboardView" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
                 <div class="flex items-center gap-3">
@@ -111,7 +111,7 @@
                 } else {
                     const container = document.getElementById('studentsInputsContainer');
                     if(container && container.children.length === 0) {
-                        addStudentInputRow(); // توليد أول حقل طالبة تلقائياً عند فتح الصفحة
+                        addStudentInputRow(); // تفعيل عرض الحقول تلقائياً فور فتح الصفحة
                     }
                 }
             });
@@ -297,7 +297,7 @@
             document.getElementById('parentWaitingView').classList.add('hidden');
             document.getElementById('parentDashboardView').classList.remove('hidden');
 
-            document.getElementById('welcomeStudentTitle', '').innerText = `👧 الطالبة الحالية: ${student.student}`;
+            document.getElementById('welcomeStudentTitle').innerText = `👧 الطالبة الحالية: ${student.student}`;
             document.getElementById('studentClassInfo').innerText = `${student.grade} - الشعبة (${student.section})`;
 
             const imgContainer = document.getElementById('dashboardImageContainer');
