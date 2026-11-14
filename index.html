@@ -15,20 +15,28 @@
 
     <div class="max-w-xl mx-auto space-y-4">
         
-        <!-- شاشة تسجيل وإدخال الأبناء (تظهر فوراً بدون انتظار) -->
+        <!-- شاشة تسجيل وإدخال الأبناء -->
         <div id="parentLoginView" class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
             <h2 class="text-lg font-bold text-pink-700 text-center">👧 بوابة ولي الأمر - تسجيل بيانات الطالبات</h2>
-            <p class="text-xs text-gray-500 text-center">أدخل بيانات التلميذة (الاسم الثلاثي، الصف، الشعبة، والصورة) ثم اضغط "إرسال طلب هذه الطالبة".</p>
+            <p class="text-xs text-gray-500 text-center">أدخل بيانات التلميذة (الاسم الثلاثي، الصف، الشعبة، والصورة). يمكنك إضافة أكثر من تلميذة وإرسال الطلبات دفعة واحدة.</p>
             
-            <div class="space-y-4">
-                <!-- حاوية الطالبات الديناميكية -->
-                <div id="studentsInputsContainer" class="space-y-4 py-2">
-                    <!-- سيتم حقن البطاقة الأولى هنا فوراً -->
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">اسم ولي الأمر / الأم (اختياري أو اللقب العائلي):</label>
+                    <input type="text" id="parentMotherName" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="مثال: أم فاطمة">
                 </div>
 
-                <!-- زر إضافة تلميذة أخرى -->
+                <!-- حاوية الحقول الديناميكية -->
+                <div id="studentsInputsContainer" class="space-y-4 border-t border-b border-pink-100 py-3">
+                    <!-- سيتم حقن الحقول هنا -->
+                </div>
+
                 <button type="button" onclick="addStudentInputRow()" class="w-full bg-purple-100 text-purple-700 py-2.5 rounded-lg font-bold text-xs hover:bg-purple-200 transition cursor-pointer">
                     ＋ إضافة تلميذة أخرى (أخت جديدة)
+                </button>
+
+                <button type="button" onclick="submitAllParentRequests()" class="w-full bg-pink-600 text-white py-3 rounded-lg font-bold text-sm hover:bg-pink-700 transition cursor-pointer shadow-sm">
+                    إرسال كافة الطلبات للإدارة 🚀
                 </button>
             </div>
         </div>
@@ -103,8 +111,8 @@
         let currentActiveStudentId = localStorage.getItem('school_parent_active_id');
         let globalSchoolData = {};
 
-        // --- ضمان ظهور الحقول فور تحميل الصفحة بشكل مباشر ---
         window.onload = function() {
+            // توليد بطاقة الإدخال الأولى فوراً وبشكل مؤكد عند التحميل
             const container = document.getElementById('studentsInputsContainer');
             if (container && container.children.length === 0) {
                 addStudentInputRow();
@@ -118,7 +126,7 @@
             });
         };
 
-        // --- إضافة بطاقة حقول خاصة بكل طالبة مع زر إرسال خاص بها ---
+        // --- دالة إضافة حقول بيانات التلميذة ---
         function addStudentInputRow() {
             const container = document.getElementById('studentsInputsContainer');
             if (!container) return;
@@ -126,7 +134,7 @@
             const rowId = 'student_row_' + Date.now() + Math.random().toString(36.substr(2, 5));
 
             const rowDiv = document.createElement('div');
-            rowDiv.className = "p-4 bg-pink-50/80 border border-pink-200 rounded-xl space-y-3 relative student-row shadow-sm";
+            rowDiv.className = "p-3.5 bg-pink-50/70 border border-pink-200 rounded-xl space-y-3 relative student-row shadow-sm";
             rowDiv.id = rowId;
 
             rowDiv.innerHTML = `
@@ -135,7 +143,7 @@
                     <button type="button" onclick="removeStudentInputRow('${rowId}')" class="text-red-500 font-bold text-xs hover:underline cursor-pointer">حذف ✕</button>
                 </div>
                 
-                <!-- أيقونة لإدخال صورة الطالبة -->
+                <!-- أيقونة الصورة -->
                 <div class="flex items-center gap-3">
                     <div class="preview_box w-10 h-10 rounded-full bg-white border border-pink-300 flex items-center justify-center text-pink-600 font-bold overflow-hidden shrink-0 shadow-inner text-xs">
                         <span>📷</span>
@@ -174,11 +182,6 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- زر إرسال خاص بهذه الطالبة فقط -->
-                <button type="button" onclick="submitSingleStudentRequest('${rowId}')" class="w-full bg-pink-600 text-white py-2 rounded-lg font-bold text-xs hover:bg-pink-700 transition cursor-pointer shadow-sm">
-                    إرسال طلب هذه الطالبة 🚀
-                </button>
             `;
             container.appendChild(rowDiv);
         }
@@ -206,17 +209,12 @@
             }
         }
 
-        // --- إرسال طلب خاص بكل طالبة على حدة ---
-        function submitSingleStudentRequest(rowId) {
-            const row = document.getElementById(rowId);
-            const studentName = row.querySelector('.student_name_input').value.trim();
-            const grade = row.querySelector('.student_grade_select').value;
-            const section = row.querySelector('.student_section_select').value;
-            const imgInput = row.querySelector('.img_file_input');
-            const imageBase64 = imgInput.dataset.base64 || '';
-
-            if (!studentName) {
-                alert("⚠️ يرجى إدخال اسم الطالبة الثلاثي أولاً.");
+        // --- إرسال كافة الطلبات دفعة واحدة للإدارة ---
+        function submitAllParentRequests() {
+            const mother = document.getElementById('parentMotherName').value.trim() || "ولي الأمر";
+            const rows = document.getElementsByClassName('student-row');
+            if (rows.length === 0) {
+                alert("⚠️ يرجى إضافة طالبة واحدة على الأقل.");
                 return;
             }
 
@@ -224,37 +222,53 @@
                 globalSchoolData = snapshot.val() || {};
                 const pending = globalSchoolData.pendingRequests || [];
                 const approved = globalSchoolData.approvedStudents || [];
+                let newIds = [];
+                let newRequestsList = [...pending];
 
-                const existsInPending = pending.some(s => s.student.toLowerCase() === studentName.toLowerCase());
-                const existsInApproved = approved.some(s => s.student.toLowerCase() === studentName.toLowerCase());
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    const studentName = row.querySelector('.student_name_input').value.trim();
+                    const grade = row.querySelector('.student_grade_select').value;
+                    const section = row.querySelector('.student_section_select').value;
+                    const imgInput = row.querySelector('.img_file_input');
+                    const imageBase64 = imgInput.dataset.base64 || '';
 
-                if (existsInPending || existsInApproved) {
-                    alert(`⚠️ تنبيه ذكي: الطالبة (${studentName}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
-                    return;
+                    if (!studentName) {
+                        alert(`⚠️ يرجى إدخال اسم الطالبة الثلاثي في الحقل رقم (${i+1}).`);
+                        return;
+                    }
+
+                    const existsInPending = pending.some(s => s.student.toLowerCase() === studentName.toLowerCase());
+                    const existsInApproved = approved.some(s => s.student.toLowerCase() === studentName.toLowerCase());
+
+                    if (existsInPending || existsInApproved) {
+                        alert(`⚠️ تنبيه ذكي: الطالبة (${studentName}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة!`);
+                        return;
+                    }
+
+                    const studentId = 'st_' + Date.now() + '_' + i;
+                    newIds.push(studentId);
+
+                    newRequestsList.push({
+                        id: studentId,
+                        student: studentName,
+                        mother: mother,
+                        grade: grade,
+                        section: section,
+                        image: imageBase64
+                    });
                 }
 
-                const studentId = 'st_' + Date.now() + '_' + Math.random().toString(36.substr(2, 4));
-                
-                const newRequest = {
-                    id: studentId,
-                    student: studentName,
-                    mother: "ولي الأمر",
-                    grade: grade,
-                    section: section,
-                    image: imageBase64
-                };
-
-                if (!globalSchoolData.pendingRequests) globalSchoolData.pendingRequests = [];
-                globalSchoolData.pendingRequests.push(newRequest);
+                globalSchoolData.pendingRequests = newRequestsList;
 
                 db.ref('school_data').set(globalSchoolData).then(() => {
-                    parentSessionIds.push(studentId);
+                    parentSessionIds = newIds;
                     localStorage.setItem('school_parent_student_ids', JSON.stringify(parentSessionIds));
-                    localStorage.setItem('school_parent_active_id', studentId);
-                    currentActiveStudentId = studentId;
+                    localStorage.setItem('school_parent_active_id', newIds[0]);
+                    currentActiveStudentId = newIds[0];
 
                     showWaitingScreen();
-                    alert(`✓ تم إرسال طلب الطالبة (${studentName}) بنجاح إلى الإدارة!`);
+                    alert("✓ تم إرسال طلبات التلميذات بنجاح إلى الإدارة!");
                 });
             });
         }
