@@ -39,7 +39,6 @@
                     <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-pink-700 transition shadow-sm">
                         🎯 متابعة مشاهدات الرسائل
                     </button>
-                    <!-- 🔄 زر استرجاع وتحديث البيانات المضمون -->
                     <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-700 transition shadow-sm">
                         🔄 استرجاع ومزامنة البيانات
                     </button>
@@ -248,7 +247,6 @@
         let parentActivities = [];
         let adminLoggedIn = localStorage.getItem('school_admin_logged') === 'true';
 
-        // --- المزامنة الحية واسترجاع البيانات الفوري ---
         window.onload = function() {
             db.ref('school_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
@@ -288,57 +286,29 @@
                 supervisorName: supervisorName,
                 parentActivities: parentActivities
             };
-            // حفظ نسخة احتياطية محلياً في المتصفح لضمان الأمان
             localStorage.setItem('school_backup_data', JSON.stringify(dataToSave));
             db.ref('school_data').set(dataToSave);
         }
 
-        // --- 🔄 خاصية استرجاع البيانات المضمونة (من السحابة أو الذاكرة المحلية) ---
         function restoreOldData() {
             db.ref('school_data').once('value').then((snapshot) => {
                 const cloudData = snapshot.val();
-
-                if (cloudData && (
-                    (cloudData.approvedStudents && cloudData.approvedStudents.length > 0) || 
-                    (cloudData.pendingRequests && cloudData.pendingRequests.length > 0) ||
-                    (cloudData.schoolSchedule && Object.keys(cloudData.schoolSchedule).length > 0)
-                )) {
+                if (cloudData) {
                     pendingRequests = cloudData.pendingRequests || [];
                     approvedStudents = cloudData.approvedStudents || [];
                     parentInquiries = cloudData.parentInquiries || [];
                     schoolSchedule = cloudData.schoolSchedule || {};
                     parentActivities = cloudData.parentActivities || [];
                     
-                    if(cloudData.principalName) principalName = cloudData.principalName;
-                    if(cloudData.supervisorName) supervisorName = cloudData.supervisorName;
-
                     renderRequests();
                     renderAdminInquiries();
                     updateTotalCountBadge();
                     renderPublishedLessons();
                     renderParentActivities();
-
-                    alert("✓ تم بنجاح استرجاع كافة البيانات ومزامنتها مع السحابة!");
+                    alert("✓ تم تحديث ومزامنة البيانات من السحابة بنجاح!");
                 } else {
-                    const localBackup = localStorage.getItem('school_backup_data');
-                    if (localBackup) {
-                        const parsedData = JSON.parse(localBackup);
-                        if (confirm("⚠️ سحابة Firebase فارغة. هل تريد استعادة البيانات من النسخة المحلية الاحتياطية ورفعها للسحابة؟")) {
-                            pendingRequests = parsedData.pendingRequests || [];
-                            approvedStudents = parsedData.approvedStudents || [];
-                            parentInquiries = parsedData.parentInquiries || [];
-                            schoolSchedule = parsedData.schoolSchedule || {};
-                            parentActivities = parsedData.parentActivities || [];
-                            
-                            saveData();
-                            alert("✓ تم استرجاع البيانات من المتصفح ورفعها للسحابة بنجاح!");
-                        }
-                    } else {
-                        alert("❌ عذراً، لا توجد أي بيانات قديمة مخزنة في السحابة أو في الذاكرة المحلية.");
-                    }
+                    alert("⚠️ لا توجد بيانات سحابية مسجلة حالياً.");
                 }
-            }).catch(error => {
-                alert("❌ خطأ في الاتصال: " + error.message);
             });
         }
 
@@ -366,7 +336,6 @@
             document.getElementById('totalSavedCount').innerText = approvedStudents.length;
         }
 
-        // --- 🔍 البحث الذكي عن الطالبة ---
         function searchStudentInSystem() {
             const query = document.getElementById('searchStudentInput').value.trim().toLowerCase();
             const resultBox = document.getElementById('searchResultContainer');
@@ -449,21 +418,25 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
-                            <button onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700">✓ موافقة</button>
-                            <button onclick="rejectStudent(${index})" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700">✕ رفض</button>
+                            <button type="button" onclick="approveStudent(${index})" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 cursor-pointer">✓ موافقة</button>
+                            <button type="button" onclick="rejectStudent(${index})" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 cursor-pointer">✕ رفض</button>
                         </div>
                     </div>`;
             });
         }
 
+        // --- إصلاح تفاعل زر الموافقة والتفعيل ---
         function approveStudent(index) {
+            if (index < 0 || index >= pendingRequests.length) return;
             const student = pendingRequests[index];
+            
             const alreadyApproved = approvedStudents.some(s => s.student.toLowerCase() === student.student.toLowerCase());
             
             if (alreadyApproved) {
                 alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة ومقبولة مسبقاً في الدليل! سيتم إزالة الطلب المعلق فقط.`);
                 pendingRequests.splice(index, 1);
                 saveData();
+                renderRequests();
                 return;
             }
 
@@ -471,14 +444,17 @@
             student.notifications = [{ type: 'text', title: "حالة الدخول", body: "✓ تمت الموافقة على دخولك المنصة.", unread: true }];
             approvedStudents.push(student);
             saveData();
+            renderRequests();
             alert(`✓ تمت الموافقة على الطالبة (${student.student}) وتفعيل دخولها!`);
         }
 
         function rejectStudent(index) {
+            if (index < 0 || index >= pendingRequests.length) return;
             const student = pendingRequests[index];
             if (confirm(`⚠️ هل أنت متأكد من رفض طلب انضمام الطالبة (${student.student})؟`)) {
                 pendingRequests.splice(index, 1);
                 saveData();
+                renderRequests();
                 alert(`✕ تم رفض وحذف طلب الطالبة (${student.student}).`);
             }
         }
