@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -35,7 +34,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <input id="adminPassInput" type="password" class="w-full px-3 py-2 border rounded-lg">
 </div>
 
-<button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-bold">دخول اللوحة</button>
+<button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-bold cursor-pointer">دخول اللوحة</button>
 <p id="loginError" class="text-red-600 text-xs text-center"></p>
 </div>
 
@@ -44,13 +43,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
 <div class="flex flex-wrap gap-2">
-<button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs">📂 دليل الطالبات المقبولات</button>
-<button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-xs">🎯 متابعة المشاهدات</button>
-<button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs">🔄 تحديث البيانات</button>
-<button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs">⬇️ نسخة احتياطية</button>
-<button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs">🛡️ حماية البيانات</button>
+<button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📂 دليل الطالبات المقبولات</button>
+<button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🎯 متابعة المشاهدات</button>
+<button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🔄 تحديث البيانات</button>
+<button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">⬇️ نسخة احتياطية</button>
+<button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🛡️ حماية البيانات</button>
 </div>
-<button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-xs">تسجيل الخروج</button>
+<button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">تسجيل الخروج</button>
 </div>
 
 <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl flex justify-between items-center">
@@ -71,8 +70,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
 <h2 class="font-bold text-blue-700">🔍 البحث عن طالبة</h2>
 <div class="flex gap-2">
-<input id="searchStudentInput" class="flex-1 border rounded-lg p-2 text-xs" placeholder="اسم الطالبة">
-<button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 rounded-lg text-xs">بحث</button>
+<input id="searchStudentInput" class="flex-1 border rounded-lg p-2 text-xs bg-white" placeholder="اسم الطالبة">
+<button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 rounded-lg text-xs cursor-pointer">بحث</button>
 </div>
 <div id="searchResultContainer" class="hidden p-3 bg-blue-50 rounded-lg text-xs"></div>
 </div>
@@ -94,14 +93,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h2 class="font-bold text-pink-700">👩‍💼 إعدادات المدرسة</h2>
 
 <label class="block text-xs">اسم المديرة</label>
-<input id="newPrincipalName" class="w-full border rounded-lg p-2 text-xs">
-<button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs">حفظ اسم المديرة</button>
+<input id="newPrincipalName" class="w-full border rounded-lg p-2 text-xs bg-white">
+<button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المديرة</button>
 
 <hr>
 
 <label class="block text-xs">اسم مشرف المنصة</label>
-<input id="newSupervisorName" class="w-full border rounded-lg p-2 text-xs">
-<button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs">حفظ اسم المشرف</button>
+<input id="newSupervisorName" class="w-full border rounded-lg p-2 text-xs bg-white">
+<button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
 <!-- الدروس -->
@@ -109,7 +108,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h2 class="font-bold text-pink-700">📅 جدول الحصص والواجبات</h2>
 
 <label class="text-xs">المادة</label>
-<select id="lessonSubject" class="w-full border rounded-lg p-2 text-xs">
+<select id="lessonSubject" class="w-full border rounded-lg p-2 text-xs bg-white">
 <option>القرآن الكريم</option>
 <option>اللغة العربية</option>
 <option>الرياضيات</option>
@@ -120,7 +119,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </select>
 
 <label class="text-xs">الصف</label>
-<select id="lessonGrade" class="w-full border rounded-lg p-2 text-xs">
+<select id="lessonGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
 <option>الأول الابتدائي</option>
 <option>الثاني الابتدائي</option>
 <option>الثالث الابتدائي</option>
@@ -130,21 +129,21 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </select>
 
 <label class="text-xs">الشعبة</label>
-<select id="lessonSection" class="w-full border rounded-lg p-2 text-xs">
+<select id="lessonSection" class="w-full border rounded-lg p-2 text-xs bg-white">
 <option value="أ">أ</option>
 <option value="ب">ب</option>
 <option value="ج">ج</option>
 </select>
 
-<textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 text-xs" placeholder="تفاصيل الدرس أو الواجب"></textarea>
+<textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="تفاصيل الدرس أو الواجب"></textarea>
 
-<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs">إرسال الدرس سحابياً</button>
+<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">إرسال الدرس سحابياً</button>
 
 <hr>
 
 <div class="flex justify-between items-center">
 <strong class="text-xs">📖 الدروس المنشورة</strong>
-<button onclick="clearAllLessons()" class="text-red-600 text-xs">حذف جميع الدروس</button>
+<button onclick="clearAllLessons()" class="text-red-600 text-xs cursor-pointer">حذف جميع الدروس</button>
 </div>
 
 <div id="publishedLessonsContainer" class="space-y-2"></div>
@@ -152,11 +151,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <!-- التعميمات -->
 <div class="bg-white rounded-xl shadow border border-indigo-100 overflow-hidden">
-<button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 font-bold text-indigo-700 text-right">🎙️ إرسال تعميم لجميع أولياء الأمور ▼</button>
+<button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 font-bold text-indigo-700 text-right cursor-pointer">🎙️ إرسال تعميم لجميع أولياء الأمور ▼</button>
 
 <div id="broadcastContentBody" class="hidden p-5 space-y-3">
 <label class="text-xs">الصف</label>
-<select id="broadcastGrade" class="w-full border rounded-lg p-2 text-xs">
+<select id="broadcastGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
 <option value="الكل">جميع الصفوف</option>
 <option>الأول الابتدائي</option>
 <option>الثاني الابتدائي</option>
@@ -167,15 +166,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </select>
 
 <label class="text-xs">الشعبة</label>
-<select id="broadcastSection" class="w-full border rounded-lg p-2 text-xs">
+<select id="broadcastSection" class="w-full border rounded-lg p-2 text-xs bg-white">
 <option value="الكل">جميع الشعب</option>
 <option value="أ">أ</option>
 <option value="ب">ب</option>
 <option value="ج">ج</option>
 </select>
 
-<textarea id="broadcastText" rows="3" class="w-full border rounded-lg p-2 text-xs" placeholder="نص التعميم"></textarea>
-<button onclick="sendBroadcastMessage()" class="w-full bg-indigo-600 text-white p-2 rounded-lg text-xs">إرسال التعميم 🚀</button>
+<textarea id="broadcastText" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="نص التعميم"></textarea>
+<button onclick="sendBroadcastMessage()" class="w-full bg-indigo-600 text-white p-2 rounded-lg text-xs cursor-pointer">إرسال التعميم 🚀</button>
 </div>
 </div>
 
@@ -193,11 +192,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
 <div class="flex justify-between border-b pb-2">
 <h3 id="modalTitle" class="font-bold text-emerald-700">دليل الطالبات</h3>
-<button onclick="closeAcceptedStudentsModal()">✕</button>
+<button onclick="closeAcceptedStudentsModal()" class="cursor-pointer">✕</button>
 </div>
 <div id="acceptedStudentsContent"></div>
 <div id="modalBackBtnContainer" class="hidden">
-<button onclick="backToGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs">العودة للصفوف</button>
+<button onclick="backToGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs cursor-pointer">العودة للصفوف</button>
 </div>
 </div>
 </div>
@@ -207,7 +206,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="bg-white rounded-2xl p-5 w-full max-w-3xl max-h-[85vh] overflow-y-auto space-y-3">
 <h3 class="font-bold text-pink-700">🎯 سجل الطالبات</h3>
 <div id="modalStudentsList"></div>
-<button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white p-2 rounded-lg">إغلاق</button>
+<button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white p-2 rounded-lg cursor-pointer">إغلاق</button>
 </div>
 </div>
 
@@ -283,10 +282,6 @@ return {...item,id:item.id??key};
 return [];
 }
 
-/* ==================================================
-   التعديل الجديد: فحص الاتصال الفعلي قبل الحفظ
-================================================== */
-
 async function safeTransaction(path,updater){
 
 if(!dataLoaded){
@@ -348,10 +343,6 @@ return result.snapshot.val();
 
 }
 
-/* ==================================================
-   معالجة الأخطاء
-================================================== */
-
 function showError(error){
 
 console.error('Firebase Error:',error);
@@ -382,10 +373,6 @@ alert('⚠️ '+message);
 
 }
 
-/* ==================================================
-   تحميل بيانات المدرسة
-================================================== */
-
 function loadSchoolData(data){
 
 pendingRequests=asArray(data.pendingRequests);
@@ -410,10 +397,6 @@ renderPublishedLessons();
 renderParentActivities();
 
 }
-
-/* ==================================================
-   مراقبة الاتصال وتحميل البيانات
-================================================== */
 
 window.onload=function(){
 
@@ -463,10 +446,6 @@ document.getElementById('adminDashboardView').classList.remove('hidden');
 
 };
 
-/* ==================================================
-   تسجيل الدخول
-================================================== */
-
 function loginAdmin(){
 
 const u=document.getElementById('adminUserInput').value.trim();
@@ -498,10 +477,6 @@ document.getElementById('adminAuthView').classList.remove('hidden');
 
 }
 
-/* ==================================================
-   تحديث البيانات
-================================================== */
-
 async function restoreOldData(){
 
 try{
@@ -526,10 +501,6 @@ showError(error);
 }
 
 }
-
-/* ==================================================
-   النسخة الاحتياطية
-================================================== */
 
 async function exportBackup(){
 
@@ -569,19 +540,11 @@ showError(error);
 
 }
 
-/* ==================================================
-   عداد الطالبات
-================================================== */
-
 function updateTotalCountBadge(){
 
 document.getElementById('totalSavedCount').textContent=approvedStudents.length;
 
 }
-
-/* ==================================================
-   البحث عن طالبة
-================================================== */
 
 function searchStudentInSystem(){
 
@@ -629,10 +592,6 @@ box.innerHTML='<p class="text-red-600">❌ لم يتم العثور على ال�
 
 }
 
-/* ==================================================
-   مطابقة الطالبة
-================================================== */
-
 function sameStudent(record,id,details){
 
 if(id!==undefined&&id!==null&&String(id)!==''){
@@ -648,10 +607,6 @@ String(record.grade||'')===String(details.grade||'')&&
 String(record.section||'')===String(details.section||'');
 
 }
-
-/* ==================================================
-   عرض الطلبات المعلقة
-================================================== */
 
 function renderRequests(){
 
@@ -704,7 +659,7 @@ const actions=document.createElement('div');
 actions.className='flex gap-2';
 
 const approve=document.createElement('button');
-approve.className='bg-green-600 text-white px-3 py-2 rounded text-xs';
+approve.className='bg-green-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
 approve.textContent='✓ موافقة';
 
 approve.onclick=()=>approveStudent(
@@ -718,7 +673,7 @@ section:req.section
 );
 
 const reject=document.createElement('button');
-reject.className='bg-red-600 text-white px-3 py-2 rounded text-xs';
+reject.className='bg-red-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
 reject.textContent='✕ رفض';
 
 reject.onclick=()=>rejectStudent(
@@ -738,10 +693,6 @@ container.appendChild(item);
 });
 
 }
-
-/* ==================================================
-   الموافقة على الطالبة وحفظها
-================================================== */
 
 async function approveStudent(studentId,details){
 
@@ -824,10 +775,6 @@ showError(error);
 
 }
 
-/* ==================================================
-   رفض الطلب
-================================================== */
-
 async function rejectStudent(studentId,details){
 
 if(!confirm('هل تريدين رفض طلب الطالبة؟'))return;
@@ -870,10 +817,6 @@ showError(error);
 
 }
 
-/* ==================================================
-   دليل الطالبات
-================================================== */
-
 function openAcceptedStudentsModal(){
 
 document.getElementById('acceptedStudentsModal').classList.remove('hidden');
@@ -901,7 +844,7 @@ const count=approvedStudents.filter(s=>s.grade===grade).length;
 
 const button=document.createElement('button');
 
-button.className='w-full bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex justify-between mb-2 font-bold';
+button.className='w-full bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
 
 button.innerHTML=`
 <span>${safeText(grade)}</span>
@@ -934,7 +877,7 @@ s.grade===grade&&s.section===sec
 
 const button=document.createElement('button');
 
-button.className='w-full bg-blue-50 border border-blue-300 p-3 rounded-xl flex justify-between mb-2 font-bold';
+button.className='w-full bg-blue-50 border border-blue-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
 
 button.innerHTML=`
 <span>الشعبة (${sec})</span>
@@ -1000,7 +943,7 @@ info.appendChild(name);
 
 const remove=document.createElement('button');
 
-remove.className='bg-red-500 text-white px-3 py-1 rounded text-xs';
+remove.className='bg-red-500 text-white px-3 py-1 rounded text-xs cursor-pointer';
 remove.textContent='حذف';
 
 remove.onclick=()=>removeStudentFromAccepted(
@@ -1036,10 +979,6 @@ renderGradesView();
 }
 
 }
-
-/* ==================================================
-   حذف طالبة من المقبولات
-================================================== */
 
 async function removeStudentFromAccepted(studentId,grade,section,details){
 
@@ -1080,10 +1019,6 @@ showError(error);
 }
 
 }
-
-/* ==================================================
-   إعدادات المدرسة
-================================================== */
 
 async function updatePrincipalName(){
 
@@ -1128,10 +1063,6 @@ showError(error);
 }
 
 }
-
-/* ==================================================
-   الدروس والواجبات
-================================================== */
 
 async function sendLessonToSchedule(){
 
@@ -1181,7 +1112,7 @@ html+=`
 <strong>${safeText(grade)} - شعبة ${safeText(section)}</strong>
 <p class="font-bold mt-1">${safeText(subject)}</p>
 <p class="my-2">${safeText(content)}</p>
-<button onclick="deleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-3 py-1 rounded">حذف الدرس</button>
+<button onclick="deleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-3 py-1 rounded cursor-pointer">حذف الدرس</button>
 </div>`;
 
 }
@@ -1233,10 +1164,6 @@ showError(error);
 }
 
 }
-
-/* ==================================================
-   التعميمات
-================================================== */
 
 async function sendBroadcastMessage(){
 
@@ -1294,10 +1221,6 @@ document.getElementById('broadcastContentBody').classList.toggle('hidden');
 
 }
 
-/* ==================================================
-   نشاط أولياء الأمور
-================================================== */
-
 function renderParentActivities(){
 
 const container=document.getElementById('parentsActivityContainer');
@@ -1322,7 +1245,7 @@ act.type==='logout'?'bg-red-50':'bg-emerald-50'
 div.innerHTML=`
 <p class="font-bold">${safeText(act.message)}</p>
 <p class="text-gray-500">${safeText(act.time)}</p>
-<button class="text-red-600 mt-2">حذف التنبيه</button>`;
+<button class="text-red-600 mt-2 cursor-pointer">حذف التنبيه</button>`;
 
 div.querySelector('button').onclick=()=>removeActivity(index);
 
@@ -1358,10 +1281,6 @@ showError(error);
 
 }
 
-/* ==================================================
-   استفسارات أولياء الأمور
-================================================== */
-
 function renderAdminInquiries(){
 
 const container=document.getElementById('adminInquiriesContainer');
@@ -1385,10 +1304,10 @@ div.innerHTML=`
 <p class="font-bold">الطالبة: ${safeText(q.studentName)}</p>
 <p>${safeText(q.grade)} - شعبة ${safeText(q.section)}</p>
 <p class="bg-white p-2 rounded">${safeText(q.content)}</p>
-<textarea id="reply_${safeText(q.id)}" class="w-full border rounded p-2" placeholder="اكتبي الرد"></textarea>
+<textarea id="reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد"></textarea>
 <div class="flex gap-2">
-<button class="bg-blue-600 text-white px-3 py-2 rounded" data-action="reply">إرسال الرد</button>
-<button class="bg-red-600 text-white px-3 py-2 rounded" data-action="delete">حذف الاستفسار</button>
+<button class="bg-blue-600 text-white px-3 py-2 rounded cursor-pointer" data-action="reply">إرسال الرد</button>
+<button class="bg-red-600 text-white px-3 py-2 rounded cursor-pointer" data-action="delete">حذف الاستفسار</button>
 </div>`;
 
 div.querySelector('[data-action="reply"]').onclick=()=>replyInquiry(q.id);
@@ -1509,10 +1428,6 @@ showError(error);
 
 }
 
-/* ==================================================
-   نافذة متابعة الطالبات
-================================================== */
-
 function openStudentsModal(){
 
 document.getElementById('studentsModal').classList.remove('hidden');
@@ -1543,10 +1458,6 @@ function closeStudentsModal(){
 document.getElementById('studentsModal').classList.add('hidden');
 
 }
-
-/* ==================================================
-   زر حماية البيانات
-================================================== */
 
 function clearAllSystemData(){
 
