@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -146,7 +145,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
-<button id="submitRequestsButton" onclick="submitAllStudentsRequests()" class="w-full bg-pink-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-pink-700 shadow-md">
+<button id="submitRequestsButton" onclick="submitAllStudentsRequests()" class="w-full bg-pink-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-pink-700 shadow-md cursor-pointer">
 إرسال كافة الطلبات للإدارة 🚀
 </button>
 
@@ -161,7 +160,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="text-xs text-gray-600">
 تم إرسال الطلبات بنجاح. يرجى الانتظار لحين موافقة الإدارة وتفعيل الحسابات.
 </p>
-<button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold">
+<button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer">
 تحديث الحالة 🔄
 </button>
 </div>
@@ -177,7 +176,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
 </div>
 </div>
-<button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
+<button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">
 خروج 🚪
 </button>
 </div>
@@ -208,7 +207,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100 space-y-3">
 <h4 class="font-bold text-blue-700 text-xs border-b pb-2">💬 إرسال استفسار أو ملاحظة للإدارة</h4>
 <textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب استفسارك هنا..."></textarea>
-<button id="sendInquiryButton" onclick="sendParentInquiry()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold">
+<button id="sendInquiryButton" onclick="sendParentInquiry()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold cursor-pointer">
 إرسال الاستفسار ✉️
 </button>
 </div>
@@ -217,7 +216,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <script>
-/* إعداد Firebase */
 const firebaseConfig = {
 apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0n",
 authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
@@ -284,9 +282,7 @@ function getApprovedList(){
 return asArray(globalSchoolData.approvedStudents);
 }
 
-/* الاستماع إلى بيانات المدرسة */
 window.onload=function(){
-
 db.ref(ROOT).on('value',snapshot=>{
 globalSchoolData=snapshot.val()||{};
 dataLoaded=true;
@@ -300,11 +296,8 @@ showParentError('تعذر تحميل بيانات المدرسة. يرجى تح�
 });
 };
 
-/* إرسال طلبات التسجيل دون صور */
 async function submitAllStudentsRequests(){
-
 if(parentBusy)return;
-
 if(!dataLoaded){
 alert('يرجى الانتظار حتى يتم تحميل بيانات المدرسة.');
 return;
@@ -314,13 +307,11 @@ parentBusy=true;
 setButtonLoading('submitRequestsButton',true);
 
 try{
-
 const newRequests=[];
 const approved=getApprovedList();
 const pending=getPendingList();
 
 for(let i=1;i<=3;i++){
-
 const student=document.getElementById(`parentStudentName_${i}`).value.trim();
 const mother=document.getElementById(`parentMotherName_${i}`).value.trim();
 const grade=document.getElementById(`parentGrade_${i}`).value;
@@ -333,17 +324,11 @@ throw new Error(`يرجى إكمال بيانات الطالبة رقم ${i} أ�
 }
 
 const duplicateInForm=newRequests.some(s=>s.student.toLowerCase()===student.toLowerCase());
-
-const duplicatePending=pending.some(s=>
-String(s.student||'').toLowerCase()===student.toLowerCase()
-);
-
-const duplicateApproved=approved.some(s=>
-String(s.student||'').toLowerCase()===student.toLowerCase()
-);
+const duplicatePending=pending.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
+const duplicateApproved=approved.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
 
 if(duplicateInForm||duplicatePending||duplicateApproved){
-throw new Error(`الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة.`);
+throw new Error(`الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة ولا يمكن تكرارها.`);
 }
 
 newRequests.push({
@@ -360,28 +345,20 @@ if(newRequests.length===0){
 throw new Error('يرجى إدخال بيانات طالبة واحدة على الأقل.');
 }
 
-/* إضافة الطلبات إلى المسار المحدد فقط */
 const pendingRef=db.ref(ROOT+'/pendingRequests');
-
 const result=await pendingRef.transaction(current=>{
 const list=asArray(current);
-
-/* فحص التكرار مرة أخرى داخل المعاملة */
 for(const newStudent of newRequests){
-const exists=list.some(s=>
-String(s.student||'').toLowerCase()===newStudent.student.toLowerCase()
-);
-if(exists)return;
+const existsPending=list.some(s=>String(s.student||'').toLowerCase()===newStudent.student.toLowerCase());
+if(existsPending)return;
 }
-
 return list.concat(newRequests);
 },undefined,false);
 
 if(!result.committed){
-throw new Error('لم يتم حفظ الطلبات. قد تكون مسجلة مسبقاً، يرجى تحديث الصفحة.');
+throw new Error('لم يتم حفظ الطلبات. قد تكون الطالبة مسجلة مسبقاً في السحابة.');
 }
 
-/* حفظ معرفات الطالبات على جهاز ولي الأمر */
 parentSessionIds=newRequests.map(s=>s.id);
 currentActiveStudentId=parentSessionIds[0];
 
@@ -389,9 +366,7 @@ localStorage.setItem('school_parent_student_ids',JSON.stringify(parentSessionIds
 localStorage.setItem('school_parent_active_id',currentActiveStudentId);
 
 document.getElementById('parentFormError').textContent='';
-
 showWaitingScreen();
-
 alert(`✓ تم إرسال طلبات ${newRequests.length} طالبة بنجاح إلى الإدارة.`);
 
 }catch(error){
@@ -403,45 +378,29 @@ setButtonLoading('submitRequestsButton',false,'إرسال كافة الطلبا�
 }
 }
 
-/* التحقق من موافقة الإدارة ومزامنة الدخول */
 function checkAndSyncSession(){
-
 if(!dataLoaded)return;
-
 const approved=getApprovedList();
 const pending=getPendingList();
 
-const approvedSiblings=parentSessionIds
-.map(id=>approved.find(s=>sameId(s.id,id)))
-.filter(Boolean);
-
-const pendingSiblings=parentSessionIds
-.map(id=>pending.find(s=>sameId(s.id,id)))
-.filter(Boolean);
+const approvedSiblings=parentSessionIds.map(id=>approved.find(s=>sameId(s.id,id))).filter(Boolean);
+const pendingSiblings=parentSessionIds.map(id=>pending.find(s=>sameId(s.id,id))).filter(Boolean);
 
 if(approvedSiblings.length>0){
-
 if(!approvedSiblings.some(s=>sameId(s.id,currentActiveStudentId))){
 currentActiveStudentId=approvedSiblings[0].id;
 localStorage.setItem('school_parent_active_id',currentActiveStudentId);
 }
-
 const activeStudent=approvedSiblings.find(s=>sameId(s.id,currentActiveStudentId))||approvedSiblings[0];
-
 showDashboard(activeStudent,approvedSiblings);
 renderParentContent(activeStudent);
-
 }else if(pendingSiblings.length>0){
-
 showWaitingScreen();
-
 }else{
-
 logoutParent();
 }
 }
 
-/* تحديث الحالة */
 async function checkApprovalStatusAgain(){
 try{
 const snapshot=await db.ref(ROOT).once('value');
@@ -461,17 +420,12 @@ document.getElementById('parentDashboardView').classList.add('hidden');
 }
 
 function showDashboard(student,siblings){
-
 document.getElementById('parentLoginView').classList.add('hidden');
 document.getElementById('parentWaitingView').classList.add('hidden');
 document.getElementById('parentDashboardView').classList.remove('hidden');
 
 document.getElementById('welcomeStudentTitle').innerText='👧 الطالبة الحالية: '+student.student;
-
-document.getElementById('studentClassInfo').innerText=
-`${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
-
-/* رمز بدلاً من الصورة */
+document.getElementById('studentClassInfo').innerText=`${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
 document.getElementById('dashboardImageContainer').innerHTML='👧';
 
 const listDiv=document.getElementById('siblingsButtonsList');
@@ -479,109 +433,81 @@ listDiv.innerHTML='';
 
 siblings.forEach(sib=>{
 const isActive=sameId(sib.id,student.id);
-
 const btn=document.createElement('button');
-btn.className='px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 '+(
+btn.className='px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer '+(
 isActive?'bg-pink-600 text-white font-bold shadow':'bg-pink-100 text-pink-800 hover:bg-pink-200'
 );
-
 const icon=document.createElement('span');
 icon.textContent='👧';
-
 const name=document.createElement('span');
 name.textContent=sib.student||'طالبة';
-
 btn.append(icon,name);
 btn.onclick=()=>switchActiveSibling(sib.id);
-
 listDiv.appendChild(btn);
 });
 }
 
-/* التنقل بين الطالبات */
 function switchActiveSibling(id){
 currentActiveStudentId=id;
 localStorage.setItem('school_parent_active_id',id);
 checkAndSyncSession();
 }
 
-/* عرض الإشعارات والجدول */
 function renderParentContent(student){
-
 const notifContainer=document.getElementById('parentNotificationsContainer');
-
 const notifications=Array.isArray(student.notifications)?student.notifications:[];
 
 if(notifications.length===0){
 notifContainer.innerHTML='<p class="text-gray-500">لا توجد إشعارات جديدة حالياً.</p>';
 }else{
-
 notifContainer.innerHTML='';
-
 notifications.forEach(n=>{
-
 const div=document.createElement('div');
 div.className='bg-indigo-50 border border-indigo-100 p-2 rounded-lg';
-
 const title=document.createElement('p');
 title.className='font-bold text-indigo-900';
 title.textContent=n.title||'إشعار مدرسي';
-
 const body=document.createElement('p');
 body.className='text-gray-700 mt-0.5';
 body.textContent=n.body||'';
-
 div.append(title,body);
 notifContainer.appendChild(div);
 });
 }
 
-/* الجدول */
 const scheduleContainer=document.getElementById('parentScheduleContainer');
 const classKey=`${student.grade}_${student.section}`;
-
 const schedule=(globalSchoolData.schoolSchedule&&globalSchoolData.schoolSchedule[classKey])||{};
-
 scheduleContainer.innerHTML='';
 
 if(Object.keys(schedule).length===0){
 scheduleContainer.innerHTML='<p class="text-gray-500">لا توجد دروس منشورة لهذا الصف والشعبة حالياً.</p>';
 }else{
-
 for(const [subject,content] of Object.entries(schedule)){
-
 const div=document.createElement('div');
 div.className='bg-pink-50 border border-pink-100 p-2 rounded-lg';
-
 const title=document.createElement('p');
 title.className='font-bold text-pink-800';
 title.textContent='📖 '+subject+':';
-
 const body=document.createElement('p');
 body.className='text-gray-700 mt-0.5';
 body.textContent=String(content??'');
-
 div.append(title,body);
 scheduleContainer.appendChild(div);
 }
 }
 }
 
-/* إرسال استفسار إلى الإدارة دون استبدال قاعدة البيانات */
 async function sendParentInquiry(){
-
 if(parentBusy)return;
-
 const content=document.getElementById('parentInquiryText').value.trim();
 const approved=getApprovedList();
-
 const currentStudent=approved.find(s=>sameId(s.id,currentActiveStudentId));
 
 if(!content){
 alert('يرجى كتابة الاستفسار أولاً.');
 return;
 }
-
 if(!currentStudent){
 alert('تعذر تحديد الطالبة الحالية. يرجى تحديث الصفحة.');
 return;
@@ -591,7 +517,6 @@ parentBusy=true;
 setButtonLoading('sendInquiryButton',true);
 
 try{
-
 const inquiry={
 id:'inq_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
 studentId:currentStudent.id,
@@ -603,7 +528,6 @@ createdAt:Date.now()
 };
 
 const inquiriesRef=db.ref(ROOT+'/parentInquiries');
-
 const result=await inquiriesRef.transaction(current=>{
 const list=asArray(current);
 list.push(inquiry);
@@ -616,7 +540,6 @@ throw new Error('لم يتم حفظ الاستفسار.');
 
 document.getElementById('parentInquiryText').value='';
 alert('✓ تم إرسال استفسارك للإدارة بنجاح!');
-
 }catch(error){
 console.error(error);
 alert('تعذر إرسال الاستفسار: '+error.message);
@@ -626,12 +549,9 @@ setButtonLoading('sendInquiryButton',false,'إرسال الاستفسار ✉️
 }
 }
 
-/* تسجيل الخروج */
 function logoutParent(){
-
 localStorage.removeItem('school_parent_student_ids');
 localStorage.removeItem('school_parent_active_id');
-
 parentSessionIds=[];
 currentActiveStudentId=null;
 
@@ -640,7 +560,6 @@ document.getElementById('parentWaitingView').classList.add('hidden');
 document.getElementById('parentLoginView').classList.remove('hidden');
 document.getElementById('parentFormError').textContent='';
 }
-
 </script>
 </body>
 </html>
