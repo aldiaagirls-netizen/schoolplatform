@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة التحكم والإدارة - مدرسة الضياء</title>
+<title>بوابة ولي الأمر - مدرسة الضياء للبنات</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -18,217 +19,227 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <body class="bg-pink-50 text-gray-800 min-h-screen p-4">
 
-<div class="max-w-4xl mx-auto space-y-5">
+<div class="max-w-xl mx-auto space-y-6">
 
-<div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 max-w-md mx-auto space-y-4">
-<h2 class="text-xl font-bold text-pink-700 text-center">🔒 دخول لوحة إدارة المدرسة</h2>
+<!-- شاشة تسجيل الطالبات -->
+<div id="parentLoginView" class="space-y-6">
+
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 text-center space-y-2">
+<h2 class="text-lg font-bold text-pink-700">👧 بوابة ولي الأمر - تسجيل الطالبات</h2>
+<p class="text-xs text-gray-500">
+أدخل بيانات الطالبات ثم اضغط على زر الإرسال لإرسال الطلبات إلى الإدارة.
+</p>
+<p class="text-xs text-green-700 font-semibold">
+لا حاجة إلى رفع صورة الطالبة.
+</p>
+</div>
+
+<!-- الطالبة الأولى -->
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
+<h3 class="font-bold text-pink-800 text-sm border-b pb-2">📌 بيانات الطالبة الأولى</h3>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
+<input type="text" id="parentStudentName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: فاطمة أحمد علي">
+</div>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
+<input type="text" id="parentMotherName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم فاطمة">
+</div>
+
+<div class="grid grid-cols-2 gap-2 text-xs">
 <div>
-<label class="block text-xs font-semibold mb-1">اسم المستخدم</label>
-<input id="adminUserInput" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="admin">
+<label class="block font-semibold mb-1">الصف الدراسي:</label>
+<select id="parentGrade_1" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="الأول الابتدائي">الأول الابتدائي</option>
+<option value="الثاني الابتدائي">الثاني الابتدائي</option>
+<option value="الثالث الابتدائي">الثالث الابتدائي</option>
+<option value="الرابع الابتدائي">الرابع الابتدائي</option>
+<option value="الخامس الابتدائي">الخامس الابتدائي</option>
+<option value="السادس الابتدائي">السادس الابتدائي</option>
+</select>
 </div>
 <div>
-<label class="block text-xs font-semibold mb-1">كلمة المرور</label>
-<input id="adminPassInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white">
+<label class="block font-semibold mb-1">الشعبة:</label>
+<select id="parentSection_1" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="أ">الشعبة (أ)</option>
+<option value="ب">الشعبة (ب)</option>
+<option value="ج">الشعبة (ج)</option>
+</select>
 </div>
-<button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-bold cursor-pointer">دخول اللوحة</button>
-<p id="loginError" class="text-red-600 text-xs text-center"></p>
 </div>
-
-<div id="adminDashboardView" class="hidden space-y-5">
-
-<div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
-<div class="flex flex-wrap gap-2">
-<button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📂 دليل الطالبات المقبولات</button>
-<button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🎯 متابعة المشاهدات</button>
-<button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🔄 تحديث البيانات</button>
-<button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">⬇️ نسخة احتياطية</button>
-<button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🛡️ حماية البيانات</button>
-</div>
-<button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">تسجيل الخروج</button>
 </div>
 
-<div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl flex justify-between items-center">
+<!-- الطالبة الثانية -->
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
+<h3 class="font-bold text-purple-800 text-sm border-b pb-2">📌 بيانات الطالبة الثانية (إن وجدت)</h3>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
+<input type="text" id="parentStudentName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: زينب أحمد علي">
+</div>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
+<input type="text" id="parentMotherName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم زينب">
+</div>
+
+<div class="grid grid-cols-2 gap-2 text-xs">
 <div>
-<p class="font-bold">☁️ الربط السحابي المباشر</p>
-<p class="text-xs mt-1">قاعدة بيانات مدرسة الضياء</p>
-<p id="connectionStatus" class="text-xs mt-2">جارٍ الاتصال...</p>
-</div>
-<div class="bg-white/20 p-3 rounded-lg text-center">
-<strong id="totalSavedCount" class="block text-xl">0</strong>
-<span class="text-xs">طالبة مقبولة</span>
-</div>
-</div>
-
-<div id="systemWarning" class="hidden bg-red-100 border border-red-300 text-red-800 p-3 rounded-lg text-xs"></div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
-<h2 class="font-bold text-blue-700">🔍 البحث عن طالبة</h2>
-<div class="flex gap-2">
-<input id="searchStudentInput" class="flex-1 border rounded-lg p-2 text-xs bg-white" placeholder="اسم الطالبة">
-<button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 rounded-lg text-xs cursor-pointer">بحث</button>
-</div>
-<div id="searchResultContainer" class="hidden p-3 bg-blue-50 rounded-lg text-xs"></div>
-</div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
-<h2 class="font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة</h2>
-<div id="requestsContainer">جارٍ تحميل الطلبات...</div>
-</div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
-<h2 class="font-bold text-purple-700 border-b pb-2">🔔 نشاط أولياء الأمور</h2>
-<div id="parentsActivityContainer" class="text-xs"></div>
-</div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
-<h2 class="font-bold text-pink-700">👩‍💼 إعدادات المدرسة</h2>
-<label class="block text-xs">اسم المديرة</label>
-<input id="newPrincipalName" class="w-full border rounded-lg p-2 text-xs bg-white">
-<button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المديرة</button>
-<hr>
-<label class="block text-xs">اسم مشرف المنصة</label>
-<input id="newSupervisorName" class="w-full border rounded-lg p-2 text-xs bg-white">
-<button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المشرف</button>
-</div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
-<h2 class="font-bold text-pink-700">📅 جدول الحصص والواجبات</h2>
-<label class="text-xs">المادة</label>
-<select id="lessonSubject" class="w-full border rounded-lg p-2 text-xs bg-white">
-<option>القرآن الكريم</option>
-<option>اللغة العربية</option>
-<option>الرياضيات</option>
-<option>الاجتماعيات</option>
-<option>اللغة الإنجليزية</option>
-<option>الأخلاقية</option>
-<option>العلوم</option>
+<label class="block font-semibold mb-1">الصف الدراسي:</label>
+<select id="parentGrade_2" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="الأول الابتدائي">الأول الابتدائي</option>
+<option value="الثاني الابتدائي">الثاني الابتدائي</option>
+<option value="الثالث الابتدائي">الثالث الابتدائي</option>
+<option value="الرابع الابتدائي">الرابع الابتدائي</option>
+<option value="الخامس الابتدائي">الخامس الابتدائي</option>
+<option value="السادس الابتدائي">السادس الابتدائي</option>
 </select>
-<label class="text-xs">الصف</label>
-<select id="lessonGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
-<option>الأول الابتدائي</option>
-<option>الثاني الابتدائي</option>
-<option>الثالث الابتدائي</option>
-<option>الرابع الابتدائي</option>
-<option>الخامس الابتدائي</option>
-<option>السادس الابتدائي</option>
+</div>
+<div>
+<label class="block font-semibold mb-1">الشعبة:</label>
+<select id="parentSection_2" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="أ">الشعبة (أ)</option>
+<option value="ب">الشعبة (ب)</option>
+<option value="ج">الشعبة (ج)</option>
 </select>
-<label class="text-xs">الشعبة</label>
-<select id="lessonSection" class="w-full border rounded-lg p-2 text-xs bg-white">
-<option value="أ">أ</option>
-<option value="ب">ب</option>
-<option value="ج">ج</option>
+</div>
+</div>
+</div>
+
+<!-- الطالبة الثالثة -->
+<div class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 space-y-4">
+<h3 class="font-bold text-indigo-800 text-sm border-b pb-2">📌 بيانات الطالبة الثالثة (إن وجدت)</h3>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
+<input type="text" id="parentStudentName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: رقية أحمد علي">
+</div>
+
+<div class="text-xs">
+<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
+<input type="text" id="parentMotherName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم رقية">
+</div>
+
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div>
+<label class="block font-semibold mb-1">الصف الدراسي:</label>
+<select id="parentGrade_3" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="الأول الابتدائي">الأول الابتدائي</option>
+<option value="الثاني الابتدائي">الثاني الابتدائي</option>
+<option value="الثالث الابتدائي">الثالث الابتدائي</option>
+<option value="الرابع الابتدائي">الرابع الابتدائي</option>
+<option value="الخامس الابتدائي">الخامس الابتدائي</option>
+<option value="السادس الابتدائي">السادس الابتدائي</option>
 </select>
-<textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="تفاصيل الدرس أو الواجب"></textarea>
-<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">إرسال الدرس سحابياً</button>
-<hr>
-<div class="flex justify-between items-center">
-<strong class="text-xs">📖 الدروس المنشورة</strong>
-<button onclick="clearAllLessons()" class="text-red-600 text-xs cursor-pointer">حذف جميع الدروس</button>
 </div>
-<div id="publishedLessonsContainer" class="space-y-2"></div>
-</div>
-
-<div class="bg-white rounded-xl shadow border border-indigo-100 overflow-hidden">
-<button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 font-bold text-indigo-700 text-right cursor-pointer">🎙️ إرسال تعميم لجميع أولياء الأمور ▼</button>
-<div id="broadcastContentBody" class="hidden p-5 space-y-3">
-<label class="text-xs">الصف</label>
-<select id="broadcastGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
-<option value="الكل">جميع الصفوف</option>
-<option>الأول الابتدائي</option>
-<option>الثاني الابتدائي</option>
-<option>الثالث الابتدائي</option>
-<option>الرابع الابتدائي</option>
-<option>الخامس الابتدائي</option>
-<option>السادس الابتدائي</option>
+<div>
+<label class="block font-semibold mb-1">الشعبة:</label>
+<select id="parentSection_3" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="أ">الشعبة (أ)</option>
+<option value="ب">الشعبة (ب)</option>
+<option value="ج">الشعبة (ج)</option>
 </select>
-<label class="text-xs">الشعبة</label>
-<select id="broadcastSection" class="w-full border rounded-lg p-2 text-xs bg-white">
-<option value="الكل">جميع الشعب</option>
-<option value="أ">أ</option>
-<option value="ب">ب</option>
-<option value="ج">ج</option>
-</select>
-<textarea id="broadcastText" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="نص التعميم"></textarea>
-<button onclick="sendBroadcastMessage()" class="w-full bg-indigo-600 text-white p-2 rounded-lg text-xs cursor-pointer">إرسال التعميم 🚀</button>
-</div>
-</div>
-
-<div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
-<h2 class="font-bold text-blue-700">💬 استفسارات أولياء الأمور</h2>
-<div id="adminInquiriesContainer" class="space-y-3 text-xs"></div>
-</div>
-
-</div>
-</div>
-
-<div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
-<div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
-<div class="flex justify-between border-b pb-2">
-<h3 id="modalTitle" class="font-bold text-emerald-700">دليل الطالبات</h3>
-<button onclick="closeAcceptedStudentsModal()" class="cursor-pointer">✕</button>
-</div>
-<div id="acceptedStudentsContent"></div>
-<div id="modalBackBtnContainer" class="hidden">
-<button onclick="backToGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs cursor-pointer">العودة للصفوف</button>
 </div>
 </div>
 </div>
 
-<div id="studentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
-<div class="bg-white rounded-2xl p-5 w-full max-w-3xl max-h-[85vh] overflow-y-auto space-y-3">
-<h3 class="font-bold text-pink-700">🎯 سجل الطالبات</h3>
-<div id="modalStudentsList"></div>
-<button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white p-2 rounded-lg cursor-pointer">إغلاق</button>
+<button id="submitRequestsButton" onclick="submitAllStudentsRequests()" class="w-full bg-pink-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-pink-700 shadow-md cursor-pointer">
+إرسال كافة الطلبات للإدارة 🚀
+</button>
+
+<p id="parentFormError" class="text-red-600 text-xs text-center"></p>
+
+</div>
+
+<!-- شاشة انتظار الموافقة -->
+<div id="parentWaitingView" class="hidden bg-white p-8 rounded-2xl shadow-sm border border-yellow-200 text-center space-y-4">
+<div class="text-4xl">⏳</div>
+<h2 class="text-base font-bold text-yellow-700">طلبات الطالبات قيد المراجعة</h2>
+<p class="text-xs text-gray-600">
+تم إرسال الطلبات بنجاح. يرجى الانتظار لحين موافقة الإدارة وتفعيل الحسابات.
+</p>
+<button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer">
+تحديث الحالة 🔄
+</button>
+</div>
+
+<!-- البوابة الرئيسية -->
+<div id="parentDashboardView" class="hidden space-y-4">
+
+<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div id="dashboardImageContainer" class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 text-xl">👧</div>
+<div>
+<h3 id="welcomeStudentTitle" class="font-bold text-pink-700 text-sm">مرحباً بك</h3>
+<p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
+</div>
+</div>
+<button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">
+خروج 🚪
+</button>
+</div>
+
+<!-- الطالبات المقبولات -->
+<div class="bg-white p-3 rounded-xl shadow-sm border border-pink-100 space-y-2">
+<p class="font-bold text-xs text-pink-800">👧 الطالبات المقبولات (اضغط على الاسم للتنقل):</p>
+<div id="siblingsButtonsList" class="flex gap-2 flex-wrap"></div>
+</div>
+
+<!-- الإشعارات -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
+<h4 class="font-bold text-indigo-700 text-xs border-b pb-2">📢 الإشعارات والتعاميم المدرسية</h4>
+<div id="parentNotificationsContainer" class="space-y-2 text-xs">
+<p class="text-gray-500">لا توجد إشعارات جديدة.</p>
+</div>
+</div>
+
+<!-- الجدول -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
+<h4 class="font-bold text-pink-700 text-xs border-b pb-2">📚 جدول الدروس والتحاضير اليومية</h4>
+<div id="parentScheduleContainer" class="space-y-2 text-xs">
+<p class="text-gray-500">لا توجد دروس منشورة حالياً.</p>
+</div>
+</div>
+
+<!-- الاستفسارات -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100 space-y-3">
+<h4 class="font-bold text-blue-700 text-xs border-b pb-2">💬 إرسال استفسار أو ملاحظة للإدارة</h4>
+<textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب استفسارك هنا..."></textarea>
+<button id="sendInquiryButton" onclick="sendParentInquiry()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold cursor-pointer">
+إرسال الاستفسار ✉️
+</button>
+</div>
+
 </div>
 </div>
 
 <script>
 const firebaseConfig = {
-apiKey:"AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0",
-authDomain:"aldiyaaschool-af7e1.firebaseapp.com",
-databaseURL:"https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
-projectId:"aldiyaaschool-af7e1",
-storageBucket:"aldiyaaschool-af7e1.firebasestorage.app",
-messagingSenderId:"322321446203",
-appId:"1:322321446203:web:6bfbfc082076982e68b31e",
-measurementId:"G-2GW91EKFN0"
+apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0n",
+authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
+databaseURL: "https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
+projectId: "aldiyaaschool-af7e1",
+storageBucket: "aldiyaaschool-af7e1.firebasestorage.app",
+messagingSenderId: "322321446203",
+appId: "1:322321446203:web:6bfbfc082076982e68b31e",
+measurementId: "G-2GW91EKFN0"
 };
 
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length){
+firebase.initializeApp(firebaseConfig);
+}
 
 const db=firebase.database();
 const ROOT='school_data';
 
-const adminUser='admin';
-const adminPass='123456';
+let parentSessionIds=JSON.parse(localStorage.getItem('school_parent_student_ids')||'[]');
+let currentActiveStudentId=localStorage.getItem('school_parent_active_id');
 
-let principalName='د. أمل عبد الله';
-let supervisorName='الأستاذ أحمد علي';
-
-let pendingRequests=[];
-let approvedStudents=[];
-let parentInquiries=[];
-let schoolSchedule={};
-let parentActivities=[];
-
-let firebaseConnected=false;
+let globalSchoolData={};
 let dataLoaded=false;
-let adminLoggedIn=localStorage.getItem('school_admin_logged')==='true';
-let currentGrade='';
-let currentSection='';
-let approvalInProgress=false;
-
-const gradesList=[
-'الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي',
-'الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي'
-];
-const sectionsList=['أ','ب','ج'];
-
-function safeText(value){
-return String(value??'').replace(/[&<>"']/g,ch=>({
-'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-}[ch]));
-}
+let parentBusy=false;
 
 function asArray(value){
 if(Array.isArray(value)){
@@ -243,809 +254,325 @@ return {...item,id:item.id??key};
 return [];
 }
 
-function sameStudent(record,id,details){
-if(!record)return false;
-if(id!==undefined&&id!==null&&String(id)!==''&&
-record.id!==undefined&&String(record.id)===String(id))return true;
-
-return !!details&&
-String(record.student||'').trim().toLowerCase()===String(details.student||'').trim().toLowerCase();
+function sameId(a,b){
+return String(a??'')===String(b??'');
 }
 
-function waitForFirebaseConnection(timeout=20000){
-return new Promise((resolve,reject)=>{
-if(firebaseConnected){
-resolve(true);
-return;
+function showParentError(message){
+document.getElementById('parentFormError').textContent=message;
 }
 
-let finished=false;
-const ref=db.ref('.info/connected');
-
-const timer=setTimeout(()=>{
-if(finished)return;
-finished=true;
-ref.off('value',handler);
-reject(new Error('لم يعد الاتصال بقاعدة Firebase خلال المهلة المحددة.'));
-},timeout);
-
-function handler(snapshot){
-if(snapshot.val()===true&&!finished){
-finished=true;
-clearTimeout(timer);
-ref.off('value',handler);
-resolve(true);
+function setButtonLoading(id,loading,label){
+const btn=document.getElementById(id);
+if(!btn)return;
+btn.disabled=loading;
+if(loading){
+btn.dataset.originalText=btn.textContent;
+btn.textContent='جارٍ الإرسال...';
+}else{
+btn.textContent=label||btn.dataset.originalText||'إرسال';
 }
 }
 
-function cancelHandler(error){
-if(finished)return;
-finished=true;
-clearTimeout(timer);
-ref.off('value',handler);
-reject(error||new Error('تعذر التحقق من اتصال Firebase.'));
+function getPendingList(){
+return asArray(globalSchoolData.pendingRequests);
 }
 
-ref.on('value',handler,cancelHandler);
-});
-}
-
-async function safeTransaction(path,updater){
-await waitForFirebaseConnection();
-if(!dataLoaded){
-throw new Error('لم يكتمل تحميل بيانات المدرسة. اضغطي تحديث البيانات ثم حاولي مجدداً.');
-}
-
-const result=await db.ref(path).transaction(
-current=>updater(current),
-undefined,
-false
-);
-
-if(!result.committed){
-throw new Error('لم تعتمد Firebase عملية الحفظ.');
-}
-
-return result.snapshot.val();
-}
-
-function showError(error){
-console.error('Firebase Error:',error);
-let message='لم يتم إكمال العملية.';
-if(error?.code==='PERMISSION_DENIED'||
-String(error?.message||'').toLowerCase().includes('permission')){
-message='رفضت قواعد Firebase عملية الكتابة.';
-}else if(String(error?.message||'').toLowerCase().includes('network')||
-String(error?.message||'').toLowerCase().includes('disconnect')){
-message='انقطع الاتصال بقاعدة Firebase أثناء العملية.';
-}else if(error?.message){
-message+=' التفاصيل: '+error.message;
-}
-alert('⚠️ '+message);
-}
-
-function loadSchoolData(data){
-pendingRequests=asArray(data.pendingRequests);
-approvedStudents=asArray(data.approvedStudents);
-parentInquiries=asArray(data.parentInquiries);
-parentActivities=asArray(data.parentActivities);
-
-schoolSchedule=data.schoolSchedule&&typeof data.schoolSchedule==='object'
-?data.schoolSchedule:{};
-
-if(data.principalName)principalName=data.principalName;
-if(data.supervisorName)supervisorName=data.supervisorName;
-
-document.getElementById('newPrincipalName').value=principalName;
-document.getElementById('newSupervisorName').value=supervisorName;
-
-updateTotalCountBadge();
-renderRequests();
-renderAdminInquiries();
-renderPublishedLessons();
-renderParentActivities();
+function getApprovedList(){
+return asArray(globalSchoolData.approvedStudents);
 }
 
 window.onload=function(){
-db.ref('.info/connected').on('value',snapshot=>{
-firebaseConnected=snapshot.val()===true;
-document.getElementById('connectionStatus').textContent=
-firebaseConnected?'🟢 متصل بقاعدة البيانات':'🔴 غير متصل بالسحابة';
-});
-
 db.ref(ROOT).on('value',snapshot=>{
-try{
-loadSchoolData(snapshot.val()||{});
+globalSchoolData=snapshot.val()||{};
 dataLoaded=true;
-document.getElementById('systemWarning').classList.add('hidden');
-}catch(error){
-dataLoaded=false;
-showError(error);
+
+/* التحقق من وجود جلسة مسجلة مسبقاً وتوجيه المستخدم مباشرة دون عرض شاشة التسجيل */
+if(parentSessionIds.length>0){
+checkAndSyncSession();
+} else {
+/* إذا لم تكن هناك جلسة مسجلة، نضمن إظهار شاشة التسجيل بوضوح */
+document.getElementById('parentLoginView').classList.remove('hidden');
+document.getElementById('parentWaitingView').classList.add('hidden');
+document.getElementById('parentDashboardView').classList.add('hidden');
 }
 },error=>{
-dataLoaded=false;
-const warning=document.getElementById('systemWarning');
-warning.classList.remove('hidden');
-warning.textContent='تعذر تحميل بيانات المدرسة: '+error.message;
+console.error('Firebase read error:',error);
+showParentError('تعذر تحميل بيانات المدرسة. يرجى تحديث الصفحة.');
 });
-
-if(adminLoggedIn){
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('adminDashboardView').classList.remove('hidden');
-}
 };
 
-function loginAdmin(){
-const u=document.getElementById('adminUserInput').value.trim();
-const p=document.getElementById('adminPassInput').value.trim();
-
-if(u===adminUser&&p===adminPass){
-adminLoggedIn=true;
-localStorage.setItem('school_admin_logged','true');
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('adminDashboardView').classList.remove('hidden');
-}else{
-document.getElementById('loginError').textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
-}
-}
-
-function logoutAdmin(){
-adminLoggedIn=false;
-localStorage.removeItem('school_admin_logged');
-document.getElementById('adminDashboardView').classList.add('hidden');
-document.getElementById('adminAuthView').classList.remove('hidden');
-}
-
-async function restoreOldData(){
-try{
-await waitForFirebaseConnection();
-const snap=await db.ref(ROOT).once('value');
-if(!snap.exists()){
-alert('لا توجد بيانات في قاعدة البيانات حالياً.');
-return;
-}
-loadSchoolData(snap.val());
-dataLoaded=true;
-alert('✓ تمت قراءة أحدث البيانات من السحابة دون حذف أي شيء.');
-}catch(error){showError(error);}
-}
-
-async function exportBackup(){
-try{
-await waitForFirebaseConnection();
-const snap=await db.ref(ROOT).once('value');
-if(!snap.exists()){
-alert('لا توجد بيانات لإنشاء نسخة احتياطية.');
-return;
-}
-const blob=new Blob([JSON.stringify(snap.val(),null,2)],{
-type:'application/json;charset=utf-8'
-});
-const url=URL.createObjectURL(blob);
-const link=document.createElement('a');
-link.href=url;
-link.download='Al-Diyaa-Backup-'+new Date().toISOString().slice(0,10)+'.json';
-document.body.appendChild(link);
-link.click();
-link.remove();
-setTimeout(()=>URL.revokeObjectURL(url),1500);
-alert('✓ تم تنزيل النسخة الاحتياطية.');
-}catch(error){showError(error);}
-}
-
-function updateTotalCountBadge(){
-document.getElementById('totalSavedCount').textContent=approvedStudents.length;
-}
-
-function searchStudentInSystem(){
-const query=document.getElementById('searchStudentInput').value.trim().toLowerCase();
-const box=document.getElementById('searchResultContainer');
-if(!query){box.classList.add('hidden');return;}
-
-const approved=approvedStudents.find(s=>String(s.student||'').toLowerCase().includes(query));
-const pending=pendingRequests.find(s=>String(s.student||'').toLowerCase().includes(query));
-
-box.classList.remove('hidden');
-
-if(approved){
-box.innerHTML=`
-<p class="font-bold text-emerald-700">✅ الطالبة مقبولة</p>
-<p>الاسم: ${safeText(approved.student)}</p>
-<p>الصف: ${safeText(approved.grade)}</p>
-<p>الشعبة: ${safeText(approved.section)}</p>
-<p>ولي الأمر: ${safeText(approved.mother)}</p>`;
-}else if(pending){
-box.innerHTML=`
-<p class="font-bold text-amber-700">⏳ الطلب بانتظار الموافقة</p>
-<p>الاسم: ${safeText(pending.student)}</p>
-<p>الصف: ${safeText(pending.grade)}</p>
-<p>الشعبة: ${safeText(pending.section)}</p>
-<p>ولي الأمر: ${safeText(pending.mother)}</p>`;
-}else{
-box.innerHTML='<p class="text-red-600">❌ لم يتم العثور على الطالبة.</p>';
-}
-}
-
-function renderRequests(){
-const container=document.getElementById('requestsContainer');
-if(!pendingRequests.length){
-container.innerHTML='<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>';
-return;
-}
-
-container.innerHTML='';
-
-pendingRequests.forEach(req=>{
-const item=document.createElement('div');
-item.className='p-3 bg-pink-50 border rounded-lg flex flex-wrap justify-between items-center gap-3 mb-2';
-
-const info=document.createElement('div');
-info.className='flex items-center gap-3';
-
-if(req.image){
-const img=document.createElement('img');
-img.src=req.image;
-img.className='w-12 h-12 rounded-full object-cover border';
-info.appendChild(img);
-}else{
-const placeholder=document.createElement('div');
-placeholder.className='w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center';
-placeholder.textContent='👧';
-info.appendChild(placeholder);
-}
-
-const details=document.createElement('div');
-details.innerHTML=`
-<p class="font-bold text-pink-900">${safeText(req.student)}</p>
-<p class="text-xs text-gray-600">ولي الأمر: ${safeText(req.mother)}</p>
-<p class="text-xs text-gray-600">${safeText(req.grade)} - شعبة (${safeText(req.section)})</p>`;
-info.appendChild(details);
-
-const actions=document.createElement('div');
-actions.className='flex gap-2';
-
-const approve=document.createElement('button');
-approve.className='bg-green-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
-approve.textContent='✓ موافقة';
-approve.onclick=()=>approveStudent(req.id,{
-student:req.student,mother:req.mother,grade:req.grade,section:req.section
-});
-
-const reject=document.createElement('button');
-reject.className='bg-red-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
-reject.textContent='✕ رفض';
-reject.onclick=()=>rejectStudent(req.id,{
-student:req.student,mother:req.mother,grade:req.grade,section:req.section
-});
-
-actions.append(approve,reject);
-item.append(info,actions);
-container.appendChild(item);
-});
-}
-
-/* دالة الموافقة الآمنة مع منع التكرار تماماً */
-async function approveStudent(studentId,details){
-if(approvalInProgress){
-alert('توجد عملية موافقة قيد التنفيذ. انتظري قليلاً.');
-return;
-}
-
-if(!confirm('هل تريدين الموافقة على هذا الطلب؟'))return;
-
-approvalInProgress=true;
-const buttons=document.querySelectorAll('#requestsContainer button');
-buttons.forEach(b=>b.disabled=true);
-
-try{
-await waitForFirebaseConnection();
+async function submitAllStudentsRequests(){
+if(parentBusy)return;
 if(!dataLoaded){
-throw new Error('لم يكتمل تحميل بيانات المدرسة. حدّثي البيانات ثم حاولي مجدداً.');
+alert('يرجى الانتظار حتى يتم تحميل بيانات المدرسة.');
+return;
+}
+
+parentBusy=true;
+setButtonLoading('submitRequestsButton',true);
+
+try{
+const newRequests=[];
+const approved=getApprovedList();
+const pending=getPendingList();
+
+for(let i=1;i<=3;i++){
+const student=document.getElementById(`parentStudentName_${i}`).value.trim();
+const mother=document.getElementById(`parentMotherName_${i}`).value.trim();
+const grade=document.getElementById(`parentGrade_${i}`).value;
+const section=document.getElementById(`parentSection_${i}`).value;
+
+if(!student&&!mother)continue;
+
+if(!student||!mother){
+throw new Error(`يرجى إكمال بيانات الطالبة رقم ${i} أو ترك الحقول فارغة تماماً.`);
+}
+
+const duplicateInForm=newRequests.some(s=>s.student.toLowerCase()===student.toLowerCase());
+const duplicatePending=pending.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
+const duplicateApproved=approved.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
+
+if(duplicateInForm||duplicatePending||duplicateApproved){
+throw new Error(`الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة ولا يمكن تكرارها.`);
+}
+
+newRequests.push({
+id:'st_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7),
+student:student,
+mother:mother,
+grade:grade,
+section:section,
+createdAt:Date.now()
+});
+}
+
+if(newRequests.length===0){
+throw new Error('يرجى إدخال بيانات طالبة واحدة على الأقل.');
 }
 
 const pendingRef=db.ref(ROOT+'/pendingRequests');
-const pendingSnap=await pendingRef.once('value');
-const pendingList=asArray(pendingSnap.val());
-
-let student=pendingList.find(s=>sameStudent(s,studentId,details));
-
-const approvedRef=db.ref(ROOT+'/approvedStudents');
-const approvedSnapBefore=await approvedRef.once('value');
-const approvedBefore=asArray(approvedSnapBefore.val());
-
-if(!student){
-const already=approvedBefore.some(s=>sameStudent(s,studentId,details));
-if(already){
-alert('الطالبة مسجلة مسبقاً في قائمة المقبولات. سيتم إزالة الطلب المعلق فقط.');
-await pendingRef.transaction(current=>{
+const result=await pendingRef.transaction(current=>{
 const list=asArray(current);
-const idx=list.findIndex(s=>sameStudent(s,studentId,details));
-if(idx!==-1)list.splice(idx,1);
-return list;
-},undefined,false);
-return;
+for(const newStudent of newRequests){
+const existsPending=list.some(s=>String(s.student||'').toLowerCase()===newStudent.student.toLowerCase());
+if(existsPending)return;
 }
-throw new Error('لم يتم العثور على الطلب المعلق.');
-}
-
-/* فحص دقيق لمنع تكرار الاسم نهائياً في المقبولات */
-const alreadyApprovedName=approvedBefore.some(s=>
-String(s.student||'').trim().toLowerCase()===String(student.student||'').trim().toLowerCase()
-);
-
-if(alreadyApprovedName){
-alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة مسبقاً في دليل المقبولات! لن يتم إضافتها مجدداً لتجنب التكرار.`);
-/* حذف الطلب المعلق المتكرر فقط لتنظيف القائمة */
-await pendingRef.transaction(current=>{
-const list=asArray(current);
-const idx=list.findIndex(s=>sameStudent(s,studentId,details));
-if(idx!==-1)list.splice(idx,1);
-return list;
-},undefined,false);
-return;
-}
-
-student={...student};
-if((student.id===undefined||student.id===null)&&studentId!==undefined){
-student.id=studentId;
-}
-
-const saveResult=await approvedRef.transaction(current=>{
-const list=asArray(current);
-const exists=list.some(s=>sameStudent(s,student.id,student) || String(s.student||'').trim().toLowerCase()===String(student.student||'').trim().toLowerCase());
-if(exists)return list;
-
-const newStudent={...student};
-if(!Array.isArray(newStudent.notifications)){
-newStudent.notifications=[];
-}
-newStudent.notifications.unshift({
-type:'text',
-title:'حالة الدخول',
-body:'✓ تمت الموافقة على دخولك المنصة.',
-unread:true
-});
-list.push(newStudent);
-return list;
+return list.concat(newRequests);
 },undefined,false);
 
-if(!saveResult.committed){
-throw new Error('لم تنجح عملية حفظ الطالبة في قائمة المقبولات.');
+if(!result.committed){
+throw new Error('لم يتم حفظ الطلبات. قد تكون الطالبة مسجلة مسبقاً في السحابة.');
 }
 
-const removeResult=await pendingRef.transaction(current=>{
-const list=asArray(current);
-const index=list.findIndex(s=>sameStudent(s,student.id,student));
-if(index===-1)return list;
-list.splice(index,1);
-return list;
-},undefined,false);
+parentSessionIds=newRequests.map(s=>s.id);
+currentActiveStudentId=parentSessionIds[0];
 
-if(!removeResult.committed){
-throw new Error('تم حفظ الطالبة، لكن تعذر إزالة الطلب المعلق.');
-}
+localStorage.setItem('school_parent_student_ids',JSON.stringify(parentSessionIds));
+localStorage.setItem('school_parent_active_id',currentActiveStudentId);
 
-const latest=await db.ref(ROOT).once('value');
-loadSchoolData(latest.val()||{});
-dataLoaded=true;
-
-alert('✓ تمت الموافقة وحفظ بيانات الطالبة بنجاح دون أي تكرار.');
+document.getElementById('parentFormError').textContent='';
+showWaitingScreen();
+alert(`✓ تم إرسال طلبات ${newRequests.length} طالبة بنجاح إلى الإدارة.`);
 
 }catch(error){
-console.error('Approval error:',error);
-showError(error);
-try{
-if(firebaseConnected){
-const latest=await db.ref(ROOT).once('value');
-loadSchoolData(latest.val()||{});
-dataLoaded=true;
-}
-}catch(refreshError){
-console.error('Refresh error:',refreshError);
-}
+console.error(error);
+alert('⚠️ '+error.message);
 }finally{
-approvalInProgress=false;
-buttons.forEach(b=>b.disabled=false);
+parentBusy=false;
+setButtonLoading('submitRequestsButton',false,'إرسال كافة الطلبات للإدارة 🚀');
 }
 }
 
-async function rejectStudent(studentId,details){
-if(!confirm('هل تريدين رفض طلب الطالبة؟'))return;
+function checkAndSyncSession(){
+if(!dataLoaded)return;
+const approved=getApprovedList();
+const pending=getPendingList();
 
-try{
-const updated=await safeTransaction(ROOT+'/pendingRequests',current=>{
-const list=asArray(current);
-const index=list.findIndex(s=>sameStudent(s,studentId,details));
-if(index===-1)return current;
-list.splice(index,1);
-return list;
-});
+const approvedSiblings=parentSessionIds.map(id=>approved.find(s=>sameId(s.id,id))).filter(Boolean);
+const pendingSiblings=parentSessionIds.map(id=>pending.find(s=>sameId(s.id,id))).filter(Boolean);
 
-if(asArray(updated).some(s=>sameStudent(s,studentId,details))){
-alert('لم يتم العثور على الطلب أو لم يُحذف.');
-return;
+if(approvedSiblings.length>0){
+if(!approvedSiblings.some(s=>sameId(s.id,currentActiveStudentId))){
+currentActiveStudentId=approvedSiblings[0].id;
+localStorage.setItem('school_parent_active_id',currentActiveStudentId);
 }
-alert('✓ تم رفض الطلب.');
-}catch(error){showError(error);}
-}
-
-function openAcceptedStudentsModal(){
-document.getElementById('acceptedStudentsModal').classList.remove('hidden');
-renderGradesView();
-}
-
-function closeAcceptedStudentsModal(){
-document.getElementById('acceptedStudentsModal').classList.add('hidden');
-}
-
-function renderGradesView(){
-document.getElementById('modalTitle').textContent='📂 دليل الطالبات - اختر الصف';
-document.getElementById('modalBackBtnContainer').classList.add('hidden');
-const container=document.getElementById('acceptedStudentsContent');
-container.innerHTML='';
-
-gradesList.forEach(grade=>{
-const count=approvedStudents.filter(s=>s.grade===grade).length;
-const button=document.createElement('button');
-button.className='w-full bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
-button.innerHTML=`<span>${safeText(grade)}</span><span>${count} طالبة</span>`;
-button.onclick=()=>renderSectionsView(grade);
-container.appendChild(button);
-});
-}
-
-function renderSectionsView(grade){
-currentGrade=grade;
-currentSection='';
-document.getElementById('modalTitle').textContent=grade+' - اختر الشعبة';
-document.getElementById('modalBackBtnContainer').classList.remove('hidden');
-const container=document.getElementById('acceptedStudentsContent');
-container.innerHTML='';
-
-sectionsList.forEach(sec=>{
-const count=approvedStudents.filter(s=>s.grade===grade&&s.section===sec).length;
-const button=document.createElement('button');
-button.className='w-full bg-blue-50 border border-blue-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
-button.innerHTML=`<span>الشعبة (${sec})</span><span>${count} طالبة</span>`;
-button.onclick=()=>renderStudentsView(grade,sec);
-container.appendChild(button);
-});
-}
-
-function renderStudentsView(grade,section){
-currentGrade=grade;
-currentSection=section;
-document.getElementById('modalTitle').textContent='طالبات '+grade+' - شعبة ('+section+')';
-document.getElementById('modalBackBtnContainer').classList.remove('hidden');
-const container=document.getElementById('acceptedStudentsContent');
-const filtered=approvedStudents.filter(s=>s.grade===grade&&s.section===section);
-container.innerHTML='';
-
-if(!filtered.length){
-container.innerHTML='<p class="text-center p-5 text-gray-500">لا توجد طالبات.</p>';
-return;
-}
-
-filtered.forEach(st=>{
-const row=document.createElement('div');
-row.className='flex justify-between items-center border p-3 rounded-lg mb-2';
-const info=document.createElement('div');
-info.className='flex items-center gap-2';
-
-if(st.image){
-const img=document.createElement('img');
-img.src=st.image;
-img.className='w-10 h-10 rounded-full object-cover';
-info.appendChild(img);
-}
-
-const name=document.createElement('div');
-name.innerHTML=`<p class="font-bold">${safeText(st.student)}</p><p class="text-gray-500 text-xs">${safeText(st.mother)}</p>`;
-info.appendChild(name);
-
-const remove=document.createElement('button');
-remove.className='bg-red-500 text-white px-3 py-1 rounded text-xs cursor-pointer';
-remove.textContent='حذف';
-remove.onclick=()=>removeStudentFromAccepted(st.id,grade,section,{
-student:st.student,mother:st.mother,grade:st.grade,section:st.section
-});
-
-row.append(info,remove);
-container.appendChild(row);
-});
-}
-
-function backToGradesView(){
-if(currentSection){
-currentSection='';
-renderSectionsView(currentGrade);
+const activeStudent=approvedSiblings.find(s=>sameId(s.id,currentActiveStudentId))||approvedSiblings[0];
+showDashboard(activeStudent,approvedSiblings);
+renderParentContent(activeStudent);
+}else if(pendingSiblings.length>0){
+showWaitingScreen();
 }else{
-renderGradesView();
+/* إذا لم تعد الجلسة موجودة في السحابة (تم الحذف أو إعادة الضبط)، نعيد تعيين التخزين المحلي وإظهار شاشة التسجيل */
+localStorage.removeItem('school_parent_student_ids');
+localStorage.removeItem('school_parent_active_id');
+parentSessionIds=[];
+currentActiveStudentId=null;
+
+document.getElementById('parentDashboardView').classList.add('hidden');
+document.getElementById('parentWaitingView').classList.add('hidden');
+document.getElementById('parentLoginView').classList.remove('hidden');
 }
 }
 
-async function removeStudentFromAccepted(studentId,grade,section,details){
-if(!confirm('هل تريدين حذف الطالبة من المقبولات؟'))return;
-
+async function checkApprovalStatusAgain(){
 try{
-const updated=await safeTransaction(ROOT+'/approvedStudents',current=>{
-const list=asArray(current);
-const index=list.findIndex(s=>sameStudent(s,studentId,details));
-if(index===-1)return current;
-list.splice(index,1);
-return list;
-});
-
-if(asArray(updated).some(s=>sameStudent(s,studentId,details))){
-alert('لم يتم العثور على الطالبة.');
-return;
-}
-alert('✓ تم حذف الطالبة.');
-}catch(error){showError(error);}
-}
-
-async function updatePrincipalName(){
-const val=document.getElementById('newPrincipalName').value.trim();
-if(!val)return alert('أدخلي اسم المديرة.');
-
-try{
-await safeTransaction(ROOT+'/principalName',()=>val);
-principalName=val;
-alert('✓ تم حفظ اسم المديرة.');
-}catch(error){showError(error);}
-}
-
-async function updateSupervisorName(){
-const val=document.getElementById('newSupervisorName').value.trim();
-if(!val)return alert('أدخلي اسم المشرف.');
-
-try{
-await safeTransaction(ROOT+'/supervisorName',()=>val);
-supervisorName=val;
-alert('✓ تم حفظ اسم المشرف.');
-}catch(error){showError(error);}
-}
-
-async function sendLessonToSchedule(){
-const subject=document.getElementById('lessonSubject').value;
-const grade=document.getElementById('lessonGrade').value;
-const section=document.getElementById('lessonSection').value;
-const content=document.getElementById('lessonContent').value.trim();
-
-if(!content)return alert('اكتبي تفاصيل الدرس.');
-const classKey=grade+'_'+section;
-
-try{
-await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>content);
-document.getElementById('lessonContent').value='';
-alert('✓ تم نشر الدرس.');
-}catch(error){showError(error);}
-}
-
-function renderPublishedLessons(){
-const container=document.getElementById('publishedLessonsContainer');
-let html='';
-
-for(const [classKey,subjects] of Object.entries(schoolSchedule||{})){
-if(!subjects||typeof subjects!=='object')continue;
-const [grade,section]=classKey.split('_');
-
-for(const [subject,content] of Object.entries(subjects)){
-html+=`
-<div class="bg-pink-50 border p-3 rounded-lg mb-2 text-xs">
-<strong>${safeText(grade)} - شعبة ${safeText(section)}</strong>
-<p class="font-bold mt-1">${safeText(subject)}</p>
-<p class="my-2">${safeText(content)}</p>
-<button onclick="deleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-3 py-1 rounded cursor-pointer">حذف الدرس</button>
-</div>`;
+const snapshot=await db.ref(ROOT).once('value');
+globalSchoolData=snapshot.val()||{};
+dataLoaded=true;
+checkAndSyncSession();
+alert('✓ تم فحص حالة الطلبات.');
+}catch(error){
+alert('تعذر الاتصال بقاعدة البيانات: '+error.message);
 }
 }
 
-container.innerHTML=html||'<p class="text-gray-400">لا توجد دروس منشورة.</p>';
+function showWaitingScreen(){
+document.getElementById('parentLoginView').classList.add('hidden');
+document.getElementById('parentWaitingView').classList.remove('hidden');
+document.getElementById('parentDashboardView').classList.add('hidden');
 }
 
-async function deleteLesson(classKeyEncoded,subjectEncoded){
-const classKey=decodeURIComponent(classKeyEncoded);
-const subject=decodeURIComponent(subjectEncoded);
-if(!confirm('هل تريدين حذف هذا الدرس؟'))return;
+function showDashboard(student,siblings){
+document.getElementById('parentLoginView').classList.add('hidden');
+document.getElementById('parentWaitingView').classList.add('hidden');
+document.getElementById('parentDashboardView').classList.remove('hidden');
 
-try{
-await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>null);
-alert('✓ تم حذف الدرس.');
-}catch(error){showError(error);}
-}
+document.getElementById('welcomeStudentTitle').innerText='👧 الطالبة الحالية: '+student.student;
+document.getElementById('studentClassInfo').innerText=`${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
+document.getElementById('dashboardImageContainer').innerHTML='👧';
 
-async function clearAllLessons(){
-if(!confirm('سيتم حذف جميع الدروس فقط. هل أنت متأكدة؟'))return;
-try{
-await safeTransaction(ROOT+'/schoolSchedule',()=>null);
-alert('✓ تم حذف الدروس.');
-}catch(error){showError(error);}
-}
+const listDiv=document.getElementById('siblingsButtonsList');
+listDiv.innerHTML='';
 
-async function sendBroadcastMessage(){
-const targetGrade=document.getElementById('broadcastGrade').value;
-const targetSection=document.getElementById('broadcastSection').value;
-const textContent=document.getElementById('broadcastText').value.trim();
-
-if(!textContent)return alert('اكتبي نص التعميم.');
-
-try{
-await safeTransaction(ROOT+'/approvedStudents',current=>{
-const list=asArray(current);
-list.forEach(st=>{
-if((targetGrade==='الكل'||st.grade===targetGrade)&&
-(targetSection==='الكل'||st.section===targetSection)){
-if(!Array.isArray(st.notifications))st.notifications=[];
-st.notifications.unshift({
-type:'text',
-title:'📢 تعميم إداري عام',
-body:textContent,
-unread:true
-});
-}
-});
-return list;
-});
-
-document.getElementById('broadcastText').value='';
-alert('✓ تم إرسال التعميم.');
-}catch(error){showError(error);}
-}
-
-function toggleBroadcastSection(){
-document.getElementById('broadcastContentBody').classList.toggle('hidden');
-}
-
-function renderParentActivities(){
-const container=document.getElementById('parentsActivityContainer');
-
-if(!parentActivities.length){
-container.innerHTML='<p class="text-gray-400">لا توجد تنبيهات نشاط.</p>';
-return;
-}
-
-container.innerHTML='';
-parentActivities.forEach((act,index)=>{
-const div=document.createElement('div');
-div.className='p-3 border rounded-lg mb-2 '+(act.type==='logout'?'bg-red-50':'bg-emerald-50');
-div.innerHTML=`
-<p class="font-bold">${safeText(act.message)}</p>
-<p class="text-gray-500">${safeText(act.time)}</p>
-<button class="text-red-600 mt-2 cursor-pointer">حذف التنبيه</button>`;
-div.querySelector('button').onclick=()=>removeActivity(index);
-container.appendChild(div);
-});
-}
-
-async function removeActivity(index){
-if(!confirm('هل تريدين حذف التنبيه؟'))return;
-
-try{
-await safeTransaction(ROOT+'/parentActivities',current=>{
-const list=asArray(current);
-if(index<0||index>=list.length)return current;
-list.splice(index,1);
-return list;
-});
-}catch(error){showError(error);}
-}
-
-function renderAdminInquiries(){
-const container=document.getElementById('adminInquiriesContainer');
-
-if(!parentInquiries.length){
-container.innerHTML='<p class="text-gray-500">لا توجد استفسارات جديدة.</p>';
-return;
-}
-
-container.innerHTML='';
-parentInquiries.forEach(q=>{
-const div=document.createElement('div');
-div.className='p-3 bg-blue-50 border rounded-lg space-y-2 mb-2';
-
-div.innerHTML=`
-<p class="font-bold">الطالبة: ${safeText(q.studentName)}</p>
-<p>${safeText(q.grade)} - شعبة ${safeText(q.section)}</p>
-<p class="bg-white p-2 rounded">${safeText(q.content)}</p>
-<textarea id="reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد"></textarea>
-<div class="flex gap-2">
-<button class="bg-blue-600 text-white px-3 py-2 rounded cursor-pointer" data-action="reply">إرسال الرد</button>
-<button class="bg-red-600 text-white px-3 py-2 rounded cursor-pointer" data-action="delete">حذف الاستفسار</button>
-</div>`;
-
-div.querySelector('[data-action="reply"]').onclick=()=>replyInquiry(q.id);
-div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
-container.appendChild(div);
-});
-}
-
-async function replyInquiry(id){
-const input=document.getElementById('reply_'+id);
-const replyText=input?input.value.trim():'';
-if(!replyText)return alert('اكتبي الرد أولاً.');
-
-try{
-const updated=await safeTransaction(ROOT,current=>{
-if(!current||typeof current!=='object')return current;
-const data={...current};
-const inquiries=asArray(data.parentInquiries);
-const students=asArray(data.approvedStudents);
-
-const index=inquiries.findIndex(q=>String(q.id)===String(id));
-if(index===-1)return current;
-
-const inquiry=inquiries[index];
-const studentIndex=students.findIndex(s=>String(s.id)===String(inquiry.studentId));
-if(studentIndex===-1)return current;
-
-const student={...students[studentIndex]};
-if(!Array.isArray(student.notifications))student.notifications=[];
-
-student.notifications.unshift({
-type:'text',
-title:'💬 رد الإدارة على استفساركم',
-body:replyText,
-unread:true
-});
-
-students[studentIndex]=student;
-inquiries.splice(index,1);
-data.parentInquiries=inquiries;
-data.approvedStudents=students;
-return data;
-});
-
-const stillThere=asArray(updated?.parentInquiries).some(q=>String(q.id)===String(id));
-if(stillThere){
-alert('لم يتم إرسال الرد: لم يتم العثور على الطالبة أو الاستفسار.');
-return;
-}
-alert('✓ تم إرسال الرد.');
-}catch(error){showError(error);}
-}
-
-async function deleteInquiry(id){
-if(!confirm('هل تريدين حذف الاستفسار؟'))return;
-
-try{
-await safeTransaction(ROOT+'/parentInquiries',current=>{
-const list=asArray(current);
-const index=list.findIndex(q=>String(q.id)===String(id));
-if(index===-1)return current;
-list.splice(index,1);
-return list;
-});
-alert('✓ تم حذف الاستفسار.');
-}catch(error){showError(error);}
-}
-
-function openStudentsModal(){
-document.getElementById('studentsModal').classList.remove('hidden');
-const box=document.getElementById('modalStudentsList');
-box.innerHTML='<p class="text-gray-500">تُعرض بيانات الطالبات المقبولات هنا.</p>';
-
-approvedStudents.forEach(st=>{
-const div=document.createElement('div');
-div.className='border p-3 rounded-lg mb-2';
-div.innerHTML=`
-<strong>${safeText(st.student)}</strong>
-<p>${safeText(st.grade)} - شعبة ${safeText(st.section)}</p>
-<p>ولي الأمر: ${safeText(st.mother)}</p>`;
-box.appendChild(div);
-});
-}
-
-function closeStudentsModal(){
-document.getElementById('studentsModal').classList.add('hidden');
-}
-
-function clearAllSystemData(){
-alert(
-'🛡️ حماية البيانات مفعّلة.\n'+
-'هذا الزر لا يحذف أي بيانات.\n'+
-'استخدمي زر النسخة الاحتياطية لتنزيل نسخة من بيانات المدرسة.'
+siblings.forEach(sib=>{
+const isActive=sameId(sib.id,student.id);
+const btn=document.createElement('button');
+btn.className='px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer '+(
+isActive?'bg-pink-600 text-white font-bold shadow':'bg-pink-100 text-pink-800 hover:bg-pink-200'
 );
+const icon=document.createElement('span');
+icon.textContent='👧';
+const name=document.createElement('span');
+name.textContent=sib.student||'طالبة';
+btn.append(icon,name);
+btn.onclick=()=>switchActiveSibling(sib.id);
+listDiv.appendChild(btn);
+});
+}
+
+function switchActiveSibling(id){
+currentActiveStudentId=id;
+localStorage.setItem('school_parent_active_id',id);
+checkAndSyncSession();
+}
+
+function renderParentContent(student){
+const notifContainer=document.getElementById('parentNotificationsContainer');
+const notifications=Array.isArray(student.notifications)?student.notifications:[];
+
+if(notifications.length===0){
+notifContainer.innerHTML='<p class="text-gray-500">لا توجد إشعارات جديدة حالياً.</p>';
+}else{
+notifContainer.innerHTML='';
+notifications.forEach(n=>{
+const div=document.createElement('div');
+div.className='bg-indigo-50 border border-indigo-100 p-2 rounded-lg';
+const title=document.createElement('p');
+title.className='font-bold text-indigo-900';
+title.textContent=n.title||'إشعار مدرسي';
+const body=document.createElement('p');
+body.className='text-gray-700 mt-0.5';
+body.textContent=n.body||'';
+div.append(title,body);
+notifContainer.appendChild(div);
+});
+}
+
+const scheduleContainer=document.getElementById('parentScheduleContainer');
+const classKey=`${student.grade}_${student.section}`;
+const schedule=(globalSchoolData.schoolSchedule&&globalSchoolData.schoolSchedule[classKey])||{};
+scheduleContainer.innerHTML='';
+
+if(Object.keys(schedule).length===0){
+scheduleContainer.innerHTML='<p class="text-gray-500">لا توجد دروس منشورة لهذا الصف والشعبة حالياً.</p>';
+}else{
+for(const [subject,content] of Object.entries(schedule)){
+const div=document.createElement('div');
+div.className='bg-pink-50 border border-pink-100 p-2 rounded-lg';
+const title=document.createElement('p');
+title.className='font-bold text-pink-800';
+title.textContent='📖 '+subject+':';
+const body=document.createElement('p');
+body.className='text-gray-700 mt-0.5';
+body.textContent=String(content??'');
+div.append(title,body);
+scheduleContainer.appendChild(div);
+}
+}
+}
+
+async function sendParentInquiry(){
+if(parentBusy)return;
+const content=document.getElementById('parentInquiryText').value.trim();
+const approved=getApprovedList();
+const currentStudent=approved.find(s=>sameId(s.id,currentActiveStudentId));
+
+if(!content){
+alert('يرجى كتابة الاستفسار أولاً.');
+return;
+}
+if(!currentStudent){
+alert('تعذر تحديد الطالبة الحالية. يرجى تحديث الصفحة.');
+return;
+}
+
+parentBusy=true;
+setButtonLoading('sendInquiryButton',true);
+
+try{
+const inquiry={
+id:'inq_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+studentId:currentStudent.id,
+studentName:currentStudent.student,
+grade:currentStudent.grade,
+section:currentStudent.section,
+content:content,
+createdAt:Date.now()
+};
+
+const inquiriesRef=db.ref(ROOT+'/parentInquiries');
+const result=await inquiriesRef.transaction(current=>{
+const list=asArray(current);
+list.push(inquiry);
+return list;
+},undefined,false);
+
+if(!result.committed){
+throw new Error('لم يتم حفظ الاستفسار.');
+}
+
+document.getElementById('parentInquiryText').value='';
+alert('✓ تم إرسال استفسارك للإدارة بنجاح!');
+}catch(error){
+console.error(error);
+alert('تعذر إرسال الاستفسار: '+error.message);
+}finally{
+parentBusy=false;
+setButtonLoading('sendInquiryButton',false,'إرسال الاستفسار ✉️');
+}
+}
+
+function logoutParent(){
+localStorage.removeItem('school_parent_student_ids');
+localStorage.removeItem('school_parent_active_id');
+parentSessionIds=[];
+currentActiveStudentId=null;
+
+document.getElementById('parentDashboardView').classList.add('hidden');
+document.getElementById('parentWaitingView').classList.add('hidden');
+document.getElementById('parentLoginView').classList.remove('hidden');
+document.getElementById('parentFormError').textContent='';
 }
 </script>
 </body>
