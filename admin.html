@@ -16,37 +16,37 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 min-h-screen p-4 flex items-center justify-center">
+<body class="bg-gray-100 text-gray-800 min-h-screen p-4 flex items-center justify-center">
 
-<div class="max-w-xl w-full space-y-5">
+<div class="max-w-xl w-full mx-auto space-y-5">
 
-<!-- شاشة تسجيل الدخول المشتركة (للإدارة أو المعلمات) -->
-<div id="authView" class="bg-white p-8 rounded-2xl shadow border border-gray-100 space-y-4">
+<!-- شاشة تسجيل الدخول الموحد -->
+<div id="authView" class="bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-gray-200 space-y-4">
 <h2 class="text-xl font-bold text-indigo-700 text-center">🔐 تسجيل الدخول الموحد</h2>
 <p class="text-xs text-gray-500 text-center">أدخل كلمة المرور الخاصة بك (الإدارة أو الكادر التعليمي).</p>
 <div>
 <label class="block text-xs font-semibold mb-1">كلمة المرور:</label>
-<input id="passInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white text-xs" placeholder="أدخل كلمة المرور">
+<input id="passInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="أدخل كلمة المرور">
 </div>
-<button onclick="loginUser()" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold text-xs cursor-pointer hover:bg-indigo-700 transition">دخول النظام 🚀</button>
-<p id="loginError" class="text-red-600 text-xs text-center"></p>
+<button onclick="loginUser()" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold text-xs hover:bg-indigo-700 transition cursor-pointer">دخول النظام 🚀</button>
+<p id="loginError" class="text-red-600 text-xs text-center font-semibold"></p>
 </div>
 
-<!-- لوحة التحكم الإدارية الكاملة (تظهر فقط للإدارة) -->
-<div id="adminDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-gray-100 space-y-5">
+<!-- لوحة التحكم الإدارية الكاملة -->
+<div id="adminDashboardView" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-gray-200 space-y-5">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
-<h2 class="font-bold text-indigo-700 text-sm">🛠️ لوحة التحكم الإدارية - مدرسة الضياء</h2>
+<h2 class="font-bold text-indigo-700 text-sm sm:text-base">🛠️ لوحة التحكم الإدارية - مدرسة الضياء</h2>
 <p class="text-[11px] text-gray-500">صلاحيات كاملة لإدارة المنصة</p>
 </div>
-<button onclick="logoutUser()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+<button onclick="logoutUser()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 transition cursor-pointer">خروج 🚪</button>
 </div>
 
-<div class="space-y-3 text-xs">
-<h3 class="font-bold text-gray-700">📚 نشر درس إداري جديد</h3>
+<div class="space-y-4 text-xs">
+<h3 class="font-bold text-gray-700 text-sm border-r-4 border-indigo-600 pr-2">📚 نشر درس إداري جديد</h3>
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
-<select id="adminLessonSubject" class="w-full border rounded-lg p-2 bg-white">
+<select id="adminLessonSubject" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-indigo-500">
 <option>القرآن الكريم</option>
 <option>اللغة العربية</option>
 <option>الرياضيات</option>
@@ -59,7 +59,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div>
 <label class="block font-semibold mb-1">الصف الدراسي:</label>
-<select id="adminLessonGrade" class="w-full border rounded-lg p-2 bg-white">
+<select id="adminLessonGrade" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-indigo-500">
 <option>الأول الابتدائي</option>
 <option>الثاني الابتدائي</option>
 <option>الثالث الابتدائي</option>
@@ -71,38 +71,38 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div>
 <label class="block font-semibold mb-1">الشعب المستهدفة:</label>
-<div class="flex gap-4 p-2 border rounded-lg bg-indigo-50">
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="adminSection" value="أ" class="w-4 h-4 text-indigo-600"> الشعبة (أ)</label>
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="adminSection" value="ب" class="w-4 h-4 text-indigo-600"> الشعبة (ب)</label>
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="adminSection" value="ج" class="w-4 h-4 text-indigo-600"> الشعبة (ج)</label>
+<div class="flex flex-wrap gap-4 p-3 border rounded-lg bg-indigo-50/50">
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="adminSection" value="أ" class="w-4 h-4 text-indigo-600 rounded"> الشعبة (أ)</label>
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="adminSection" value="ب" class="w-4 h-4 text-indigo-600 rounded"> الشعبة (ب)</label>
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="adminSection" value="ج" class="w-4 h-4 text-indigo-600 rounded"> الشعبة (ج)</label>
 </div>
 </div>
 
 <div>
 <label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
-<textarea id="adminLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي التفاصيل..."></textarea>
+<textarea id="adminLessonContent" rows="3" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-indigo-500" placeholder="اكتبي التفاصيل..."></textarea>
 </div>
 
-<button id="adminPublishBtn" onclick="adminSendLesson()" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-indigo-700 transition cursor-pointer">
+<button id="adminPublishBtn" onclick="adminSendLesson()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-indigo-700 transition cursor-pointer shadow-sm">
 نشر الدرس للشعب المحددة 🚀
 </button>
 </div>
 </div>
 
-<!-- واجهة المعلمات المخصصة (تظهر فقط عند دخول المعلمة) -->
-<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 space-y-4">
+<!-- واجهة المعلمات المخصصة -->
+<div id="teacherDashboardView" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-pink-200 space-y-4">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
-<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - نشر الدروس</h2>
+<h2 class="font-bold text-pink-700 text-sm sm:text-base">👩‍🏫 بوابة المعلمات - نشر الدروس</h2>
 <p class="text-[11px] text-gray-500">مخصصة لنشر الحصص والواجبات فقط</p>
 </div>
-<button onclick="logoutUser()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+<button onclick="logoutUser()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 transition cursor-pointer">خروج 🚪</button>
 </div>
 
-<div class="space-y-3 text-xs">
+<div class="space-y-4 text-xs">
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
-<select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
+<select id="teacherLessonSubject" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-pink-500">
 <option>القرآن الكريم</option>
 <option>اللغة العربية</option>
 <option>الرياضيات</option>
@@ -115,7 +115,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div>
 <label class="block font-semibold mb-1">الصف الدراسي:</label>
-<select id="teacherLessonGrade" class="w-full border rounded-lg p-2 bg-white">
+<select id="teacherLessonGrade" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-pink-500">
 <option>الأول الابتدائي</option>
 <option>الثاني الابتدائي</option>
 <option>الثالث الابتدائي</option>
@@ -127,19 +127,19 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div>
 <label class="block font-semibold mb-1">الشعب المستهدفة:</label>
-<div class="flex gap-4 p-2 border rounded-lg bg-pink-50">
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="أ" class="w-4 h-4 text-pink-600"> الشعبة (أ)</label>
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ب" class="w-4 h-4 text-pink-600"> الشعبة (ب)</label>
-<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
+<div class="flex flex-wrap gap-4 p-3 border rounded-lg bg-pink-50/50">
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="teacherSection" value="أ" class="w-4 h-4 text-pink-600 rounded"> الشعبة (أ)</label>
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="teacherSection" value="ب" class="w-4 h-4 text-pink-600 rounded"> الشعبة (ب)</label>
+<label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="teacherSection" value="ج" class="w-4 h-4 text-pink-600 rounded"> الشعبة (ج)</label>
 </div>
 </div>
 
 <div>
 <label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
-<textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس..."></textarea>
+<textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-pink-500" placeholder="اكتبي تفاصيل الدرس..."></textarea>
 </div>
 
-<button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
+<button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer shadow-sm">
 نشر الدرس للشعب المحددة 🚀
 </button>
 </div>
@@ -164,11 +164,10 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const ROOT='school_data';
 
-// كلمات المرور (يمكنك تغييرها لاحقاً حسب رغبتك)
 const adminPass='admin2026';
 const teacherPass='teacher2026';
 
-let userRole=localStorage.getItem('school_user_role'); // 'admin' or 'teacher'
+let userRole=localStorage.getItem('school_user_role');
 
 window.onload=function(){
 if(userRole==='admin'){
@@ -208,7 +207,6 @@ document.getElementById('authView').classList.remove('hidden');
 document.getElementById('passInput').value='';
 }
 
-// دالة النشر الخاصة بالإدارة
 async function adminSendLesson(){
 const subject=document.getElementById('adminLessonSubject').value;
 const grade=document.getElementById('adminLessonGrade').value;
@@ -245,7 +243,6 @@ btn.textContent='نشر الدرس للشعب المحددة 🚀';
 }
 }
 
-// دالة النشر الخاصة للمعلمات
 async function teacherSendLesson(){
 const subject=document.getElementById('teacherLessonSubject').value;
 const grade=document.getElementById('teacherLessonGrade').value;
