@@ -108,7 +108,6 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const ROOT='school_data';
 
-/* كلمة مرور خاصة بالكادر التعليمي (يمكنك تعديلها بحسب رغبتك) */
 const teacherPass='teacher2026';
 let teacherLoggedIn=localStorage.getItem('school_teacher_logged')==='true';
 
@@ -194,4 +193,3 @@ btn.textContent='نشر الدرس للشعب المحددة 🚀';
 </script>
 </body>
 </html>
-
