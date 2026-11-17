@@ -20,6 +20,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div class="max-w-4xl mx-auto space-y-5">
 
+<!-- تسجيل الدخول -->
 <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 max-w-md mx-auto space-y-4">
 <h2 class="text-xl font-bold text-pink-700 text-center">🔒 دخول لوحة إدارة المدرسة</h2>
 <div>
@@ -34,12 +35,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p id="loginError" class="text-red-600 text-xs text-center"></p>
 </div>
 
+<!-- لوحة الإدارة الرئيسية -->
 <div id="adminDashboardView" class="hidden space-y-5">
 
 <div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
 <div class="flex flex-wrap gap-2">
 <button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📂 دليل الطالبات المقبولات</button>
 <button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🎯 متابعة المشاهدات</button>
+<button onclick="openLessonsArchiveModal()" class="bg-purple-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📚 أرشيف الحصص والدروس</button>
 <button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🔄 تحديث البيانات</button>
 <button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">⬇️ نسخة احتياطية</button>
 <button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🛡️ حماية البيانات</button>
@@ -61,6 +64,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div id="systemWarning" class="hidden bg-red-100 border border-red-300 text-red-800 p-3 rounded-lg text-xs"></div>
 
+<!-- البحث -->
 <div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
 <h2 class="font-bold text-blue-700">🔍 البحث عن طالبة</h2>
 <div class="flex gap-2">
@@ -70,16 +74,19 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div id="searchResultContainer" class="hidden p-3 bg-blue-50 rounded-lg text-xs"></div>
 </div>
 
+<!-- الطلبات المعلقة -->
 <div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
 <h2 class="font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة</h2>
 <div id="requestsContainer">جارٍ تحميل الطلبات...</div>
 </div>
 
+<!-- نشاط أولياء الأمور -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
 <h2 class="font-bold text-purple-700 border-b pb-2">🔔 نشاط أولياء الأمور</h2>
 <div id="parentsActivityContainer" class="text-xs"></div>
 </div>
 
+<!-- إعدادات المدرسة -->
 <div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
 <h2 class="font-bold text-pink-700">👩‍💼 إعدادات المدرسة</h2>
 <label class="block text-xs">اسم المديرة</label>
@@ -91,7 +98,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- جدول الحصص والواجبات (محدث بمربعات اختيار الشعب المتعددة) -->
+<!-- جدول الحصص والواجبات (مع اختيار متعدد للشعب) -->
 <div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
 <h2 class="font-bold text-pink-700">📅 جدول الحصص والواجبات</h2>
 
@@ -130,12 +137,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <hr>
 
 <div class="flex justify-between items-center">
-<strong class="text-xs">📖 الدروس المنشورة</strong>
+<strong class="text-xs">📖 الدروس المنشورة السريعة</strong>
 <button onclick="clearAllLessons()" class="text-red-600 text-xs cursor-pointer">حذف جميع الدروس</button>
 </div>
 <div id="publishedLessonsContainer" class="space-y-2"></div>
 </div>
 
+<!-- التعميمات -->
 <div class="bg-white rounded-xl shadow border border-indigo-100 overflow-hidden">
 <button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 font-bold text-indigo-700 text-right cursor-pointer">🎙️ إرسال تعميم لجميع أولياء الأمور ▼</button>
 <div id="broadcastContentBody" class="hidden p-5 space-y-3">
@@ -161,6 +169,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
+<!-- الاستفسارات -->
 <div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
 <h2 class="font-bold text-blue-700">💬 استفسارات أولياء الأمور</h2>
 <div id="adminInquiriesContainer" class="space-y-3 text-xs"></div>
@@ -169,6 +178,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
+<!-- نافذة دليل الطالبات المقبولات -->
 <div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
 <div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
 <div class="flex justify-between border-b pb-2">
@@ -182,11 +192,26 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
+<!-- نافذة متابعة المشاهدات -->
 <div id="studentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
 <div class="bg-white rounded-2xl p-5 w-full max-w-3xl max-h-[85vh] overflow-y-auto space-y-3">
 <h3 class="font-bold text-pink-700">🎯 سجل الطالبات</h3>
 <div id="modalStudentsList"></div>
 <button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white p-2 rounded-lg cursor-pointer">إغلاق</button>
+</div>
+</div>
+
+<!-- نافذة أرشيف الحصص والدروس (الجديدة) -->
+<div id="lessonsArchiveModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+<div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
+<div class="flex justify-between border-b pb-2 items-center">
+<h3 id="archiveModalTitle" class="font-bold text-purple-700 text-sm">📚 أرشيف الحصص والدروس - اختر الصف</h3>
+<button onclick="closeLessonsArchiveModal()" class="cursor-pointer font-bold text-gray-600 text-base">✕</button>
+</div>
+<div id="archiveModalContent" class="space-y-2"></div>
+<div id="archiveBackBtnContainer" class="hidden pt-2 border-t">
+<button onclick="backToArchiveGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs cursor-pointer font-semibold">العودة لقائمة الصفوف</button>
+</div>
 </div>
 </div>
 
@@ -225,6 +250,10 @@ let adminLoggedIn=localStorage.getItem('school_admin_logged')==='true';
 let currentGrade='';
 let currentSection='';
 let approvalInProgress=false;
+
+/* متطلبات الأرشيف التدرجي */
+let archiveCurrentGrade='';
+let archiveCurrentSection='';
 
 const gradesList=[
 'الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي',
@@ -352,6 +381,17 @@ renderRequests();
 renderAdminInquiries();
 renderPublishedLessons();
 renderParentActivities();
+
+/* تحديث عرض الأرشيف إن كان مفتوحاً */
+if(!document.getElementById('lessonsArchiveModal').classList.contains('hidden')){
+if(archiveCurrentSection){
+renderArchiveLessonsView(archiveCurrentGrade, archiveCurrentSection);
+}else if(archiveCurrentGrade){
+renderArchiveSectionsView(archiveCurrentGrade);
+}else{
+renderArchiveGradesView();
+}
+}
 }
 
 window.onload=function(){
@@ -892,6 +932,119 @@ try{
 await safeTransaction(ROOT+'/schoolSchedule',()=>null);
 alert('✓ تم حذف الدروس.');
 }catch(error){showError(error);}
+}
+
+/* ==================================================
+   وظائف أرشيف الحصص والدروس المتدرج الجديد
+================================================== */
+function openLessonsArchiveModal(){
+document.getElementById('lessonsArchiveModal').classList.remove('hidden');
+renderArchiveGradesView();
+}
+
+function closeLessonsArchiveModal(){
+document.getElementById('lessonsArchiveModal').classList.add('hidden');
+archiveCurrentGrade='';
+archiveCurrentSection='';
+}
+
+function renderArchiveGradesView(){
+archiveCurrentGrade='';
+archiveCurrentSection='';
+document.getElementById('archiveModalTitle').textContent='📚 أرشيف الحصص والدروس - اختر الصف';
+document.getElementById('archiveBackBtnContainer').classList.add('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+gradesList.forEach(grade=>{
+// حساب عدد الدروس الكلي لهذا الصف عبر كل الشعب
+let gradeLessonsCount=0;
+sectionsList.forEach(sec=>{
+const key=grade+'_'+sec;
+if(schoolSchedule[key]&&typeof schoolSchedule[key]==='object'){
+gradeLessonsCount+=Object.keys(schoolSchedule[key]).length;
+}
+});
+
+const button=document.createElement('button');
+button.className='w-full bg-purple-50 border border-purple-200 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer hover:bg-purple-100 transition';
+button.innerHTML=`<span>${safeText(grade)}</span><span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs">${gradeLessonsCount} درس</span>`;
+button.onclick=()=>renderArchiveSectionsView(grade);
+container.appendChild(button);
+});
+}
+
+function renderArchiveSectionsView(grade){
+archiveCurrentGrade=grade;
+archiveCurrentSection='';
+document.getElementById('archiveModalTitle').textContent=grade+' - اختر الشعبة';
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+sectionsList.forEach(sec=>{
+const key=grade+'_'+sec;
+const subjects=(schoolSchedule[key]&&typeof schoolSchedule[key]==='object')?schoolSchedule[key]:{};
+const count=Object.keys(subjects).length;
+
+const button=document.createElement('button');
+button.className='w-full bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer hover:bg-indigo-100 transition';
+button.innerHTML=`<span>الشعبة (${sec})</span><span class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs">${count} درس</span>`;
+button.onclick=()=>renderArchiveLessonsView(grade,sec);
+container.appendChild(button);
+});
+}
+
+function renderArchiveLessonsView(grade,section){
+archiveCurrentGrade=grade;
+archiveCurrentSection=section;
+document.getElementById('archiveModalTitle').textContent=`دروس ${grade} - شعبة (${section})`;
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+const key=grade+'_'+section;
+const subjects=(schoolSchedule[key]&&typeof schoolSchedule[key]==='object')?schoolSchedule[key]:{};
+
+if(Object.keys(subjects).length===0){
+container.innerHTML='<p class="text-center p-5 text-gray-500 text-xs">لا توجد دروس منشورة لهذه الشعبة.</p>';
+return;
+}
+
+for(const [subject,content] of Object.entries(subjects)){
+const div=document.createElement('div');
+div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 shadow-sm text-xs';
+div.innerHTML=`
+<div class="flex justify-between items-center border-b pb-1.5">
+<strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
+<button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
+</div>
+<p class="text-gray-700 whitespace-pre-wrap">${safeText(content)}</p>
+`;
+container.appendChild(div);
+}
+}
+
+async function deleteArchiveLesson(encodedKey, encodedSubject){
+const classKey=decodeURIComponent(encodedKey);
+const subject=decodeURIComponent(encodedSubject);
+
+if(!confirm(`هل تريدين حذف درس (${subject}) نهائياً؟`))return;
+
+try{
+await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>null);
+alert('✓ تم حذف الدرس بنجاح من الأرشيف.');
+}catch(error){
+showError(error);
+}
+}
+
+function backToArchiveGradesView(){
+if(archiveCurrentSection){
+renderArchiveSectionsView(archiveCurrentGrade);
+}else{
+renderArchiveGradesView();
+}
 }
 
 async function sendBroadcastMessage(){
