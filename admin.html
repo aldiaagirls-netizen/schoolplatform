@@ -167,45 +167,37 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 </div>
 
-<!-- واجهة المعلمات المخصصة (نشر الدروس + اختيار التخصص + استفسارات الصف والمادة) -->
+<!-- واجهة المعلمات المخصصة (تدعم اختيار عدة مواد وعدة صفوف) -->
 <div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
 <h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - نشر الدروس والاستفسارات</h2>
-<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي</p>
+<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي (متعددة التخصصات)</p>
 </div>
 <button onclick="logoutAdmin()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
 </div>
 
-<!-- تحديد تخصص المعلمة (الصف والمادة) -->
+<!-- تحديد مواد وصفوف المعلمة (متعددة الاختيارات) -->
 <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-3 text-xs">
-<h3 class="font-bold text-purple-900">📌 تحديد صفوف ومواد المعلمة الخاصة بك</h3>
-<div class="grid grid-cols-2 gap-2">
+<h3 class="font-bold text-purple-900">📌 حددي المواد والصفوف التي تدرسينها (يمكنك اختيار أكثر من خيار):</h3>
+
+
 <div>
-<label class="block font-semibold mb-1">المادة التي تدرسينها:</label>
-<select id="teacherMySubject" onchange="saveTeacherProfile()" class="w-full border rounded-lg p-2 bg-white">
-<option>القرآن الكريم</option>
-<option>اللغة العربية</option>
-<option>الرياضيات</option>
-<option>الاجتماعيات</option>
-<option>اللغة الإنجليزية</option>
-<option>الأخلاقية</option>
-<option>العلوم</option>
-</select>
+<label class="block font-semibold mb-1 text-purple-800">المواد الدراسية التي تدرسينها:</label>
+<div id="mySubjectsCheckboxes" class="grid grid-cols-2 gap-2 bg-white p-3 rounded-lg border">
+<!-- يتم تعبئتها برمجياً -->
 </div>
+</div>
+
 <div>
-<label class="block font-semibold mb-1">الصف الذي تدرسينه:</label>
-<select id="teacherMyGrade" onchange="saveTeacherProfile()" class="w-full border rounded-lg p-2 bg-white">
-<option>الأول الابتدائي</option>
-<option>الثاني الابتدائي</option>
-<option>الثالث الابتدائي</option>
-<option>الرابع الابتدائي</option>
-<option>الخامس الابتدائي</option>
-<option>السادس الابتدائي</option>
-</select>
+<label class="block font-semibold mb-1 text-purple-800">الصفوف الدراسية التي تدرسينها:</label>
+<div id="myGradesCheckboxes" class="grid grid-cols-2 gap-2 bg-white p-3 rounded-lg border">
+<!-- يتم تعبئتها برمجياً -->
 </div>
 </div>
-<p class="text-[10px] text-purple-700">💡 سيتم عرض استفسارات أولياء الأمور لهذا الصف والمادة حصراً لك أدناه.</p>
+
+<button onclick="saveTeacherProfile()" class="w-full bg-purple-600 text-white py-2 rounded-lg font-bold hover:bg-purple-700 transition cursor-pointer">حفظ جدولك وتخصصاتك 💾</button>
+<p class="text-[10px] text-purple-700 text-center">💡 ستظهر لك أدناه استفسارات أولياء الأمور الخاصة بالمواد والصفوف التي حددتِها فقط.</p>
 </div>
 
 <!-- قسم نشر الدروس -->
@@ -257,7 +249,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <!-- قسم استفسارات أولياء الأمور المفلترة الخاصة بالمعلمة -->
 <div class="space-y-3 text-xs border-t pt-4">
-<h3 class="font-bold text-purple-700">💬 استفسارات صفك ومادتك الخاصة</h3>
+<h3 class="font-bold text-purple-700">💬 استفسارات صفوفك وموادك الخاصة</h3>
 <div id="teacherInquiriesContainer" class="space-y-3"></div>
 </div>
 
@@ -345,6 +337,10 @@ let archiveCurrentSection='';
 const gradesList=[
 'الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي',
 'الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي'
+];
+const subjectsList=[
+'القرآن الكريم','اللغة العربية','الرياضيات',
+'الاجتماعيات','اللغة الإنجليزية','الأخلاقية','العلوم'
 ];
 const sectionsList=['أ','ب','ج'];
 
@@ -483,6 +479,8 @@ renderArchiveGradesView();
 }
 
 window.onload=function(){
+buildTeacherCheckboxes();
+
 db.ref('.info/connected').on('value',snapshot=>{
 firebaseConnected=snapshot.val()===true;
 const connStatus=document.getElementById('connectionStatus');
@@ -551,20 +549,54 @@ document.getElementById('adminPassInput').value='';
 document.getElementById('adminUserInput').value='';
 }
 
-// حفظ واسترجاع تخصص المعلمة محلياً
+// بناء مربعات الاختيار المتعددة لمواد وصفوف المعلمة
+function buildTeacherCheckboxes(){
+const subjContainer=document.getElementById('mySubjectsCheckboxes');
+const gradeContainer=document.getElementById('myGradesCheckboxes');
+if(!subjContainer || !gradeContainer) return;
+
+subjContainer.innerHTML='';
+subjectsList.forEach(subj=>{
+subjContainer.innerHTML+=`
+<label class="flex items-center gap-2 cursor-pointer text-xs">
+<input type="checkbox" name="teacherSubjCheck" value="${subj}" class="w-4 h-4 text-purple-600 rounded"> ${subj}
+</label>`;
+});
+
+gradeContainer.innerHTML='';
+gradesList.forEach(grade=>{
+gradeContainer.innerHTML+=`
+<label class="flex items-center gap-2 cursor-pointer text-xs">
+<input type="checkbox" name="teacherGradeCheck" value="${grade}" class="w-4 h-4 text-purple-600 rounded"> ${grade}
+</label>`;
+});
+}
+
+// حفظ تخصصات المعلمة المتعددة في الذاكرة المحلية
 function saveTeacherProfile(){
-const subj=document.getElementById('teacherMySubject').value;
-const grade=document.getElementById('teacherMyGrade').value;
-localStorage.setItem('teacher_subject', subj);
-localStorage.setItem('teacher_grade', grade);
+const selectedSubjs=Array.from(document.querySelectorAll('input[name="teacherSubjCheck"]:checked')).map(cb=>cb.value);
+const selectedGrades=Array.from(document.querySelectorAll('input[name="teacherGradeCheck"]:checked')).map(cb=>cb.value);
+
+localStorage.setItem('teacher_subjects_list', JSON.stringify(selectedSubjs));
+localStorage.setItem('teacher_grades_list', JSON.stringify(selectedGrades));
+
+alert('✓ تم حفظ جدولك وتخصصاتك بنجاح.');
 renderTeacherInquiries();
 }
 
+// استرجاع تخصصات المعلمة
 function loadTeacherProfile(){
-const subj=localStorage.getItem('teacher_subject');
-const grade=localStorage.getItem('teacher_grade');
-if(subj) document.getElementById('teacherMySubject').value=subj;
-if(grade) document.getElementById('teacherMyGrade').value=grade;
+const savedSubjs = JSON.parse(localStorage.getItem('teacher_subjects_list')||'[]');
+const savedGrades = JSON.parse(localStorage.getItem('teacher_grades_list')||'[]');
+
+document.querySelectorAll('input[name="teacherSubjCheck"]').forEach(cb=>{
+if(savedSubjs.includes(cb.value)) cb.checked=true;
+});
+
+document.querySelectorAll('input[name="teacherGradeCheck"]').forEach(cb=>{
+if(savedGrades.includes(cb.value)) cb.checked=true;
+});
+
 renderTeacherInquiries();
 }
 
@@ -1281,22 +1313,1409 @@ container.appendChild(div);
 });
 }
 
-// عرض الاستفسارات المفلترة حصراً للصف والمادة التي اختارتها المعلمة
+// عرض الاستفسارات المفلترة بناءً على المواد والصفوف المتعددة التي حددتها المعلمة
 function renderTeacherInquiries(){
 const container=document.getElementById('teacherInquiriesContainer');
 if(!container)return;
 
-const mySubject=document.getElementById('teacherMySubject').value;
-const myGrade=document.getElementById('teacherMyGrade').value;
+const savedSubjs = JSON.parse(localStorage.getItem('teacher_subjects_list')||'[]');
+const savedGrades = JSON.parse(localStorage.getItem('teacher_grades_list')||'[]');
 
-// تصفية الاستفسارات لتطابق صف ومادة المعلمة فقط
+if(savedSubjs.length === 0 || savedGrades.length === 0){
+container.innerHTML=`<p class="text-purple-700 text-xs font-bold">⚠️ يرجى اختيار وتحديد المواد والصفوف التي تدرسينها بالأعلى ثم الضغط على زر "حفظ جدولك وتخصصاتك" لتظهر لك الاستفسارات.</p>`;
+return;
+}
+
+// تصفية الاستفسارات لتطابق أي مادة وأي صف من ضمن جدول المعلمة
 const filteredInquiries=parentInquiries.filter(q=>{
-return String(q.grade||'').trim()===String(myGrade||'').trim() &&
-String(q.subject||'').trim()===String(mySubject||'').trim();
+const matchGrade = savedGrades.includes(String(q.grade||'').trim());
+const matchSubj = savedSubjs.includes(String(q.subject||'').trim());
+return matchGrade && matchSubj;
 });
 
 if(!filteredInquiries.length){
-container.innerHTML=`<p class="text-gray-500 text-xs">لا توجد استفسارات جديدة تخص مادة (${mySubject}) للصف (${myGrade}).</p>`;
+container.innerHTML=`<p class="text-gray-500 text-xs">لا توجد استفسارات جديدة تخص صفوفك وموادك المحددة.</p>`;
+return;
+}
+
+container.innerHTML='';
+filteredInquiries.forEach(q=>{
+const div=document.createElement('div');
+div.className='p-3 bg-purple-50 border border-purple-100 rounded-lg space-y-2 mb-2';
+
+div.innerHTML=`
+<p class="font-bold text-purple-900">الطالبة: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
+<p class="text-xs text-gray-600 font-semibold">المادة المطلوبة: ${safeText(q.subject)}</p>
+<p class="bg-white p-2 rounded text-gray-700">${safeText(q.content)}</p>
+<textarea id="teacher_reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد كمعلمة للمادة..."></textarea>
+<div class="flex gap-2">
+<button onclick="replyInquiry('${q.id}')" class="bg-purple-600 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">إرسال الرد لولي الأمر 🚀</button>
+<button onclick="deleteInquiry('${q.id}')" class="bg-red-500 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">حذف الاستفسار</button>
+</div>`;
+container.appendChild(div);
+});
+}
+
+async function replyInquiry(id){
+const input=document.getElementById('reply_'+id) || document.getElementById('teacher_reply_'+id);
+const replyText=input?input.value.trim():'';
+if(!replyText)return alert('اكتبي الرد أولاً.');
+
+try{
+const updated=await safeTransaction(ROOT,current=>{
+if(!current||typeof current!=='object')return current;
+const data={...current};
+const inquiries=asArray(data.parentInquiries);
+const students=asArray(data.approvedStudents);
+
+const index=inquiries.findIndex(q=>String(q.id)===String(id));
+if(index===-1)return current;
+
+const inquiry=inquiries[index];
+const studentIndex=students.findIndex(s=>String(s.id)===String(inquiry.studentId));
+if(studentIndex===-1)return current;
+
+const student={...students[studentIndex]};
+if(!Array.isArray(student.notifications))student.notifications=[];
+
+student.notifications.unshift({
+type:'text',
+title:'💬 رد معلمة المادة على استفساركم',
+body:replyText,
+unread:true
+});
+
+students[studentIndex]=student;
+inquiries.splice(index,1);
+data.parentInquiries=inquiries;
+data.approvedStudents=students;
+return data;
+});
+
+alert('✓ تم إرسال الرد بنجاح لولي الأمر.');
+}catch(error){showError(error);}
+}
+
+async function deleteInquiry(id){
+if(!confirm('هل تريدين حذف الاستفسار؟'))return;
+
+try{
+awaitممتاز جداً! هذا الحل العملي سيجعل المنصة مرنة للغاية وتتناسب تماماً مع الواقع المدرسي الحقيقي، حيث يمكن للمعلمة اختيار عدة مواد وعدة صفوف وشعب لتظهر لها الاستفسارات والدروس الخاصة بها دفعة واحدة.
+
+لقد قمت بتحديث الكود بالكامل ليشمل **نظام الاختيارات المتعددة (Checkboxes) للمواد والصفوف والشعب** لكل معلمة، مع الاحتفاظ بكامل صلاحيات الإدارة ودون الحاجة لتعديل بوابة ولي الأمر نهائياً.
+
+تفضل بنسخ هذا **الكود المحدّث بالكامل** ولصقه في ملف `admin.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم والإدارة - مدرسة الضياء</title>
+
+<script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+<link href="[https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap)" rel="stylesheet">
+<script src="[https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js](https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js)"></script>
+<script src="[https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js](https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js)"></script>
+
+<style>
+body{font-family:'Cairo',sans-serif}
+button:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+
+<body class="bg-pink-50 text-gray-800 min-h-screen p-4">
+
+<div class="max-w-4xl mx-auto space-y-5">
+
+<!-- شاشة تسجيل الدخول الموحد (للإدارة أو المعلمات) -->
+<div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 max-w-md mx-auto space-y-4">
+<h2 class="text-xl font-bold text-pink-700 text-center">🔐 تسجيل الدخول الموحد</h2>
+<p class="text-xs text-gray-500 text-center">أدخل كلمة المرور الخاصة بك (الإدارة أو الكادر التعليمي).</p>
+<div>
+<label class="block text-xs font-semibold mb-1">اسم المستخدم أو كلمة المرور</label>
+<input id="adminUserInput" class="w-full px-3 py-2 border rounded-lg bg-white mb-2" placeholder="اسم المستخدم (للإدارة فقط)">
+<input id="adminPassInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="كلمة المرور">
+</div>
+<button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2 rounded-lg font-bold cursor-pointer hover:bg-pink-700 transition">دخول النظام 🚀</button>
+<p id="loginError" class="text-red-600 text-xs text-center"></p>
+</div>
+
+<!-- لوحة الإدارة الرئيسية (تظهر للإدارة حصراً) -->
+<div id="adminDashboardView" class="hidden space-y-5">
+
+<div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
+<div class="flex flex-wrap gap-2">
+<button onclick="openAcceptedStudentsModal()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📂 دليل الطالبات المقبولات</button>
+<button onclick="openStudentsModal()" class="bg-pink-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🎯 متابعة المشاهدات</button>
+<button onclick="openLessonsArchiveModal()" class="bg-purple-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">📚 أرشيف الحصص والدروس</button>
+<button onclick="restoreOldData()" class="bg-amber-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🔄 تحديث البيانات</button>
+<button onclick="exportBackup()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">⬇️ نسخة احتياطية</button>
+<button onclick="clearAllSystemData()" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">🛡️ حماية البيانات</button>
+</div>
+<button onclick="logoutAdmin()" class="bg-gray-600 text-white px-3 py-2 rounded-lg text-xs cursor-pointer">تسجيل الخروج</button>
+</div>
+
+<div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl flex justify-between items-center">
+<div>
+<p class="font-bold">☁️ الربط السحابي المباشر</p>
+<p class="text-xs mt-1">قاعدة بيانات مدرسة الضياء</p>
+<p id="connectionStatus" class="text-xs mt-2">جارٍ الاتصال...</p>
+</div>
+<div class="bg-white/20 p-3 rounded-lg text-center">
+<strong id="totalSavedCount" class="block text-xl">0</strong>
+<span class="text-xs">طالبة مقبولة</span>
+</div>
+</div>
+
+<div id="systemWarning" class="hidden bg-red-100 border border-red-300 text-red-800 p-3 rounded-lg text-xs"></div>
+
+<!-- البحث -->
+<div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
+<h2 class="font-bold text-blue-700">🔍 البحث عن طالبة</h2>
+<div class="flex gap-2">
+<input id="searchStudentInput" class="flex-1 border rounded-lg p-2 text-xs bg-white" placeholder="اسم الطالبة">
+<button onclick="searchStudentInSystem()" class="bg-blue-600 text-white px-4 rounded-lg text-xs cursor-pointer">بحث</button>
+</div>
+<div id="searchResultContainer" class="hidden p-3 bg-blue-50 rounded-lg text-xs"></div>
+</div>
+
+<!-- الطلبات المعلقة -->
+<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
+<h2 class="font-bold text-pink-700 border-b pb-2">📋 طلبات الدخول المعلقة</h2>
+<div id="requestsContainer">جارٍ تحميل الطلبات...</div>
+</div>
+
+<!-- نشاط أولياء الأمور -->
+<div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
+<h2 class="font-bold text-purple-700 border-b pb-2">🔔 نشاط أولياء الأمور</h2>
+<div id="parentsActivityContainer" class="text-xs"></div>
+</div>
+
+<!-- إعدادات المدرسة -->
+<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
+<h2 class="font-bold text-pink-700">👩‍💼 إعدادات المدرسة</h2>
+<label class="block text-xs">اسم المديرة</label>
+<input id="newPrincipalName" class="w-full border rounded-lg p-2 text-xs bg-white">
+<button onclick="updatePrincipalName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المديرة</button>
+<hr>
+<label class="block text-xs">اسم مشرف المنصة</label>
+<input id="newSupervisorName" class="w-full border rounded-lg p-2 text-xs bg-white">
+<button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المشرف</button>
+</div>
+
+<!-- جدول الحصص والواجبات للإدارة -->
+<div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
+<h2 class="font-bold text-pink-700">📅 جدول الحصص والواجبات (إدارة)</h2>
+
+<label class="text-xs">المادة</label>
+<select id="lessonSubject" class="w-full border rounded-lg p-2 text-xs bg-white">
+<option>القرآن الكريم</option>
+<option>اللغة العربية</option>
+<option>الرياضيات</option>
+<option>الاجتماعيات</option>
+<option>اللغة الإنجليزية</option>
+<option>الأخلاقية</option>
+<option>العلوم</option>
+</select>
+
+<label class="text-xs">الصف</label>
+<select id="lessonGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+
+<label class="block text-xs font-semibold">الشعب المستهدفة (يمكن اختيار أكثر من شعبة):</label>
+<div class="flex gap-4 p-2 border rounded-lg bg-pink-50 text-xs">
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="lessonSection" value="أ" class="w-4 h-4 text-pink-600"> الشعبة (أ)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="lessonSection" value="ب" class="w-4 h-4 text-pink-600"> الشعبة (ب)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="lessonSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
+</div>
+
+<textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="تفاصيل الدرس أو الواجب"></textarea>
+
+<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">إرسال الدرس وتوجيهه للأرشيف 🚀</button>
+</div>
+
+<!-- التعميمات -->
+<div class="bg-white rounded-xl shadow border border-indigo-100 overflow-hidden">
+<button onclick="toggleBroadcastSection()" class="w-full bg-indigo-50 p-4 font-bold text-indigo-700 text-right cursor-pointer">🎙️ إرسال تعميم لجميع أولياء الأمور ▼</button>
+<div id="broadcastContentBody" class="hidden p-5 space-y-3">
+<label class="text-xs">الصف</label>
+<select id="broadcastGrade" class="w-full border rounded-lg p-2 text-xs bg-white">
+<option value="الكل">جميع الصفوف</option>
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+<label class="text-xs">الشعبة</label>
+<select id="broadcastSection" class="w-full border rounded-lg p-2 text-xs bg-white">
+<option value="الكل">جميع الشعب</option>
+<option value="أ">أ</option>
+<option value="ب">ب</option>
+<option value="ج">ج</option>
+</select>
+<textarea id="broadcastText" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="نص التعميم"></textarea>
+<button onclick="sendBroadcastMessage()" class="w-full bg-indigo-600 text-white p-2 rounded-lg text-xs cursor-pointer">إرسال التعميم 🚀</button>
+</div>
+</div>
+
+<!-- الاستفسارات للإدارة -->
+<div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
+<h2 class="font-bold text-blue-700">💬 استفسارات أولياء الأمور (الإدارة العامة)</h2>
+<div id="adminInquiriesContainer" class="space-y-3 text-xs"></div>
+</div>
+
+</div>
+
+<!-- واجهة المعلمات المخصصة (تعدد الصفوف والمواد والشعب) -->
+<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6">
+<div class="flex justify-between items-center border-b pb-3">
+<div>
+<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - الجدول والاستفسارات</h2>
+<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي</p>
+</div>
+<button onclick="logoutAdmin()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+</div>
+
+<!-- اختيار المواد والصفوف التي تدرسها المعلمة (متعددة) -->
+<div class="bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-3 text-xs">
+<h3 class="font-bold text-purple-900">📌 حددي المواد والصفوف التي تدرسينها (يمكن اختيار أكثر من خيار):</h3>
+
+<div>
+<label class="block font-semibold mb-1 text-purple-900">المواد الدراسية التي تدرسينها:</label>
+<div id="teacherSubjectsCheckboxes" class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border">
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="القرآن الكريم" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> القرآن الكريم</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="اللغة العربية" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> اللغة العربية</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="الرياضيات" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الرياضيات</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="الاجتماعيات" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الاجتماعيات</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="اللغة الإنجليزية" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> اللغة الإنجليزية</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="الأخلاقية" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الأخلاقية</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tSub" value="العلوم" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> العلوم</label>
+</div>
+</div>
+
+<div>
+<label class="block font-semibold mb-1 text-purple-900">الصفوف الدراسية التي تدرسينها:</label>
+<div id="teacherGradesCheckboxes" class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border">
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="الأول الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الأول الابتدائي</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="الثاني الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الثاني الابتدائي</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="الثالث الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الثالث الابتدائي</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="الرابع الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الرابع الابتدائي</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="الخامس الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> الخامس الابتدائي</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="tGrade" value="السادس الابتدائي" onchange="saveTeacherProfile()" class="w-4 h-4 text-purple-600"> السادس الابتدائي</label>
+</div>
+</div>
+
+<p class="text-[10px] text-purple-700">💡 ستظهر لك أدناه فقط الاستفسارات الواردة لجميع المواد والصفوف التي حددتِها.</p>
+</div>
+
+<!-- قسم نشر الدروس -->
+<div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
+<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد</h3>
+<div>
+<label class="block font-semibold mb-1">المادة الدراسية:</label>
+<select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
+<option>القرآن الكريم</option>
+<option>اللغة العربية</option>
+<option>الرياضيات</option>
+<option>الاجتماعيات</option>
+<option>اللغة الإنجليزية</option>
+<option>الأخلاقية</option>
+<option>العلوم</option>
+</select>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">الصف الدراسي:</label>
+<select id="teacherLessonGrade" class="w-full border rounded-lg p-2 bg-white">
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">الشعب المستهدفة:</label>
+<div class="flex gap-4 p-2 border rounded-lg bg-white">
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="أ" class="w-4 h-4 text-pink-600"> الشعبة (أ)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ب" class="w-4 h-4 text-pink-600"> الشعبة (ب)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
+</div>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
+<textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس..."></textarea>
+</div>
+
+<button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
+نشر الدرس للشعب المحددة 🚀
+</button>
+</div>
+
+<!-- قسم استفسارات أولياء الأمور المفلترة لمواد وصفوف المعلمة -->
+<div class="space-y-3 text-xs border-t pt-4">
+<h3 class="font-bold text-purple-700">💬 استفسارات موادك وصفوفك المحددة</h3>
+<div id="teacherInquiriesContainer" class="space-y-3"></div>
+</div>
+
+</div>
+
+</div>
+
+<!-- نافذة دليل الطالبات المقبولات -->
+<div id="acceptedStudentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+<div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
+<div class="flex justify-between border-b pb-2">
+<h3 id="modalTitle" class="font-bold text-emerald-700">دليل الطالبات</h3>
+<button onclick="closeAcceptedStudentsModal()" class="cursor-pointer">✕</button>
+</div>
+<div id="acceptedStudentsContent"></div>
+<div id="modalBackBtnContainer" class="hidden">
+<button onclick="backToGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs cursor-pointer">العودة للصفوف</button>
+</div>
+</div>
+</div>
+
+<!-- نافذة متابعة المشاهدات -->
+<div id="studentsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+<div class="bg-white rounded-2xl p-5 w-full max-w-3xl max-h-[85vh] overflow-y-auto space-y-3">
+<h3 class="font-bold text-pink-700">🎯 سجل الطالبات</h3>
+<div id="modalStudentsList"></div>
+<button onclick="closeStudentsModal()" class="w-full bg-gray-500 text-white p-2 rounded-lg cursor-pointer">إغلاق</button>
+</div>
+</div>
+
+<!-- نافذة أرشيف الحصص والدروس -->
+<div id="lessonsArchiveModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
+<div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
+<div class="flex justify-between border-b pb-2 items-center">
+<h3 id="archiveModalTitle" class="font-bold text-purple-700 text-sm">📚 أرشيف الحصص والدروس - اختر الصف</h3>
+<button onclick="closeLessonsArchiveModal()" class="cursor-pointer font-bold text-gray-600 text-base">✕</button>
+</div>
+<div id="archiveModalContent" class="space-y-2"></div>
+<div id="archiveBackBtnContainer" class="hidden pt-2 border-t">
+<button onclick="backToArchiveGradesView()" class="w-full bg-gray-600 text-white p-2 rounded-lg text-xs cursor-pointer font-semibold">العودة لقائمة الصفوف</button>
+</div>
+</div>
+</div>
+
+<script>
+const firebaseConfig = {
+apiKey:"AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0",
+authDomain:"aldiyaaschool-af7e1.firebaseapp.com",
+databaseURL:"[https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com](https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com)",
+projectId:"aldiyaaschool-af7e1",
+storageBucket:"aldiyaaschool-af7e1.firebasestorage.app",
+messagingSenderId:"322321446203",
+appId:"1:322321446203:web:6bfbfc082076982e68b31e",
+measurementId:"G-2GW91EKFN0"
+};
+
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const db=firebase.database();
+const ROOT='school_data';
+
+const adminUser='admin';
+const adminPass='123456';
+const teacherPass='teacher2026';
+
+let principalName='د. أمل عبد الله';
+let supervisorName='الأستاذ أحمد علي';
+
+let pendingRequests=[];
+let approvedStudents=[];
+let parentInquiries=[];
+let schoolSchedule={};
+let parentActivities=[];
+
+let firebaseConnected=false;
+let dataLoaded=false;
+let userRole=localStorage.getItem('school_user_role');
+let currentGrade='';
+let currentSection='';
+let approvalInProgress=false;
+
+let archiveCurrentGrade='';
+let archiveCurrentSection='';
+
+const gradesList=[
+'الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي',
+'الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي'
+];
+const sectionsList=['أ','ب','ج'];
+
+function safeText(value){
+return String(value??'').replace(/[&<>"']/g,ch=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[ch]));
+}
+
+function asArray(value){
+if(Array.isArray(value)){
+return value.filter(x=>x&&typeof x==='object');
+}
+if(value&&typeof value==='object'){
+return Object.entries(value).map(([key,item])=>{
+if(!item||typeof item!=='object')return null;
+return {...item,id:item.id??key};
+}).filter(Boolean);
+}
+return [];
+}
+
+function sameStudent(record,id,details){
+if(!record)return false;
+if(id!==undefined&&id!==null&&String(id)!==''&&
+record.id!==undefined&&String(record.id)===String(id))return true;
+
+return !!details&&
+String(record.student||'').trim().toLowerCase()===String(details.student||'').trim().toLowerCase();
+}
+
+function waitForFirebaseConnection(timeout=20000){
+return new Promise((resolve,reject)=>{
+if(firebaseConnected){
+resolve(true);
+return;
+}
+
+let finished=false;
+const ref=db.ref('.info/connected');
+
+const timer=setTimeout(()=>{
+if(finished)return;
+finished=true;
+ref.off('value',handler);
+reject(new Error('لم يعد الاتصال بقاعدة Firebase خلال المهلة المحددة.'));
+},timeout);
+
+function handler(snapshot){
+if(snapshot.val()===true&&!finished){
+finished=true;
+clearTimeout(timer);
+ref.off('value',handler);
+resolve(true);
+}
+}
+
+function cancelHandler(error){
+if(finished)return;
+finished=true;
+clearTimeout(timer);
+ref.off('value',handler);
+reject(error||new Error('تعذر التحقق من اتصال Firebase.'));
+}
+
+ref.on('value',handler,cancelHandler);
+});
+}
+
+async function safeTransaction(path,updater){
+await waitForFirebaseConnection();
+if(!dataLoaded){
+throw new Error('لم يكتمل تحميل بيانات المدرسة. اضغطي تحديث البيانات ثم حاولي مجدداً.');
+}
+
+const result=await db.ref(path).transaction(
+current=>updater(current),
+undefined,
+false
+);
+
+if(!result.committed){
+throw new Error('لم تعتمد Firebase عملية الحفظ.');
+}
+
+return result.snapshot.val();
+}
+
+function showError(error){
+console.error('Firebase Error:',error);
+let message='لم يتم إكمال العملية.';
+if(error?.code==='PERMISSION_DENIED'||
+String(error?.message||'').toLowerCase().includes('permission')){
+message='رفضت قواعد Firebase عملية الكتابة.';
+}else if(String(error?.message||'').toLowerCase().includes('network')||
+String(error?.message||'').toLowerCase().includes('disconnect')){
+message='انقطع الاتصال بقاعدة Firebase أثناء العملية.';
+}else if(error?.message){
+message+=' التفاصيل: '+error.message;
+}
+alert('⚠️ '+message);
+}
+
+function loadSchoolData(data){
+pendingRequests=asArray(data.pendingRequests);
+approvedStudents=asArray(data.approvedStudents);
+parentInquiries=asArray(data.parentInquiries);
+parentActivities=asArray(data.parentActivities);
+
+schoolSchedule=data.schoolSchedule&&typeof data.schoolSchedule==='object'
+?data.schoolSchedule:{};
+
+if(data.principalName)principalName=data.principalName;
+if(data.supervisorName)supervisorName=data.supervisorName;
+
+const pNameInput=document.getElementById('newPrincipalName');
+const sNameInput=document.getElementById('newSupervisorName');
+if(pNameInput)pNameInput.value=principalName;
+if(sNameInput)sNameInput.value=supervisorName;
+
+updateTotalCountBadge();
+renderRequests();
+renderAdminInquiries();
+renderTeacherInquiries();
+renderParentActivities();
+
+if(!document.getElementById('lessonsArchiveModal').classList.contains('hidden')){
+if(archiveCurrentSection){
+renderArchiveLessonsView(archiveCurrentGrade, archiveCurrentSection);
+}else if(archiveCurrentGrade){
+renderArchiveSectionsView(archiveCurrentGrade);
+}else{
+renderArchiveGradesView();
+}
+}
+}
+
+window.onload=function(){
+db.ref('.info/connected').on('value',snapshot=>{
+firebaseConnected=snapshot.val()===true;
+const connStatus=document.getElementById('connectionStatus');
+if(connStatus)connStatus.textContent=
+firebaseConnected?'🟢 متصل بقاعدة البيانات':'🔴 غير متصل بالسحابة';
+});
+
+db.ref(ROOT).on('value',snapshot=>{
+try{
+loadSchoolData(snapshot.val()||{});
+dataLoaded=true;
+const warning=document.getElementById('systemWarning');
+if(warning)warning.classList.add('hidden');
+}catch(error){
+dataLoaded=false;
+showError(error);
+}
+},error=>{
+dataLoaded=false;
+const warning=document.getElementById('systemWarning');
+if(warning){
+warning.classList.remove('hidden');
+warning.textContent='تعذر تحميل بيانات المدرسة: '+error.message;
+}
+});
+
+if(userRole==='admin'){
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('adminDashboardView').classList.remove('hidden');
+}else if(userRole==='teacher'){
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.remove('hidden');
+loadTeacherProfile();
+}
+};
+
+function loginAdmin(){
+const u=document.getElementById('adminUserInput').value.trim();
+const p=document.getElementById('adminPassInput').value.trim();
+
+if((u===adminUser&&p===adminPass)||p===adminPass){
+userRole='admin';
+localStorage.setItem('school_user_role','admin');
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('adminDashboardView').classList.remove('hidden');
+document.getElementById('loginError').textContent='';
+}else if(p===teacherPass){
+userRole='teacher';
+localStorage.setItem('school_user_role','teacher');
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.remove('hidden');
+document.getElementById('loginError').textContent='';
+loadTeacherProfile();
+}else{
+document.getElementById('loginError').textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+}
+}
+
+function logoutAdmin(){
+userRole=null;
+localStorage.removeItem('school_user_role');
+document.getElementById('adminDashboardView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.add('hidden');
+document.getElementById('adminAuthView').classList.remove('hidden');
+document.getElementById('adminPassInput').value='';
+document.getElementById('adminUserInput').value='';
+}
+
+// حفظ واسترجاع تخصصات المعلمة (متعددة المواد والصفوف) محلياً
+function saveTeacherProfile(){
+const selectedSubjects=Array.from(document.querySelectorAll('input[name="tSub"]:checked')).map(cb=>cb.value);
+const selectedGrades=Array.from(document.querySelectorAll('input[name="tGrade"]:checked')).map(cb=>cb.value);
+
+localStorage.setItem('teacher_subjects_list', JSON.stringify(selectedSubjects));
+localStorage.setItem('teacher_grades_list', JSON.stringify(selectedGrades));
+renderTeacherInquiries();
+}
+
+function loadTeacherProfile(){
+try{
+const savedSubs=JSON.parse(localStorage.getItem('teacher_subjects_list')||'[]');
+const savedGrades=JSON.parse(localStorage.getItem('teacher_grades_list')||'[]');
+
+document.querySelectorAll('input[name="tSub"]').forEach(cb=>{
+if(savedSubs.includes(cb.value)) cb.checked=true;
+});
+document.querySelectorAll('input[name="tGrade"]').forEach(cb=>{
+if(savedGrades.includes(cb.value)) cb.checked=true;
+});
+}catch(e){console.error(e);}
+renderTeacherInquiries();
+}
+
+async function restoreOldData(){
+try{
+await waitForFirebaseConnection();
+const snap=await db.ref(ROOT).once('value');
+if(!snap.exists()){
+alert('لا توجد بيانات في قاعدة البيانات حالياً.');
+return;
+}
+loadSchoolData(snap.val());
+dataLoaded=true;
+alert('✓ تمت قراءة أحدث البيانات من السحابة دون حذف أي شيء.');
+}catch(error){showError(error);}
+}
+
+async function exportBackup(){
+try{
+await waitForFirebaseConnection();
+const snap=await db.ref(ROOT).once('value');
+if(!snap.exists()){
+alert('لا توجد بيانات لإنشاء نسخة احتياطية.');
+return;
+}
+const blob=new Blob([JSON.stringify(snap.val(),null,2)],{
+type:'application/json;charset=utf-8'
+});
+const url=URL.createObjectURL(blob);
+const link=document.createElement('a');
+link.href=url;
+link.download='Al-Diyaa-Backup-'+new Date().toISOString().slice(0,10)+'.json';
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(()=>URL.revokeObjectURL(url),1500);
+alert('✓ تم تنزيل النسخة الاحتياطية.');
+}catch(error){showError(error);}
+}
+
+function updateTotalCountBadge(){
+const badge=document.getElementById('totalSavedCount');
+if(badge)badge.textContent=approvedStudents.length;
+}
+
+function searchStudentInSystem(){
+const query=document.getElementById('searchStudentInput').value.trim().toLowerCase();
+const box=document.getElementById('searchResultContainer');
+if(!query){box.classList.add('hidden');return;}
+
+const approved=approvedStudents.find(s=>String(s.student||'').toLowerCase().includes(query));
+const pending=pendingRequests.find(s=>String(s.student||'').toLowerCase().includes(query));
+
+box.classList.remove('hidden');
+
+if(approved){
+box.innerHTML=`
+<p class="font-bold text-emerald-700">✅ الطالبة مقبولة</p>
+<p>الاسم: ${safeText(approved.student)}</p>
+<p>الصف: ${safeText(approved.grade)}</p>
+<p>الشعبة: ${safeText(approved.section)}</p>
+<p>ولي الأمر: ${safeText(approved.mother)}</p>`;
+}else if(pending){
+box.innerHTML=`
+<p class="font-bold text-amber-700">⏳ الطلب بانتظار الموافقة</p>
+<p>الاسم: ${safeText(pending.student)}</p>
+<p>الصف: ${safeText(pending.grade)}</p>
+<p>الشعبة: ${safeText(pending.section)}</p>
+<p>ولي الأمر: ${safeText(pending.mother)}</p>`;
+}else{
+box.innerHTML='<p class="text-red-600">❌ لم يتم العثور على الطالبة.</p>';
+}
+}
+
+function renderRequests(){
+const container=document.getElementById('requestsContainer');
+if(!container)return;
+if(!pendingRequests.length){
+container.innerHTML='<p class="text-gray-500 text-sm">لا توجد طلبات معلقة حالياً.</p>';
+return;
+}
+
+container.innerHTML='';
+
+pendingRequests.forEach(req=>{
+const item=document.createElement('div');
+item.className='p-3 bg-pink-50 border rounded-lg flex flex-wrap justify-between items-center gap-3 mb-2';
+
+const info=document.createElement('div');
+info.className='flex items-center gap-3';
+
+if(req.image){
+const img=document.createElement('img');
+img.src=req.image;
+img.className='w-12 h-12 rounded-full object-cover border';
+info.appendChild(img);
+}else{
+const placeholder=document.createElement('div');
+placeholder.className='w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center';
+placeholder.textContent='👧';
+info.appendChild(placeholder);
+}
+
+const details=document.createElement('div');
+details.innerHTML=`
+<p class="font-bold text-pink-900">${safeText(req.student)}</p>
+<p class="text-xs text-gray-600">ولي الأمر: ${safeText(req.mother)}</p>
+<p class="text-xs text-gray-600">${safeText(req.grade)} - شعبة (${safeText(req.section)})</p>`;
+info.appendChild(details);
+
+const actions=document.createElement('div');
+actions.className='flex gap-2';
+
+const approve=document.createElement('button');
+approve.className='bg-green-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
+approve.textContent='✓ موافقة';
+approve.onclick=()=>approveStudent(req.id,{
+student:req.student,mother:req.mother,grade:req.grade,section:req.section
+});
+
+const reject=document.createElement('button');
+reject.className='bg-red-600 text-white px-3 py-2 rounded text-xs cursor-pointer';
+reject.textContent='✕ رفض';
+reject.onclick=()=>rejectStudent(req.id,{
+student:req.student,mother:req.mother,grade:req.grade,section:req.section
+});
+
+actions.append(approve,reject);
+item.append(info,actions);
+container.appendChild(item);
+});
+}
+
+async function approveStudent(studentId,details){
+if(approvalInProgress){
+alert('توجد عملية موافقة قيد التنفيذ. انتظري قليلاً.');
+return;
+}
+
+if(!confirm('هل تريدين الموافقة على هذا الطلب؟'))return;
+
+approvalInProgress=true;
+const buttons=document.querySelectorAll('#requestsContainer button');
+buttons.forEach(b=>b.disabled=true);
+
+try{
+await waitForFirebaseConnection();
+if(!dataLoaded){
+throw new Error('لم يكتمل تحميل بيانات المدرسة. حدّثي البيانات ثم حاولي مجدداً.');
+}
+
+const pendingRef=db.ref(ROOT+'/pendingRequests');
+const pendingSnap=await pendingRef.once('value');
+const pendingList=asArray(pendingSnap.val());
+
+let student=pendingList.find(s=>sameStudent(s,studentId,details));
+
+const approvedRef=db.ref(ROOT+'/approvedStudents');
+const approvedSnapBefore=await approvedRef.once('value');
+const approvedBefore=asArray(approvedSnapBefore.val());
+
+if(!student){
+const already=approvedBefore.some(s=>sameStudent(s,studentId,details));
+if(already){
+alert('الطالبة مسجلة مسبقاً في قائمة المقبولات. سيتم إزالة الطلب المعلق فقط.');
+await pendingRef.transaction(current=>{
+const list=asArray(current);
+const idx=list.findIndex(s=>sameStudent(s,studentId,details));
+if(idx!==-1)list.splice(idx,1);
+return list;
+},undefined,false);
+return;
+}
+throw new Error('لم يتم العثور على الطلب المعلق.');
+}
+
+const alreadyApprovedName=approvedBefore.some(s=>
+String(s.student||'').trim().toLowerCase()===String(student.student||'').trim().toLowerCase()
+);
+
+if(alreadyApprovedName){
+alert(`⚠️ تنبيه: الطالبة (${student.student}) مسجلة مسبقاً في دليل المقبولات! لن يتم إضافتها مجدداً لتجنب التكرار.`);
+await pendingRef.transaction(current=>{
+const list=asArray(current);
+const idx=list.findIndex(s=>sameStudent(s,studentId,details));
+if(idx!==-1)list.splice(idx,1);
+return list;
+},undefined,false);
+return;
+}
+
+student={...student};
+if((student.id===undefined||student.id===null)&&studentId!==undefined){
+student.id=studentId;
+}
+
+const saveResult=await approvedRef.transaction(current=>{
+const list=asArray(current);
+const exists=list.some(s=>sameStudent(s,student.id,student) || String(s.student||'').trim().toLowerCase()===String(student.student||'').trim().toLowerCase());
+if(exists)return list;
+
+const newStudent={...student};
+if(!Array.isArray(newStudent.notifications)){
+newStudent.notifications=[];
+}
+newStudent.notifications.unshift({
+type:'text',
+title:'حالة الدخول',
+body:'✓ تمت الموافقة على دخولك المنصة.',
+unread:true
+});
+list.push(newStudent);
+return list;
+},undefined,false);
+
+if(!saveResult.committed){
+throw new Error('لم تنجح عملية حفظ الطالبة في قائمة المقبولات.');
+}
+
+const removeResult=await pendingRef.transaction(current=>{
+const list=asArray(current);
+const index=list.findIndex(s=>sameStudent(s,student.id,student));
+if(index===-1)return list;
+list.splice(index,1);
+return list;
+},undefined,false);
+
+if(!removeResult.committed){
+throw new Error('تم حفظ الطالبة، لكن تعذر إزالة الطلب المعلق.');
+}
+
+const latest=await db.ref(ROOT).once('value');
+loadSchoolData(latest.val()||{});
+dataLoaded=true;
+
+alert('✓ تمت الموافقة وحفظ بيانات الطالبة بنجاح دون أي تكرار.');
+
+}catch(error){
+console.error('Approval error:',error);
+showError(error);
+try{
+if(firebaseConnected){
+const latest=await db.ref(ROOT).once('value');
+loadSchoolData(latest.val()||{});
+dataLoaded=true;
+}
+}catch(refreshError){
+console.error('Refresh error:',refreshError);
+}
+}finally{
+approvalInProgress=false;
+buttons.forEach(b=>b.disabled=false);
+}
+}
+
+async function rejectStudent(studentId,details){
+if(!confirm('هل تريدين رفض طلب الطالبة؟'))return;
+
+try{
+const updated=await safeTransaction(ROOT+'/pendingRequests',current=>{
+const list=asArray(current);
+const index=list.findIndex(s=>sameStudent(s,studentId,details));
+if(index===-1)return current;
+list.splice(index,1);
+return list;
+});
+
+if(asArray(updated).some(s=>sameStudent(s,studentId,details))){
+alert('لم يتم العثور على الطلب أو لم يُحذف.');
+return;
+}
+alert('✓ تم رفض الطلب.');
+}catch(error){showError(error);}
+}
+
+function openAcceptedStudentsModal(){
+document.getElementById('acceptedStudentsModal').classList.remove('hidden');
+renderGradesView();
+}
+
+function closeAcceptedStudentsModal(){
+document.getElementById('acceptedStudentsModal').classList.add('hidden');
+}
+
+function renderGradesView(){
+document.getElementById('modalTitle').textContent='📂 دليل الطالبات - اختر الصف';
+document.getElementById('modalBackBtnContainer').classList.add('hidden');
+const container=document.getElementById('acceptedStudentsContent');
+container.innerHTML='';
+
+gradesList.forEach(grade=>{
+const count=approvedStudents.filter(s=>s.grade===grade).length;
+const button=document.createElement('button');
+button.className='w-full bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
+button.innerHTML=`<span>${safeText(grade)}</span><span>${count} طالبة</span>`;
+button.onclick=()=>renderSectionsView(grade);
+container.appendChild(button);
+});
+}
+
+function renderSectionsView(grade){
+currentGrade=grade;
+currentSection='';
+document.getElementById('modalTitle').textContent=grade+' - اختر الشعبة';
+document.getElementById('modalBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('acceptedStudentsContent');
+container.innerHTML='';
+
+sectionsList.forEach(sec=>{
+const count=approvedStudents.filter(s=>s.grade===grade&&s.section===sec).length;
+const button=document.createElement('button');
+button.className='w-full bg-blue-50 border border-blue-300 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer';
+button.innerHTML=`<span>الشعبة (${sec})</span><span>${count} طالبة</span>`;
+button.onclick=()=>renderStudentsView(grade,sec);
+container.appendChild(button);
+});
+}
+
+function renderStudentsView(grade,section){
+currentGrade=grade;
+currentSection=section;
+document.getElementById('modalTitle').textContent='طالبات '+grade+' - شعبة ('+section+')';
+document.getElementById('modalBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('acceptedStudentsContent');
+const filtered=approvedStudents.filter(s=>s.grade===grade&&s.section===section);
+container.innerHTML='';
+
+if(!filtered.length){
+container.innerHTML='<p class="text-center p-5 text-gray-500">لا توجد طالبات.</p>';
+return;
+}
+
+filtered.forEach(st=>{
+const row=document.createElement('div');
+row.className='flex justify-between items-center border p-3 rounded-lg mb-2';
+const info=document.createElement('div');
+info.className='flex items-center gap-2';
+
+if(st.image){
+const img=document.createElement('img');
+img.src=st.image;
+img.className='w-10 h-10 rounded-full object-cover';
+info.appendChild(img);
+}
+
+const name=document.createElement('div');
+name.innerHTML=`<p class="font-bold">${safeText(st.student)}</p><p class="text-gray-500 text-xs">${safeText(st.mother)}</p>`;
+info.appendChild(name);
+
+const remove=document.createElement('button');
+remove.className='bg-red-500 text-white px-3 py-1 rounded text-xs cursor-pointer';
+remove.textContent='حذف';
+remove.onclick=()=>removeStudentFromAccepted(st.id,grade,section,{
+student:st.student,mother:st.mother,grade:st.grade,section:st.section
+});
+
+row.append(info,remove);
+container.appendChild(row);
+});
+}
+
+function backToGradesView(){
+if(currentSection){
+currentSection='';
+renderSectionsView(currentGrade);
+}else{
+renderGradesView();
+}
+}
+
+async function removeStudentFromAccepted(studentId,grade,section,details){
+if(!confirm('هل تريدين حذف الطالبة من المقبولات؟'))return;
+
+try{
+const updated=await safeTransaction(ROOT+'/approvedStudents',current=>{
+const list=asArray(current);
+const index=list.findIndex(s=>sameStudent(s,studentId,details));
+if(index===-1)return current;
+list.splice(index,1);
+return list;
+});
+
+if(asArray(updated).some(s=>sameStudent(s,studentId,details))){
+alert('لم يتم العثور على الطالبة.');
+return;
+}
+alert('✓ تم حذف الطالبة.');
+}catch(error){showError(error);}
+}
+
+async function updatePrincipalName(){
+const val=document.getElementById('newPrincipalName').value.trim();
+if(!val)return alert('أدخلي اسم المديرة.');
+
+try{
+await safeTransaction(ROOT+'/principalName',()=>val);
+principalName=val;
+alert('✓ تم حفظ اسم المديرة.');
+}catch(error){showError(error);}
+}
+
+async function updateSupervisorName(){
+const val=document.getElementById('newSupervisorName').value.trim();
+if(!val)return alert('أدخلي اسم المشرف.');
+
+try{
+await safeTransaction(ROOT+'/supervisorName',()=>val);
+supervisorName=val;
+alert('✓ تم حفظ اسم المشرف.');
+}catch(error){showError(error);}
+}
+
+// دالة إرسال الدرس للإدارة
+async function sendLessonToSchedule(){
+const subject=document.getElementById('lessonSubject').value;
+const grade=document.getElementById('lessonGrade').value;
+const content=document.getElementById('lessonContent').value.trim();
+
+const checkedSections=Array.from(document.querySelectorAll('input[name="lessonSection"]:checked')).map(cb=>cb.value);
+
+if(!content)return alert('اكتبي تفاصيل الدرس.');
+if(checkedSections.length===0)return alert('يرجى اختيار شعبة واحدة على الأقل.');
+
+try{
+await waitForFirebaseConnection();
+
+const scheduleRef=db.ref(ROOT+'/schoolSchedule');
+const result=await scheduleRef.transaction(current=>{
+const scheduleData=(current&&typeof current==='object')?{...current}:{};
+
+checkedSections.forEach(section=>{
+const classKey=grade+'_'+section;
+if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
+scheduleData[classKey]={};
+}
+scheduleData[classKey][subject]=content;
+});
+
+return scheduleData;
+},undefined,false);
+
+if(!result.committed){
+throw new Error('لم يتم حفظ الدروس في السحابة.');
+}
+
+document.getElementById('lessonContent').value='';
+document.querySelectorAll('input[name="lessonSection"]').forEach(cb=>cb.checked=false);
+
+alert(`✓ تم نشر الدرس بنجاح للشعب (${checkedSections.join(', ')}) وحفظه في الأرشيف.`);
+}catch(error){
+showError(error);
+}
+}
+
+// دالة إرسال الدرس الخاصة بالمعلمات
+async function teacherSendLesson(){
+const subject=document.getElementById('teacherLessonSubject').value;
+const grade=document.getElementById('teacherLessonGrade').value;
+const content=document.getElementById('teacherLessonContent').value.trim();
+const checkedSections=Array.from(document.querySelectorAll('input[name="teacherSection"]:checked')).map(cb=>cb.value);
+
+if(!content){
+alert('يرجى كتابة تفاصيل الدرس أو الواجب أولاً.');
+return;
+}
+if(checkedSections.length===0){
+alert('يرجى اختيار شعبة واحدة على الأقل.');
+return;
+}
+
+const btn=document.getElementById('teacherPublishBtn');
+btn.disabled=true;
+btn.textContent='جارٍ النشر سحابياً...';
+
+try{
+await waitForFirebaseConnection();
+const scheduleRef=db.ref(ROOT+'/schoolSchedule');
+const result=await scheduleRef.transaction(current=>{
+const scheduleData=(current&&typeof current==='object')?{...current}:{};
+
+checkedSections.forEach(section=>{
+const classKey=grade+'_'+section;
+if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
+scheduleData[classKey]={};
+}
+scheduleData[classKey][subject]=content;
+});
+
+return scheduleData;
+},undefined,false);
+
+if(!result.committed){
+throw new Error('لم يتم حفظ الدرس في السحابة.');
+}
+
+document.getElementById('teacherLessonContent').value='';
+document.querySelectorAll('input[name="teacherSection"]').forEach(cb=>cb.checked=false);
+
+alert(`✓ تم نشر الدرس بنجاح لشعب (${checkedSections.join(', ')}) وتوجيهه للأرشيف وفي أجهزة أولياء الأمور.`);
+}catch(error){
+showError(error);
+}finally{
+btn.disabled=false;
+btn.textContent='نشر الدرس للشعب المحددة 🚀';
+}
+}
+
+function openLessonsArchiveModal(){
+document.getElementById('lessonsArchiveModal').classList.remove('hidden');
+renderArchiveGradesView();
+}
+
+function closeLessonsArchiveModal(){
+document.getElementById('lessonsArchiveModal').classList.add('hidden');
+archiveCurrentGrade='';
+archiveCurrentSection='';
+}
+
+function renderArchiveGradesView(){
+archiveCurrentGrade='';
+archiveCurrentSection='';
+document.getElementById('archiveModalTitle').textContent='📚 أرشيف الحصص والدروس - اختر الصف';
+document.getElementById('archiveBackBtnContainer').classList.add('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+gradesList.forEach(grade=>{
+let gradeLessonsCount=0;
+sectionsList.forEach(sec=>{
+const key=grade+'_'+sec;
+if(schoolSchedule[key]&&typeof schoolSchedule[key]==='object'){
+gradeLessonsCount+=Object.keys(schoolSchedule[key]).length;
+}
+});
+
+const button=document.createElement('button');
+button.className='w-full bg-purple-50 border border-purple-200 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer hover:bg-purple-100 transition';
+button.innerHTML=`<span>${safeText(grade)}</span><span class="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs">${gradeLessonsCount} درس</span>`;
+button.onclick=()=>renderArchiveSectionsView(grade);
+container.appendChild(button);
+});
+}
+
+function renderArchiveSectionsView(grade){
+archiveCurrentGrade=grade;
+archiveCurrentSection='';
+document.getElementById('archiveModalTitle').textContent=grade+' - اختر الشعبة';
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+sectionsList.forEach(sec=>{
+const key=grade+'_'+sec;
+const subjects=(schoolSchedule[key]&&typeof schoolSchedule[key]==='object')?schoolSchedule[key]:{};
+const count=Object.keys(subjects).length;
+
+const button=document.createElement('button');
+button.className='w-full bg-indigo-50 border border-indigo-200 p-3 rounded-xl flex justify-between mb-2 font-bold cursor-pointer hover:bg-indigo-100 transition';
+button.innerHTML=`<span>الشعبة (${sec})</span><span class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs">${count} درس</span>`;
+button.onclick=()=>renderArchiveLessonsView(grade,sec);
+container.appendChild(button);
+});
+}
+
+function renderArchiveLessonsView(grade,section){
+archiveCurrentGrade=grade;
+archiveCurrentSection=section;
+document.getElementById('archiveModalTitle').textContent=`دروس ${grade} - شعبة (${section})`;
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+const container=document.getElementById('archiveModalContent');
+container.innerHTML='';
+
+const key=grade+'_'+section;
+const subjects=(schoolSchedule[key]&&typeof schoolSchedule[key]==='object')?schoolSchedule[key]:{};
+
+if(Object.keys(subjects).length===0){
+container.innerHTML='<p class="text-center p-5 text-gray-500 text-xs">لا توجد دروس منشورة لهذه الشعبة.</p>';
+return;
+}
+
+for(const [subject,content] of Object.entries(subjects)){
+const div=document.createElement('div');
+div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 shadow-sm text-xs';
+div.innerHTML=`
+<div class="flex justify-between items-center border-b pb-1.5">
+<strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
+<button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
+</div>
+<p class="text-gray-700 whitespace-pre-wrap">${safeText(content)}</p>
+`;
+container.appendChild(div);
+}
+}
+
+async function deleteArchiveLesson(encodedKey, encodedSubject){
+const classKey=decodeURIComponent(encodedKey);
+const subject=decodeURIComponent(encodedSubject);
+
+if(!confirm(`هل تريدين حذف درس (${subject}) نهائياً؟`))return;
+
+try{
+await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>null);
+alert('✓ تم حذف الدرس بنجاح من الأرشيف.');
+}catch(error){
+showError(error);
+}
+}
+
+function backToArchiveGradesView(){
+if(archiveCurrentSection){
+renderArchiveSectionsView(archiveCurrentGrade);
+}else{
+renderArchiveGradesView();
+}
+}
+
+async function sendBroadcastMessage(){
+const targetGrade=document.getElementById('broadcastGrade').value;
+const targetSection=document.getElementById('broadcastSection').value;
+const textContent=document.getElementById('broadcastText').value.trim();
+
+if(!textContent)return alert('اكتبي نص التعميم.');
+
+try{
+await safeTransaction(ROOT+'/approvedStudents',current=>{
+const list=asArray(current);
+list.forEach(st=>{
+if((targetGrade==='الكل'||st.grade===targetGrade)&&
+(targetSection==='الكل'||st.section===targetSection)){
+if(!Array.isArray(st.notifications))st.notifications=[];
+st.notifications.unshift({
+type:'text',
+title:'📢 تعميم إداري عام',
+body:textContent,
+unread:true
+});
+}
+});
+return list;
+});
+
+document.getElementById('broadcastText').value='';
+alert('✓ تم إرسال التعميم.');
+}catch(error){showError(error);}
+}
+
+function toggleBroadcastSection(){
+const body=document.getElementById('broadcastContentBody');
+if(body)body.classList.toggle('hidden');
+}
+
+function renderParentActivities(){
+const container=document.getElementById('parentsActivityContainer');
+if(!container)return;
+
+if(!parentActivities.length){
+container.innerHTML='<p class="text-gray-400">لا توجد تنبيهات نشاط.</p>';
+return;
+}
+
+container.innerHTML='';
+parentActivities.forEach((act,index)=>{
+const div=document.createElement('div');
+div.className='p-3 border rounded-lg mb-2 '+(act.type==='logout'?'bg-red-50':'bg-emerald-50');
+div.innerHTML=`
+<p class="font-bold">${safeText(act.message)}</p>
+<p class="text-gray-500">${safeText(act.time)}</p>
+<button class="text-red-600 mt-2 cursor-pointer">حذف التنبيه</button>`;
+div.querySelector('button').onclick=()=>removeActivity(index);
+container.appendChild(div);
+});
+}
+
+async function removeActivity(index){
+if(!confirm('هل تريدين حذف التنبيه؟'))return;
+
+try{
+await safeTransaction(ROOT+'/parentActivities',current=>{
+const list=asArray(current);
+if(index<0||index>=list.length)return current;
+list.splice(index,1);
+return list;
+});
+}catch(error){showError(error);}
+}
+
+function renderAdminInquiries(){
+const container=document.getElementById('adminInquiriesContainer');
+if(!container)return;
+
+if(!parentInquiries.length){
+container.innerHTML='<p class="text-gray-500">لا توجد استفسارات جديدة.</p>';
+return;
+}
+
+container.innerHTML='';
+parentInquiries.forEach(q=>{
+const div=document.createElement('div');
+div.className='p-3 bg-blue-50 border rounded-lg space-y-2 mb-2';
+
+div.innerHTML=`
+<p class="font-bold">الطالبة: ${safeText(q.studentName)}</p>
+<p>${safeText(q.grade)} - شعبة ${safeText(q.section)} | المادة: ${safeText(q.subject||'عام')}</p>
+<p class="bg-white p-2 rounded">${safeText(q.content)}</p>
+<textarea id="reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد"></textarea>
+<div class="flex gap-2">
+<button class="bg-blue-600 text-white px-3 py-2 rounded cursor-pointer" data-action="reply">إرسال الرد</button>
+<button class="bg-red-600 text-white px-3 py-2 rounded cursor-pointer" data-action="delete">حذف الاستفسار</button>
+</div>`;
+
+div.querySelector('[data-action="reply"]').onclick=()=>replyInquiry(q.id);
+div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
+container.appendChild(div);
+});
+}
+
+// عرض الاستفسارات المفلترة لجميع المواد والصفوف التي حددتها المعلمة
+function renderTeacherInquiries(){
+const container=document.getElementById('teacherInquiriesContainer');
+if(!container)return;
+
+const selectedSubjects=Array.from(document.querySelectorAll('input[name="tSub"]:checked')).map(cb=>cb.value);
+const selectedGrades=Array.from(document.querySelectorAll('input[name="tGrade"]:checked')).map(cb=>cb.value);
+
+// تصفية الاستفسارات لتطابق أي مادة وأي صف حددته المعلمة
+const filteredInquiries=parentInquiries.filter(q=>{
+const matchSub=selectedSubjects.length===0 || selectedSubjects.includes(q.subject);
+const matchGrade=selectedGrades.length===0 || selectedGrades.includes(q.grade);
+return matchSub && matchGrade;
+});
+
+if(!filteredInquiries.length){
+container.innerHTML=`<p class="text-gray-500 text-xs">لا توجد استفسارات جديدة تخص المواد والصفوف المحددة.</p>`;
 return;
 }
 
