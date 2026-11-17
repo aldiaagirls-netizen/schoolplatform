@@ -1,1 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة الكادر التعليمي - مدرسة الضياء</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<style>
+body{font-family:'Cairo',sans-serif}
+button:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+
+<body class="bg-pink-50 text-gray-800 min-h-screen p-4 flex items-center justify-center">
+
+<div class="max-w-md w-full space-y-5">
+
+<!-- شاشة تسجيل دخول المعلمة -->
+<div id="teacherAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 space-y-4">
+<h2 class="text-xl font-bold text-pink-700 text-center">👩‍🏫 بوابة المعلمات - نشر الدروس</h2>
+<p class="text-xs text-gray-500 text-center">أدخلي كلمة المرور الخاصة بالكادر التعليمي للوصول إلى لوحة النشر.</p>
+<div>
+<label class="block text-xs font-semibold mb-1">كلمة المرور:</label>
+<input id="teacherPassInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white text-xs" placeholder="أدخلي كلمة المرور">
+</div>
+<button onclick="loginTeacher()" class="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs cursor-pointer hover:bg-pink-700 transition">دخول لوحة النشر 🚀</button>
+<p id="teacherLoginError" class="text-red-600 text-xs text-center"></p>
+</div>
+
+<!-- واجهة نشر الدروس الخاصة بالمعلمة (مخفية لحين الدخول) -->
+<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 space-y-4">
+<div class="flex justify-between items-center border-b pb-3">
+<div>
+<h2 class="font-bold text-pink-700 text-sm">📚 نشر الحصص والواجبات</h2>
+<p class="text-[11px] text-gray-500">لوحة مخصصة للمعلمات فقط</p>
+</div>
+<button onclick="logoutTeacher()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+</div>
+
+<div class="space-y-3 text-xs">
+<div>
+<label class="block font-semibold mb-1">المادة الدراسية:</label>
+<select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
+<option>القرآن الكريم</option>
+<option>اللغة العربية</option>
+<option>الرياضيات</option>
+<option>الاجتماعيات</option>
+<option>اللغة الإنجليزية</option>
+<option>الأخلاقية</option>
+<option>العلوم</option>
+</select>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">الصف الدراسي:</label>
+<select id="teacherLessonGrade" class="w-full border rounded-lg p-2 bg-white">
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">الشعب المستهدفة (يمكن اختيار أكثر من شعبة):</label>
+<div class="flex gap-4 p-2 border rounded-lg bg-pink-50">
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="أ" class="w-4 h-4 text-pink-600"> الشعبة (أ)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ب" class="w-4 h-4 text-pink-600"> الشعبة (ب)</label>
+<label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
+</div>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
+<textarea id="teacherLessonContent" rows="4" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس أو الواجب هنا..."></textarea>
+</div>
+
+<button id="publishLessonBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
+نشر الدرس للشعب المحددة 🚀
+</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+apiKey:"AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0",
+authDomain:"aldiyaaschool-af7e1.firebaseapp.com",
+databaseURL:"https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
+projectId:"aldiyaaschool-af7e1",
+storageBucket:"aldiyaaschool-af7e1.firebasestorage.app",
+messagingSenderId:"322321446203",
+appId:"1:322321446203:web:6bfbfc082076982e68b31e",
+measurementId:"G-2GW91EKFN0"
+};
+
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+const db=firebase.database();
+const ROOT='school_data';
+
+/* كلمة مرور خاصة بالكادر التعليمي (يمكنك تعديلها بحسب رغبتك) */
+const teacherPass='teacher2026';
+let teacherLoggedIn=localStorage.getItem('school_teacher_logged')==='true';
+
+window.onload=function(){
+if(teacherLoggedIn){
+document.getElementById('teacherAuthView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.remove('hidden');
+}
+};
+
+function loginTeacher(){
+const p=document.getElementById('teacherPassInput').value.trim();
+if(p===teacherPass){
+teacherLoggedIn=true;
+localStorage.setItem('school_teacher_logged','true');
+document.getElementById('teacherAuthView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.remove('hidden');
+document.getElementById('teacherLoginError').textContent='';
+}else{
+document.getElementById('teacherLoginError').textContent='❌ كلمة المرور غير صحيحة';
+}
+}
+
+function logoutTeacher(){
+teacherLoggedIn=false;
+localStorage.removeItem('school_teacher_logged');
+document.getElementById('teacherDashboardView').classList.add('hidden');
+document.getElementById('teacherAuthView').classList.remove('hidden');
+document.getElementById('teacherPassInput').value='';
+}
+
+async function teacherSendLesson(){
+const subject=document.getElementById('teacherLessonSubject').value;
+const grade=document.getElementById('teacherLessonGrade').value;
+const content=document.getElementById('teacherLessonContent').value.trim();
+const checkedSections=Array.from(document.querySelectorAll('input[name="teacherSection"]:checked')).map(cb=>cb.value);
+
+if(!content){
+alert('يرجى كتابة تفاصيل الدرس أو الواجب أولاً.');
+return;
+}
+if(checkedSections.length===0){
+alert('يرجى اختيار شعبة واحدة على الأقل.');
+return;
+}
+
+const btn=document.getElementById('publishLessonBtn');
+btn.disabled=true;
+btn.textContent='جارٍ النشر سحابياً...';
+
+try{
+const scheduleRef=db.ref(ROOT+'/schoolSchedule');
+const result=await scheduleRef.transaction(current=>{
+const scheduleData=(current&&typeof current==='object')?{...current}:{};
+
+checkedSections.forEach(section=>{
+const classKey=grade+'_'+section;
+if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
+scheduleData[classKey]={};
+}
+scheduleData[classKey][subject]=content;
+});
+
+return scheduleData;
+},undefined,false);
+
+if(!result.committed){
+throw new Error('لم يتم حفظ الدرس في السحابة.');
+}
+
+document.getElementById('teacherLessonContent').value='';
+document.querySelectorAll('input[name="teacherSection"]').forEach(cb=>cb.checked=false);
+
+alert(`✓ تم نشر الدرس بنجاح لشعب (${checkedSections.join(', ')}) وتوجيهه للأرشيف وفي أجهزة أولياء الأمور.`);
+}catch(error){
+console.error(error);
+alert('⚠️ تعذر نشر الدرس: '+error.message);
+}finally{
+btn.disabled=false;
+btn.textContent='نشر الدرس للشعب المحددة 🚀';
+}
+}
+</script>
+</body>
+</html>
 
