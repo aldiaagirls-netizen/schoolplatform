@@ -159,25 +159,58 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
-<!-- الاستفسارات -->
+<!-- الاستفسارات للإدارة -->
 <div class="bg-white p-5 rounded-xl shadow border border-blue-100 space-y-3">
-<h2 class="font-bold text-blue-700">💬 استفسارات أولياء الأمور</h2>
+<h2 class="font-bold text-blue-700">💬 استفسارات أولياء الأمور (الإدارة العامة)</h2>
 <div id="adminInquiriesContainer" class="space-y-3 text-xs"></div>
 </div>
 
 </div>
 
-<!-- واجهة المعلمات المخصصة (تظهر فقط عند تسجيل الدخول بكلمة مرور المعلمات) -->
-<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-4">
+<!-- واجهة المعلمات المخصصة (نشر الدروس + اختيار التخصص + استفسارات الصف والمادة) -->
+<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
-<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - نشر الدروس</h2>
-<p class="text-[11px] text-gray-500">لوحة مخصصة للمعلمات فقط</p>
+<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - نشر الدروس والاستفسارات</h2>
+<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي</p>
 </div>
 <button onclick="logoutAdmin()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
 </div>
 
-<div class="space-y-3 text-xs">
+<!-- تحديد تخصص المعلمة (الصف والمادة) -->
+<div class="bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-3 text-xs">
+<h3 class="font-bold text-purple-900">📌 تحديد صفوف ومواد المعلمة الخاصة بك</h3>
+<div class="grid grid-cols-2 gap-2">
+<div>
+<label class="block font-semibold mb-1">المادة التي تدرسينها:</label>
+<select id="teacherMySubject" onchange="saveTeacherProfile()" class="w-full border rounded-lg p-2 bg-white">
+<option>القرآن الكريم</option>
+<option>اللغة العربية</option>
+<option>الرياضيات</option>
+<option>الاجتماعيات</option>
+<option>اللغة الإنجليزية</option>
+<option>الأخلاقية</option>
+<option>العلوم</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold mb-1">الصف الذي تدرسينه:</label>
+<select id="teacherMyGrade" onchange="saveTeacherProfile()" class="w-full border rounded-lg p-2 bg-white">
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+</div>
+</div>
+<p class="text-[10px] text-purple-700">💡 سيتم عرض استفسارات أولياء الأمور لهذا الصف والمادة حصراً لك أدناه.</p>
+</div>
+
+<!-- قسم نشر الدروس -->
+<div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
+<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد</h3>
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
 <select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
@@ -204,8 +237,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <div>
-<label class="block font-semibold mb-1">الشعب المستهدفة (يمكن اختيار أكثر من شعبة):</label>
-<div class="flex gap-4 p-2 border rounded-lg bg-pink-50">
+<label class="block font-semibold mb-1">الشعب المستهدفة:</label>
+<div class="flex gap-4 p-2 border rounded-lg bg-white">
 <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="أ" class="w-4 h-4 text-pink-600"> الشعبة (أ)</label>
 <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ب" class="w-4 h-4 text-pink-600"> الشعبة (ب)</label>
 <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="teacherSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
@@ -214,13 +247,20 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div>
 <label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
-<textarea id="teacherLessonContent" rows="4" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس أو الواجب هنا..."></textarea>
+<textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس..."></textarea>
 </div>
 
-<button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
+<button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
 نشر الدرس للشعب المحددة 🚀
 </button>
 </div>
+
+<!-- قسم استفسارات أولياء الأمور المفلترة الخاصة بالمعلمة -->
+<div class="space-y-3 text-xs border-t pt-4">
+<h3 class="font-bold text-purple-700">💬 استفسارات صفك ومادتك الخاصة</h3>
+<div id="teacherInquiriesContainer" class="space-y-3"></div>
+</div>
+
 </div>
 
 </div>
@@ -294,7 +334,7 @@ let parentActivities=[];
 
 let firebaseConnected=false;
 let dataLoaded=false;
-let userRole=localStorage.getItem('school_user_role'); // 'admin' or 'teacher'
+let userRole=localStorage.getItem('school_user_role');
 let currentGrade='';
 let currentSection='';
 let approvalInProgress=false;
@@ -428,6 +468,7 @@ if(sNameInput)sNameInput.value=supervisorName;
 updateTotalCountBadge();
 renderRequests();
 renderAdminInquiries();
+renderTeacherInquiries();
 renderParentActivities();
 
 if(!document.getElementById('lessonsArchiveModal').classList.contains('hidden')){
@@ -474,6 +515,7 @@ document.getElementById('adminDashboardView').classList.remove('hidden');
 }else if(userRole==='teacher'){
 document.getElementById('adminAuthView').classList.add('hidden');
 document.getElementById('teacherDashboardView').classList.remove('hidden');
+loadTeacherProfile();
 }
 };
 
@@ -493,6 +535,7 @@ localStorage.setItem('school_user_role','teacher');
 document.getElementById('adminAuthView').classList.add('hidden');
 document.getElementById('teacherDashboardView').classList.remove('hidden');
 document.getElementById('loginError').textContent='';
+loadTeacherProfile();
 }else{
 document.getElementById('loginError').textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
 }
@@ -506,6 +549,23 @@ document.getElementById('teacherDashboardView').classList.add('hidden');
 document.getElementById('adminAuthView').classList.remove('hidden');
 document.getElementById('adminPassInput').value='';
 document.getElementById('adminUserInput').value='';
+}
+
+// حفظ واسترجاع تخصص المعلمة محلياً
+function saveTeacherProfile(){
+const subj=document.getElementById('teacherMySubject').value;
+const grade=document.getElementById('teacherMyGrade').value;
+localStorage.setItem('teacher_subject', subj);
+localStorage.setItem('teacher_grade', grade);
+renderTeacherInquiries();
+}
+
+function loadTeacherProfile(){
+const subj=localStorage.getItem('teacher_subject');
+const grade=localStorage.getItem('teacher_grade');
+if(subj) document.getElementById('teacherMySubject').value=subj;
+if(grade) document.getElementById('teacherMyGrade').value=grade;
+renderTeacherInquiries();
 }
 
 async function restoreOldData(){
@@ -1207,7 +1267,7 @@ div.className='p-3 bg-blue-50 border rounded-lg space-y-2 mb-2';
 
 div.innerHTML=`
 <p class="font-bold">الطالبة: ${safeText(q.studentName)}</p>
-<p>${safeText(q.grade)} - شعبة ${safeText(q.section)}</p>
+<p>${safeText(q.grade)} - شعبة ${safeText(q.section)} | المادة: ${safeText(q.subject||'عام')}</p>
 <p class="bg-white p-2 rounded">${safeText(q.content)}</p>
 <textarea id="reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد"></textarea>
 <div class="flex gap-2">
@@ -1221,8 +1281,45 @@ container.appendChild(div);
 });
 }
 
+// عرض الاستفسارات المفلترة حصراً للصف والمادة التي اختارتها المعلمة
+function renderTeacherInquiries(){
+const container=document.getElementById('teacherInquiriesContainer');
+if(!container)return;
+
+const mySubject=document.getElementById('teacherMySubject').value;
+const myGrade=document.getElementById('teacherMyGrade').value;
+
+// تصفية الاستفسارات لتطابق صف ومادة المعلمة فقط
+const filteredInquiries=parentInquiries.filter(q=>{
+return String(q.grade||'').trim()===String(myGrade||'').trim() &&
+String(q.subject||'').trim()===String(mySubject||'').trim();
+});
+
+if(!filteredInquiries.length){
+container.innerHTML=`<p class="text-gray-500 text-xs">لا توجد استفسارات جديدة تخص مادة (${mySubject}) للصف (${myGrade}).</p>`;
+return;
+}
+
+container.innerHTML='';
+filteredInquiries.forEach(q=>{
+const div=document.createElement('div');
+div.className='p-3 bg-purple-50 border border-purple-100 rounded-lg space-y-2 mb-2';
+
+div.innerHTML=`
+<p class="font-bold text-purple-900">الطالبة: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
+<p class="text-xs text-gray-600 font-semibold">المادة المطلوبة: ${safeText(q.subject)}</p>
+<p class="bg-white p-2 rounded text-gray-700">${safeText(q.content)}</p>
+<textarea id="teacher_reply_${safeText(q.id)}" class="w-full border rounded p-2 bg-white" placeholder="اكتبي الرد كمعلمة للمادة..."></textarea>
+<div class="flex gap-2">
+<button onclick="replyInquiry('${q.id}')" class="bg-purple-600 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">إرسال الرد لولي الأمر 🚀</button>
+<button onclick="deleteInquiry('${q.id}')" class="bg-red-500 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">حذف الاستفسار</button>
+</div>`;
+container.appendChild(div);
+});
+}
+
 async function replyInquiry(id){
-const input=document.getElementById('reply_'+id);
+const input=document.getElementById('reply_'+id) || document.getElementById('teacher_reply_'+id);
 const replyText=input?input.value.trim():'';
 if(!replyText)return alert('اكتبي الرد أولاً.');
 
@@ -1245,7 +1342,7 @@ if(!Array.isArray(student.notifications))student.notifications=[];
 
 student.notifications.unshift({
 type:'text',
-title:'💬 رد الإدارة على استفساركم',
+title:'💬 رد معلمة المادة على استفساركم',
 body:replyText,
 unread:true
 });
@@ -1257,12 +1354,7 @@ data.approvedStudents=students;
 return data;
 });
 
-const stillThere=asArray(updated?.parentInquiries).some(q=>String(q.id)===String(id));
-if(stillThere){
-alert('لم يتم إرسال الرد: لم يتم العثور على الطالبة أو الاستفسار.');
-return;
-}
-alert('✓ تم إرسال الرد.');
+alert('✓ تم إرسال الرد بنجاح لولي الأمر.');
 }catch(error){showError(error);}
 }
 
