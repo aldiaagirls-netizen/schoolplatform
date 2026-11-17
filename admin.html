@@ -98,7 +98,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- جدول الحصص والواجبات (مع اختيار متعدد للشعب) -->
+<!-- جدول الحصص والواجبات (إرسال متعدد واختفاء السريع من الواجهة الرئيسية) -->
 <div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3">
 <h2 class="font-bold text-pink-700">📅 جدول الحصص والواجبات</h2>
 
@@ -132,15 +132,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 text-xs bg-white" placeholder="تفاصيل الدرس أو الواجب"></textarea>
 
-<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">إرسال الدرس للشعب المحددة سحابياً 🚀</button>
-
-<hr>
-
-<div class="flex justify-between items-center">
-<strong class="text-xs">📖 الدروس المنشورة السريعة</strong>
-<button onclick="clearAllLessons()" class="text-red-600 text-xs cursor-pointer">حذف جميع الدروس</button>
-</div>
-<div id="publishedLessonsContainer" class="space-y-2"></div>
+<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg text-xs cursor-pointer">إرسال الدرس وتوجيهه للأرشيف 🚀</button>
 </div>
 
 <!-- التعميمات -->
@@ -201,7 +193,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
-<!-- نافذة أرشيف الحصص والدروس (الجديدة) -->
+<!-- نافذة أرشيف الحصص والدروس -->
 <div id="lessonsArchiveModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3">
 <div class="bg-white rounded-2xl p-5 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-3">
 <div class="flex justify-between border-b pb-2 items-center">
@@ -251,7 +243,6 @@ let currentGrade='';
 let currentSection='';
 let approvalInProgress=false;
 
-/* متطلبات الأرشيف التدرجي */
 let archiveCurrentGrade='';
 let archiveCurrentSection='';
 
@@ -379,10 +370,8 @@ document.getElementById('newSupervisorName').value=supervisorName;
 updateTotalCountBadge();
 renderRequests();
 renderAdminInquiries();
-renderPublishedLessons();
 renderParentActivities();
 
-/* تحديث عرض الأرشيف إن كان مفتوحاً */
 if(!document.getElementById('lessonsArchiveModal').classList.contains('hidden')){
 if(archiveCurrentSection){
 renderArchiveLessonsView(archiveCurrentGrade, archiveCurrentSection);
@@ -851,7 +840,7 @@ alert('✓ تم حفظ اسم المشرف.');
 }catch(error){showError(error);}
 }
 
-/* إرسال الدرس لعدة شعب محددة بمربعات الاختيار دفعة واحدة */
+/* إرسال الدرس لعدة شعب، وحفظه في الأرشيف وتفريغ الواجهة الرئيسية فوراً */
 async function sendLessonToSchedule(){
 const subject=document.getElementById('lessonSubject').value;
 const grade=document.getElementById('lessonGrade').value;
@@ -884,58 +873,18 @@ if(!result.committed){
 throw new Error('لم يتم حفظ الدروس في السحابة.');
 }
 
+/* تفريغ حقل الكتابة وإلغاء تحديد الشعب لتنظيف الواجهة الرئيسية وتوجيه الدروس للأرشيف */
 document.getElementById('lessonContent').value='';
 document.querySelectorAll('input[name="lessonSection"]').forEach(cb=>cb.checked=false);
 
-alert(`✓ تم نشر الدرس بنجاح للشعب (${checkedSections.join(', ')}).`);
+alert(`✓ تم نشر الدرس بنجاح للشعب (${checkedSections.join(', ')}) وحفظه في الأرشيف.`);
 }catch(error){
 showError(error);
 }
 }
 
-function renderPublishedLessons(){
-const container=document.getElementById('publishedLessonsContainer');
-let html='';
-
-for(const [classKey,subjects] of Object.entries(schoolSchedule||{})){
-if(!subjects||typeof subjects!=='object')continue;
-const [grade,section]=classKey.split('_');
-
-for(const [subject,content] of Object.entries(subjects)){
-html+=`
-<div class="bg-pink-50 border p-3 rounded-lg mb-2 text-xs">
-<strong>${safeText(grade)} - شعبة ${safeText(section)}</strong>
-<p class="font-bold mt-1">${safeText(subject)}</p>
-<p class="my-2">${safeText(content)}</p>
-<button onclick="deleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-3 py-1 rounded cursor-pointer">حذف الدرس</button>
-</div>`;
-}
-}
-
-container.innerHTML=html||'<p class="text-gray-400">لا توجد دروس منشورة.</p>';
-}
-
-async function deleteLesson(classKeyEncoded,subjectEncoded){
-const classKey=decodeURIComponent(classKeyEncoded);
-const subject=decodeURIComponent(subjectEncoded);
-if(!confirm('هل تريدين حذف هذا الدرس؟'))return;
-
-try{
-await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>null);
-alert('✓ تم حذف الدرس.');
-}catch(error){showError(error);}
-}
-
-async function clearAllLessons(){
-if(!confirm('سيتم حذف جميع الدروس فقط. هل أنت متأكدة؟'))return;
-try{
-await safeTransaction(ROOT+'/schoolSchedule',()=>null);
-alert('✓ تم حذف الدروس.');
-}catch(error){showError(error);}
-}
-
 /* ==================================================
-   وظائف أرشيف الحصص والدروس المتدرج الجديد
+   وظائف أرشيف الحصص والدروس التدرجي (الوجهة الأساسية للدروس)
 ================================================== */
 function openLessonsArchiveModal(){
 document.getElementById('lessonsArchiveModal').classList.remove('hidden');
@@ -957,7 +906,6 @@ const container=document.getElementById('archiveModalContent');
 container.innerHTML='';
 
 gradesList.forEach(grade=>{
-// حساب عدد الدروس الكلي لهذا الصف عبر كل الشعب
 let gradeLessonsCount=0;
 sectionsList.forEach(sec=>{
 const key=grade+'_'+sec;
