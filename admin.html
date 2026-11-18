@@ -20,7 +20,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div class="max-w-4xl w-full mx-auto space-y-5">
 
-<!-- شاشة تسجيل الدخول الموحد (بوابة واحدة فقط) -->
+<!-- شاشة تسجيل الدخول الموحد -->
 <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 max-w-md mx-auto space-y-4">
 <h2 class="text-xl font-bold text-pink-700 text-center">🔐 تسجيل الدخول الموحد</h2>
 <p class="text-xs text-gray-500 text-center">أدخل كلمة المرور الخاصة بك (الإدارة أو الكادر التعليمي).</p>
@@ -33,7 +33,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p id="loginError" class="text-red-600 text-xs text-center"></p>
 </div>
 
-<!-- لوحة الإدارة الرئيسية (تظهر للإدارة حصراً) -->
+<!-- لوحة الإدارة الرئيسية -->
 <div id="adminDashboardView" class="hidden space-y-5 w-full">
 
 <div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
@@ -136,14 +136,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- قسم مراقبة تحاضير الكادر التدريسي داخل قائمة مخفية (منسدلة) مع زر حذف الصورة -->
+<!-- قسم مراقبة تحاضير الكادر التدريسي داخل قائمة مخفية (منسدلة) -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3 text-xs">
 <div class="flex justify-between items-center border-b pb-2 cursor-pointer" onclick="toggleAdminReportSection()">
 <h2 class="font-bold text-purple-800 text-sm">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة (قائمة الصفوف والشعب)</h2>
 <span class="text-purple-700 font-bold" id="reportToggleIcon">📂 طوية / فتح</span>
 </div>
 <div id="adminTeachersReportBody" class="hidden space-y-3 pt-2">
-<p class="text-xs text-gray-500">متابعة المواد والصفوف المرسلة لأولياء الأمور (يتم التحديث الآلي واستبدال الدرس القديم عند إرسال جديد):</p>
+<p class="text-xs text-gray-500">متابعة المواد والصفوف المرسلة لأولياء الأمور:</p>
 <div id="adminTeachersReportContainer" class="space-y-3 text-xs">
 <p class="text-gray-400">جارٍ تحليل سجل التحاضير...</p>
 </div>
@@ -227,6 +227,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
+<!-- قسم نشر التحضير اليومي -->
 <div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
 <h3 class="font-bold text-pink-800">📚 نشر أو تحديث التحضير اليومي (يستبدل الدرس القديم تلقائياً لأولياء الأمور)</h3>
 <div>
@@ -273,6 +274,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </button>
 </div>
 
+<!-- قسم دروسي المرسلة المخصصة للمعلمة (مع أزرار حذف الصورة وحذف الدرس) -->
+<div class="space-y-3 text-xs bg-purple-50/50 p-4 rounded-xl border border-purple-200">
+<h3 class="font-bold text-purple-900 border-b pb-2">📖 دروسي المرسلة حالياً (مع خيارات حذف الصورة والدرس)</h3>
+<div id="teacherActiveLessonsContainer" class="space-y-2">
+<p class="text-gray-500">اختر موادك وصفوفك بالأعلى لعرض الدروس المرسلة...</p>
+</div>
+</div>
+
+<!-- قسم استفسارات أولياء الأمور للمعدة -->
 <div class="space-y-3 text-xs border-t pt-4">
 <h3 class="font-bold text-purple-700">💬 استفسارات موادك وصفوفك المحددة</h3>
 <div id="teacherInquiriesContainer" class="space-y-3"></div>
@@ -490,6 +500,7 @@ updateTotalCountBadge();
 renderRequests();
 renderAdminInquiries();
 renderTeacherInquiries();
+renderTeacherActiveLessons();
 renderParentActivities();
 renderAdminTeachersReport();
 
@@ -580,6 +591,7 @@ const selectedGrades=Array.from(document.querySelectorAll('input[name="tGrade"]:
 localStorage.setItem('teacher_subjects_list', JSON.stringify(selectedSubjects));
 localStorage.setItem('teacher_grades_list', JSON.stringify(selectedGrades));
 renderTeacherInquiries();
+renderTeacherActiveLessons();
 }
 
 function loadTeacherProfile(){
@@ -595,6 +607,7 @@ if(savedGrades.includes(cb.value)) cb.checked=true;
 });
 }catch(e){console.error(e);}
 renderTeacherInquiries();
+renderTeacherActiveLessons();
 }
 
 async function restoreOldData(){
@@ -1212,7 +1225,61 @@ container.appendChild(card);
 });
 }
 
-// دالة حذف الصورة فقط من الدرس وتحديث أولياء الأمور
+// عرض دروس المعلمة المخصصة مع أزرار حذف الصورة والدرس في بوابتها
+function renderTeacherActiveLessons(){
+const container=document.getElementById('teacherActiveLessonsContainer');
+if(!container) return;
+
+const selectedSubjects=Array.from(document.querySelectorAll('input[name="tSub"]:checked')).map(cb=>cb.value);
+const selectedGrades=Array.from(document.querySelectorAll('input[name="tGrade"]:checked')).map(cb=>cb.value);
+
+if(selectedSubjects.length===0 || selectedGrades.length===0){
+container.innerHTML='<p class="text-gray-500">يرجى تحديد موادك وصفوفك بالأعلى لعرض الدروس المرسلة.</p>';
+return;
+}
+
+container.innerHTML='';
+let hasAnyLesson=false;
+
+selectedGrades.forEach(grade=>{
+sectionsList.forEach(section=>{
+const classKey=grade+'_'+section;
+const subjectsData=schoolSchedule[classKey]||{};
+
+selectedSubjects.forEach(subj=>{
+const lessonItem = subjectsData[subj];
+const hasLesson = lessonItem && (typeof lessonItem==='string' || lessonItem.text || lessonItem.image);
+if(hasLesson){
+hasAnyLesson=true;
+const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
+const hasImg = typeof lessonItem==='object' && lessonItem?.image;
+const lessonDate = typeof lessonItem==='object' && lessonItem?.date ? lessonItem.date : '';
+
+const div=document.createElement('div');
+div.className='bg-white border border-purple-200 p-2.5 rounded-lg space-y-1.5 text-xs';
+div.innerHTML=`
+<div class="flex justify-between items-center font-semibold text-purple-900">
+<span>📖 ${safeText(subj)} (${safeText(grade)} - شعبة ${section})</span>
+<span class="text-gray-400 text-[10px]">${safeText(lessonDate)}</span>
+</div>
+${lessonText ? `<p class="text-gray-700">${safeText(lessonText)}</p>` : ''}
+${hasImg ? `<div class="mt-1"><span class="text-blue-600 font-semibold text-[11px] block mb-1">📎 مرفق صورة مع الدرس</span><img src="${lessonItem.image}" class="max-h-24 rounded border object-contain"></div>` : ''}
+<div class="flex gap-2 justify-end pt-1">
+${hasImg ? `<button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصورة</button>` : ''}
+<button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف الدرس بالكامل</button>
+</div>
+`;
+container.appendChild(div);
+}
+});
+});
+});
+
+if(!hasAnyLesson){
+container.innerHTML='<p class="text-gray-500">لا توجد دروس مرسلة حالياً للمواد والصفوف المحددة.</p>';
+}
+}
+
 async function adminDeleteImage(encodedClassKey, encodedSubject){
 const classKey=decodeURIComponent(encodedClassKey);
 const subject=decodeURIComponent(encodedSubject);
@@ -1226,7 +1293,7 @@ const snap=await lessonRef.once('value');
 const val=snap.val();
 
 if(val && typeof val==='object'){
-val.image=''; // تفريغ مسار أو كود الصورة
+val.image='';
 await lessonRef.set(val);
 alert('✓ تم حذف الصورة بنجاح وتحديث أجهزة أولياء الأمور.');
 }
