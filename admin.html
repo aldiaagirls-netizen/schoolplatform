@@ -50,7 +50,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-4 rounded-xl flex justify-between items-center">
 <div>
-<p class="font-bold">☁️ الربط السحابي المباشر</p>
+<p class="font-bold">☁️ الربط السحابي المباشر ببوابة أولياء الأمور</p>
 <p class="text-xs mt-1">قاعدة بيانات مدرسة الضياء</p>
 <p id="connectionStatus" class="text-xs mt-2">جارٍ الاتصال...</p>
 </div>
@@ -99,7 +99,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <!-- قسم مراقبة تحاضير الكادر التدريسي مع أزرار الحذف الفوري والتاريخ -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
 <h2 class="font-bold text-purple-800 text-sm border-b pb-2">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
-<p class="text-xs text-gray-500">متابعة المواد والصفوف التي تم إرسال تحاضيرها (يتم تحديث الدرس تلقائياً واستبدال القديم عند إرسال جديد):</p>
+<p class="text-xs text-gray-500">متابعة المواد والصفوف المرسلة لأولياء الأمور (يتم التحديث الآلي واستبدال الدرس القديم عند إرسال جديد):</p>
 <div id="adminTeachersReportContainer" class="space-y-3 text-xs">
 <p class="text-gray-400">جارٍ تحليل سجل التحاضير...</p>
 </div>
@@ -134,7 +134,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" name="lessonSection" value="ج" class="w-4 h-4 text-pink-600"> الشعبة (ج)</label>
 </div>
 <textarea id="lessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="تفاصيل الدرس أو الواجب الجديد"></textarea>
-<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">إرسال وتحديث الدرس اليومي 🚀</button>
+<button onclick="sendLessonToSchedule()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">إرسال وتحديث الدرس لبوابة أولياء الأمور 🚀</button>
 </div>
 
 <!-- الاستفسارات للإدارة -->
@@ -145,12 +145,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 </div>
 
-<!-- واجهة المعلمات المخصصة (تدعم عدة مواد وصفوف وإرفاق الصور مع تاريخ الهاتف المتزامن) -->
+<!-- واجهة المعلمات المخصصة (تدعم عدة مواد وصفوف وإرفاق الصور مع تاريخ الهاتف المتزامن التلقائي) -->
 <div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6 w-full">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
 <h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - الجدول والاستفسارات</h2>
-<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي</p>
+<p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي (مرتبطة ببوابة ولي الأمر)</p>
 </div>
 <button onclick="logoutAdmin()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
 </div>
@@ -186,9 +186,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="text-[10px] text-purple-700">💡 يتم حفظ جدولك تلقائياً لتظهر لك استفسارات هذه المواد والصفوف فقط.</p>
 </div>
 
-<!-- قسم نشر الدروس مع رفع الصور وتاريخ الهاتف -->
+<!-- قسم نشر الدروس مع رفع الصور وتاريخ هاتف المعلم التلقائي -->
 <div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
-<h3 class="font-bold text-pink-800">📚 نشر أو تحديث التحضير اليومي (يستبدل الدرس القديم تلقائياً)</h3>
+<h3 class="font-bold text-pink-800">📚 نشر أو تحديث التحضير اليومي (يستبدل الدرس القديم تلقائياً لأولياء الأمور)</h3>
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
 <select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
@@ -229,7 +229,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <input type="file" id="teacherLessonImage" accept="image/*" class="w-full border rounded-lg p-1.5 bg-white text-xs">
 </div>
 <button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
-إرسال وتحديث التحضير اليومي تلقائياً 🚀
+إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀
 </button>
 </div>
 
@@ -968,7 +968,7 @@ alert('✓ تم حفظ اسم المشرف.');
 }catch(error){showError(error);}
 }
 
-// دالة إرسال واستبدال الدرس تلقائياً للإدارة مع تاريخ هاتف المعلم
+// دالة إرسال وتحديث الدرس تلقائياً للإدارة مع تاريخ هاتف المعلم
 async function sendLessonToSchedule(){
 const subject=document.getElementById('lessonSubject').value;
 const grade=document.getElementById('lessonGrade').value;
@@ -978,7 +978,6 @@ const checkedSections=Array.from(document.querySelectorAll('input[name="lessonSe
 if(!content)return alert('اكتبي تفاصيل الدرس.');
 if(checkedSections.length===0)return alert('يرجى اختيار شعبة واحدة على الأقل.');
 
-// التقاط تاريخ الهاتف الحالي فوراً
 const phoneDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
 
 try{
@@ -992,7 +991,7 @@ const classKey=grade+'_'+section;
 if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
 scheduleData[classKey]={};
 }
-// استبدال الدرس القديم بالدرس الجديد وتحديث التاريخ اليومي
+// استبدال التحضير القديم بالجديد فوراً ليراه ولي الأمر بشكل متزامن
 scheduleData[classKey][subject]={text:content, image:'', date:phoneDate};
 });
 
@@ -1012,7 +1011,7 @@ showError(error);
 }
 }
 
-// دالة إرسال وتحديث الدرس الخاصة بالمعلمات تلقائياً مع الصورة وتاريخ هاتف المعلم المتزامن
+// دالة إرسال وتحديث الدرس الخاصة بالمعلمات تلقائياً مع الصورة وتاريخ هاتف المعلم المتزامن لبوابة ولي الأمر
 async function teacherSendLesson(){
 const subject=document.getElementById('teacherLessonSubject').value;
 const grade=document.getElementById('teacherLessonGrade').value;
@@ -1047,7 +1046,7 @@ const classKey=grade+'_'+section;
 if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
 scheduleData[classKey]={};
 }
-// استبدال التحضير السابق بشكل كامل بالتحضير الجديد وتاريخ اليوم
+// استبدال التحضير السابق بالكامل بالتحضير الجديد وتاريخ اليوم ليتزامن مع أولياء الأمور
 scheduleData[classKey][subject]={
 text: content,
 image: imageBase64 || '',
@@ -1068,12 +1067,12 @@ alert(`✓ تم تحديث وإرسال تحضير (${subject}) للشعب (${ch
 showError(error);
 }).finally(()=>{
 btn.disabled=false;
-btn.textContent='إرسال وتحديث التحضير اليومي تلقائياً 🚀';
+btn.textContent='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
 });
 }).catch(error=>{
 showError(error);
 btn.disabled=false;
-btn.textContent='إرسال وتحديث التحضير اليومي تلقائياً 🚀';
+btn.textContent='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
 });
 };
 
@@ -1086,7 +1085,7 @@ processAndPublish(e.target.result);
 reader.onerror=function(){
 alert('حدث خطأ أثناء قراءة الصورة.');
 btn.disabled=false;
-btn.textContent='إرسال وتحديث التحضير اليومي تلقائياً 🚀';
+btn.textContent='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
 };
 reader.readAsDataURL(file);
 }else{
