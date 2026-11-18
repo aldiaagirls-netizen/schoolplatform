@@ -136,11 +136,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- قسم مراقبة تحاضير الكادر التدريسي داخل قائمة مخفية (منسدلة) -->
+<!-- قسم مراقبة تحاضير الكادر التدريسي (مع زر التحديث الفوري، قائمة الصفوف والشعب، وزر حذف جميع التحاضير) -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3 text-xs">
-<div class="flex justify-between items-center border-b pb-2 cursor-pointer" onclick="toggleAdminReportSection()">
-<h2 class="font-bold text-purple-800 text-sm">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة (قائمة الصفوف والشعب)</h2>
+<div class="flex justify-between items-center border-b pb-2">
+<div class="flex items-center gap-2 cursor-pointer flex-1" onclick="toggleAdminReportSection()">
+<h2 class="font-bold text-purple-800 text-sm">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
 <span class="text-purple-700 font-bold" id="reportToggleIcon">📂 طوية / فتح</span>
+</div>
+<div class="flex gap-2">
+<button onclick="forceRefreshData()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-blue-700">🔄 تحديث</button>
+<button onclick="deleteAllLessons()" class="bg-red-600 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-700">🗑️ حذف جميع التحاضير</button>
+</div>
 </div>
 <div id="adminTeachersReportBody" class="hidden space-y-3 pt-2">
 <p class="text-xs text-gray-500">متابعة المواد والصفوف المرسلة لأولياء الأمور:</p>
@@ -197,7 +203,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - الجدول والاستفسارات</h2>
 <p class="text-[11px] text-gray-500">لوحة مخصصة للكادر التعليمي (مرتبطة ببوابة ولي الأمر)</p>
 </div>
+<div class="flex gap-2">
+<button onclick="forceRefreshData()" class="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">🔄 تحديث</button>
 <button onclick="logoutAdmin()" class="bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+</div>
 </div>
 
 <div class="bg-purple-50 p-4 rounded-xl border border-purple-200 space-y-3 text-xs">
@@ -282,7 +291,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
-<!-- قسم استفسارات أولياء الأمور للمعدة -->
+<!-- قسم استفسارات أولياء الأمور للمعلمة -->
 <div class="space-y-3 text-xs border-t pt-4">
 <h3 class="font-bold text-purple-700">💬 استفسارات موادك وصفوفك المحددة</h3>
 <div id="teacherInquiriesContainer" class="space-y-3"></div>
@@ -582,6 +591,36 @@ document.getElementById('teacherDashboardView').classList.add('hidden');
 document.getElementById('adminAuthView').classList.remove('hidden');
 document.getElementById('adminPassInput').value='';
 document.getElementById('adminUserInput').value='';
+}
+
+// دالة التحديث السحابي الفوري للإدارة والمعلمة
+async function forceRefreshData(){
+try{
+await waitForFirebaseConnection();
+const snap=await db.ref(ROOT).once('value');
+if(snap.exists()){
+loadSchoolData(snap.val());
+dataLoaded=true;
+alert('✓ تم تحديث وجلب أحدث البيانات والتحاضير من السحابة بنجاح.');
+}else{
+alert('لا توجد بيانات حالية في السحابة.');
+}
+}catch(error){
+showError(error);
+}
+}
+
+// دالة حذف جميع التحاضير لكل الصفوف والشعب بضغطة زر واحدة
+async function deleteAllLessons(){
+if(!confirm('⚠️ تحذير خطير: هل أنت متكد من رغبتك في حذف جميع التحاضير والدروس لكل الصفوف والش الشعب دفعة واحدة؟')) return;
+if(!confirm('تأكيد نهائي: سيتم تفريغ جدول الحصص بالكامل. هل تريد المتابعة؟')) return;
+
+try{
+await safeTransaction(ROOT+'/schoolSchedule',()=>null);
+alert('✓ تم حذف جميع التحاضير والدروس لكل الصفوف والشعب بنجاح وتم تحديث أجهزة أولياء الأمور.');
+}catch(error){
+showError(error);
+}
 }
 
 function saveTeacherProfile(){
@@ -1225,7 +1264,6 @@ container.appendChild(card);
 });
 }
 
-// عرض دروس المعلمة المخصصة مع أزرار حذف الصورة والدرس في بوابتها
 function renderTeacherActiveLessons(){
 const container=document.getElementById('teacherActiveLessonsContainer');
 if(!container) return;
