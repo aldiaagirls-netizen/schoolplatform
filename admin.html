@@ -78,7 +78,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <div id="requestsContainer">جارٍ تحميل الطلبات...</div>
 </div>
 
-<!-- قسم إرسال التعاميم والتوجهات الإدارية لأولياء الأمور (الذي تم استرجاعه) -->
+<!-- قسم إرسال التعاميم والتوجهات الإدارية لأولياء الأمور -->
 <div class="bg-white p-5 rounded-xl shadow border border-indigo-100 space-y-3 text-xs">
 <div class="flex justify-between items-center border-b pb-2 cursor-pointer" onclick="toggleBroadcastSection()">
 <h2 class="font-bold text-indigo-700 text-sm">📢 إرسال تعميم أو توجيه إداري لأولياء الأمور</h2>
@@ -136,12 +136,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- قسم مراقبة تحاضير الكادر التدريسي مع أزرار الحذف الفوري والتاريخ -->
-<div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
-<h2 class="font-bold text-purple-800 text-sm border-b pb-2">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
+<!-- قسم مراقبة تحاضير الكادر التدريسي داخل قائمة مخفية (منسدلة) مع زر حذف الصورة -->
+<div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3 text-xs">
+<div class="flex justify-between items-center border-b pb-2 cursor-pointer" onclick="toggleAdminReportSection()">
+<h2 class="font-bold text-purple-800 text-sm">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة (قائمة الصفوف والشعب)</h2>
+<span class="text-purple-700 font-bold" id="reportToggleIcon">📂 طوية / فتح</span>
+</div>
+<div id="adminTeachersReportBody" class="hidden space-y-3 pt-2">
 <p class="text-xs text-gray-500">متابعة المواد والصفوف المرسلة لأولياء الأمور (يتم التحديث الآلي واستبدال الدرس القديم عند إرسال جديد):</p>
 <div id="adminTeachersReportContainer" class="space-y-3 text-xs">
 <p class="text-gray-400">جارٍ تحليل سجل التحاضير...</p>
+</div>
 </div>
 </div>
 
@@ -1121,7 +1126,6 @@ processAndPublish('');
 }
 }
 
-// دالة إرسال التوجيهات والتعاميم الإدارية لأولياء الأمور
 async function sendBroadcastMessage(){
 const targetGrade=document.getElementById('broadcastGrade').value;
 const targetSection=document.getElementById('broadcastSection').value;
@@ -1157,6 +1161,11 @@ const body=document.getElementById('broadcastContentBody');
 if(body)body.classList.toggle('hidden');
 }
 
+function toggleAdminReportSection(){
+const body=document.getElementById('adminTeachersReportBody');
+if(body)body.classList.toggle('hidden');
+}
+
 function renderAdminTeachersReport(){
 const container=document.getElementById('adminTeachersReportContainer');
 if(!container) return;
@@ -1185,8 +1194,8 @@ subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex f
 <div class="flex justify-between items-center"><span class="font-semibold text-emerald-900">✅ ${subj}</span><span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span></div>
 ${lessonDate ? `<span class="text-gray-500 text-[10px]">📅 تاريخ التحديث اليومي: ${safeText(lessonDate)}</span>` : ''}
 ${lessonText ? `<p class="text-gray-700 truncate">${safeText(lessonText)}</p>` : ''}
-${hasImg ? `<span class="text-blue-600 font-semibold">📎 مرفق صورة مع التحضير</span>` : ''}
-<div class="flex justify-end mt-1"><button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف التحضير</button></div>
+${hasImg ? `<div class="flex items-center justify-between mt-1"><span class="text-blue-600 font-semibold">📎 مرفق صورة</span><button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصورة</button></div>` : ''}
+<div class="flex justify-end mt-1"><button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف الدرس بالكامل</button></div>
 </div>`;
 }else{
 subHTML+=`<div class="bg-red-50 border border-red-200 p-2 rounded flex justify-between items-center text-[11px]">
@@ -1201,6 +1210,29 @@ card.innerHTML=subHTML;
 container.appendChild(card);
 });
 });
+}
+
+// دالة حذف الصورة فقط من الدرس وتحديث أولياء الأمور
+async function adminDeleteImage(encodedClassKey, encodedSubject){
+const classKey=decodeURIComponent(encodedClassKey);
+const subject=decodeURIComponent(encodedSubject);
+
+if(!confirm(`هل تريدين حذف الصورة المرفقة فقط لدرس (${subject}) لهذا الصف والشعبة؟`))return;
+
+try{
+await waitForFirebaseConnection();
+const lessonRef=db.ref(ROOT+'/schoolSchedule/'+classKey+'/'+subject);
+const snap=await lessonRef.once('value');
+const val=snap.val();
+
+if(val && typeof val==='object'){
+val.image=''; // تفريغ مسار أو كود الصورة
+await lessonRef.set(val);
+alert('✓ تم حذف الصورة بنجاح وتحديث أجهزة أولياء الأمور.');
+}
+}catch(error){
+showError(error);
+}
 }
 
 async function adminDeleteLesson(encodedClassKey, encodedSubject){
@@ -1300,7 +1332,10 @@ div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 s
 div.innerHTML=`
 <div class="flex justify-between items-center border-b pb-1.5">
 <strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
+<div class="flex gap-1.5">
+${imgData ? `<button onclick="adminDeleteImage('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600 transition">حذف الصورة</button>` : ''}
 <button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
+</div>
 </div>
 ${lessonDate ? `<p class="text-gray-500 text-[11px]">📅 تاريخ التحديث: ${safeText(lessonDate)}</p>` : ''}
 <p class="text-gray-700 whitespace-pre-wrap">${safeText(contentText)}</p>
