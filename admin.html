@@ -34,7 +34,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <!-- لوحة الإدارة الرئيسية (تظهر للإدارة حصراً) -->
-<div id="adminDashboardView" class="hidden space-y-5">
+<div id="adminDashboardView" class="hidden space-y-5 w-full">
 
 <div class="bg-white p-4 rounded-xl shadow border border-pink-100 flex flex-wrap gap-2 justify-between items-center">
 <div class="flex flex-wrap gap-2">
@@ -96,6 +96,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
+<!-- قسم مراقبة تحاضير الكادر التدريسي (جديد) -->
+<div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
+<h2 class="font-bold text-purple-800 text-sm border-b pb-2">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
+<p class="text-xs text-gray-500">متابعة المواد والصفوف التي تم إرسال تحاضيرها والتي لم تُرسل بعد:</p>
+<div id="adminTeachersReportContainer" class="space-y-3 text-xs">
+<p class="text-gray-400">جارٍ تحليل سجل التحاضير...</p>
+</div>
+</div>
+
 <!-- جدول الحصص والواجبات للإدارة -->
 <div class="bg-white p-5 rounded-xl shadow border border-pink-100 space-y-3 text-xs">
 <h2 class="font-bold text-pink-700 text-sm">📅 جدول الحصص والواجبات (إدارة)</h2>
@@ -137,7 +146,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <!-- واجهة المعلمات المخصصة (تدعم اختيار عدة مواد وعدة صفوف) -->
-<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6">
+<div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6 w-full">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
 <h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلمات - الجدول والاستفسارات</h2>
@@ -311,6 +320,10 @@ const gradesList=[
 'الأول الابتدائي','الثاني الابتدائي','الثالث الابتدائي',
 'الرابع الابتدائي','الخامس الابتدائي','السادس الابتدائي'
 ];
+const subjectsList=[
+'القرآن الكريم','اللغة العربية','الرياضيات',
+'الاجتماعيات','اللغة الإنجليزية','الأخلاقية','العلوم'
+];
 const sectionsList=['أ','ب','ج'];
 
 function safeText(value){
@@ -435,6 +448,7 @@ renderRequests();
 renderAdminInquiries();
 renderTeacherInquiries();
 renderParentActivities();
+renderAdminTeachersReport();
 
 if(!document.getElementById('lessonsArchiveModal').classList.contains('hidden')){
 if(archiveCurrentSection){
@@ -1045,6 +1059,45 @@ btn.textContent='نشر الدرس للشعب المحددة 🚀';
 }
 }
 
+// دالة عرض تقرير مراقبة التحاضير للإدارة
+function renderAdminTeachersReport(){
+const container=document.getElementById('adminTeachersReportContainer');
+if(!container) return;
+
+container.innerHTML='';
+
+gradesList.forEach(grade=>{
+sectionsList.forEach(section=>{
+const classKey=grade+'_'+section;
+const subjectsData=schoolSchedule[classKey]||{};
+
+const card=document.createElement('div');
+card.className='p-3 bg-purple-50/50 border border-purple-200 rounded-xl space-y-2 mb-2';
+
+let subHTML=`<p class="font-bold text-purple-900"> الصف: ${safeText(grade)} - شعبة (${section})</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">`;
+
+subjectsList.forEach(subj=>{
+const hasLesson = subjectsData[subj];
+if(hasLesson){
+subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex justify-between items-center text-[11px]">
+<span class="font-semibold text-emerald-900">✅ ${subj}</span>
+<span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span>
+</div>`;
+}else{
+subHTML+=`<div class="bg-red-50 border border-red-200 p-2 rounded flex justify-between items-center text-[11px]">
+<span class="font-semibold text-red-900">❌ ${subj}</span>
+<span class="text-red-700 bg-red-100 px-1.5 py-0.5 rounded">لم يتم الإرسال</span>
+</div>`;
+}
+});
+subHTML+=`</div>`;
+
+card.innerHTML=subHTML;
+container.appendChild(card);
+});
+});
+}
+
 function openLessonsArchiveModal(){
 document.getElementById('lessonsArchiveModal').classList.remove('hidden');
 renderArchiveGradesView();
@@ -1085,7 +1138,7 @@ function renderArchiveSectionsView(grade){
 archiveCurrentGrade=grade;
 archiveCurrentSection='';
 document.getElementById('archiveModalTitle').textContent=grade+' - اختر الشعبة';
-document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+document.getElementById('archiveBackBtnContainer').classList.add('hidden');
 const container=document.getElementById('archiveModalContent');
 container.innerHTML='';
 
@@ -1106,7 +1159,7 @@ function renderArchiveLessonsView(grade,section){
 archiveCurrentGrade=grade;
 archiveCurrentSection=section;
 document.getElementById('archiveModalTitle').textContent=`دروس ${grade} - شعبة (${section})`;
-document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
+document.getElementById('archiveBackBtnContainer').classList.add('hidden');
 const container=document.getElementById('archiveModalContent');
 container.innerHTML='';
 
