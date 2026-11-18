@@ -96,10 +96,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- قسم مراقبة تحاضير الكادر التدريسي -->
+<!-- قسم مراقبة تحاضير الكادر التدريسي مع أزرار الحذف الفوري -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
 <h2 class="font-bold text-purple-800 text-sm border-b pb-2">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
-<p class="text-xs text-gray-500">متابعة المواد والصفوف التي تم إرسال تحاضيرها والتي لم تُرسل بعد:</p>
+<p class="text-xs text-gray-500">متابعة المواد والصفوف التي تم إرسال تحاضيرها (مع إمكانية الحذف المباشر):</p>
 <div id="adminTeachersReportContainer" class="space-y-3 text-xs">
 <p class="text-gray-400">جارٍ تحليل سجل التحاضير...</p>
 </div>
@@ -145,7 +145,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 </div>
 
-<!-- واجهة المعلمات المخصصة (تدعم عدة مواد وصفوف ومرفق صور) -->
+<!-- واجهة المعلمات المخصصة (تدعم عدة مواد وصفوف وإرفاق الصور مع التاريخ) -->
 <div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6 w-full">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
@@ -186,9 +186,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="text-[10px] text-purple-700">💡 يتم حفظ جدولك تلقائياً لتظهر لك استفسارات هذه المواد والصفوف فقط.</p>
 </div>
 
-<!-- قسم نشر الدروس مع رفع الصور -->
+<!-- قسم نشر الدروس مع رفع الصور وتوثيق التاريخ -->
 <div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
-<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد مع إرفاق صورة</h3>
+<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد مع إرفاق صورة والتاريخ اليومي</h3>
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
 <select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
@@ -229,7 +229,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <input type="file" id="teacherLessonImage" accept="image/*" class="w-full border rounded-lg p-1.5 bg-white text-xs">
 </div>
 <button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
-نشر الدرس للشعب المحددة مع الصورة 🚀
+نشر الدرس للشعب المحددة مع التاريخ والصورة 🚀
 </button>
 </div>
 
@@ -968,20 +968,20 @@ alert('✓ تم حفظ اسم المشرف.');
 }catch(error){showError(error);}
 }
 
-// دالة إرسال الدرس للإدارة
+// دالة إرسال الدرس للإدارة مع التاريخ اليومي
 async function sendLessonToSchedule(){
 const subject=document.getElementById('lessonSubject').value;
 const grade=document.getElementById('lessonGrade').value;
 const content=document.getElementById('lessonContent').value.trim();
-
 const checkedSections=Array.from(document.querySelectorAll('input[name="lessonSection"]:checked')).map(cb=>cb.value);
 
 if(!content)return alert('اكتبي تفاصيل الدرس.');
 if(checkedSections.length===0)return alert('يرجى اختيار شعبة واحدة على الأقل.');
 
+const currentDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
+
 try{
 await waitForFirebaseConnection();
-
 const scheduleRef=db.ref(ROOT+'/schoolSchedule');
 const result=await scheduleRef.transaction(current=>{
 const scheduleData=(current&&typeof current==='object')?{...current}:{};
@@ -991,7 +991,7 @@ const classKey=grade+'_'+section;
 if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
 scheduleData[classKey]={};
 }
-scheduleData[classKey][subject]={text:content, image:''};
+scheduleData[classKey][subject]={text:content, image:'', date:currentDate};
 });
 
 return scheduleData;
@@ -1004,13 +1004,13 @@ throw new Error('لم يتم حفظ الدروس في السحابة.');
 document.getElementById('lessonContent').value='';
 document.querySelectorAll('input[name="lessonSection"]').forEach(cb=>cb.checked=false);
 
-alert(`✓ تم نشر الدرس بنجاح للشعب (${checkedSections.join(', ')}) وحفظه في الأرشيف.`);
+alert(`✓ تم نشر الدرس بنجاح للشعب (${checkedSections.join(', ')}) مع تاريخ اليوم.`);
 }catch(error){
 showError(error);
 }
 }
 
-// دالة إرسال الدرس الخاصة بالمعلمات مع دعم الصورة
+// دالة إرسال الدرس الخاصة بالمعلمات مع إرفاق الصورة وتاريخ اليوم
 async function teacherSendLesson(){
 const subject=document.getElementById('teacherLessonSubject').value;
 const grade=document.getElementById('teacherLessonGrade').value;
@@ -1031,6 +1031,8 @@ const btn=document.getElementById('teacherPublishBtn');
 btn.disabled=true;
 btn.textContent='جارٍ النشر سحابياً...';
 
+const currentDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
+
 const processAndPublish=(imageBase64)=>{
 waitForFirebaseConnection().then(()=>{
 const scheduleRef=db.ref(ROOT+'/schoolSchedule');
@@ -1044,7 +1046,8 @@ scheduleData[classKey]={};
 }
 scheduleData[classKey][subject]={
 text: content,
-image: imageBase64 || ''
+image: imageBase64 || '',
+date: currentDate
 };
 });
 
@@ -1056,17 +1059,17 @@ throw new Error('لم يتم حفظ الدرس في السحابة.');
 document.getElementById('teacherLessonContent').value='';
 if(imageInput) imageInput.value='';
 document.querySelectorAll('input[name="teacherSection"]').forEach(cb=>cb.checked=false);
-alert(`✓ تم نشر الدرس بنجاح لشعب (${checkedSections.join(', ')}) وتوجيهه للأرشيف ولأجهزة أولياء الأمور.`);
+alert(`✓ تم نشر الدرس وتوثيق تاريخ اليوم (${currentDate}) للشعب (${checkedSections.join(', ')}) بنجاح.`);
 }).catch(error=>{
 showError(error);
 }).finally(()=>{
 btn.disabled=false;
-btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+btn.textContent='نشر الدرس للشعب المحددة مع التاريخ والصورة 🚀';
 });
 }).catch(error=>{
 showError(error);
 btn.disabled=false;
-btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+btn.textContent='نشر الدرس للشعب المحددة مع التاريخ والصورة 🚀';
 });
 };
 
@@ -1079,7 +1082,7 @@ processAndPublish(e.target.result);
 reader.onerror=function(){
 alert('حدث خطأ أثناء قراءة الصورة.');
 btn.disabled=false;
-btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+btn.textContent='نشر الدرس للشعب المحددة مع التاريخ والصورة 🚀';
 };
 reader.readAsDataURL(file);
 }else{
@@ -1087,7 +1090,7 @@ processAndPublish('');
 }
 }
 
-// دالة عرض تقرير مراقبة التحاضير للإدارة
+// دالة عرض تقرير مراقبة التحاضير للإدارة مع أزرار الحذف الفوري لكل تحضير والتاريخ
 function renderAdminTeachersReport(){
 const container=document.getElementById('adminTeachersReportContainer');
 if(!container) return;
@@ -1109,12 +1112,15 @@ const lessonItem = subjectsData[subj];
 const hasLesson = lessonItem && (typeof lessonItem==='string' || lessonItem.text || lessonItem.image);
 const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
 const hasImg = typeof lessonItem==='object' && lessonItem?.image;
+const lessonDate = typeof lessonItem==='object' && lessonItem?.date ? lessonItem.date : '';
 
 if(hasLesson){
 subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex flex-col gap-1 text-[11px]">
 <div class="flex justify-between items-center"><span class="font-semibold text-emerald-900">✅ ${subj}</span><span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span></div>
+${lessonDate ? `<span class="text-gray-500 text-[10px]">📅 تاريخ النشر: ${safeText(lessonDate)}</span>` : ''}
 ${lessonText ? `<p class="text-gray-700 truncate">${safeText(lessonText)}</p>` : ''}
 ${hasImg ? `<span class="text-blue-600 font-semibold">📎 مرفق صورة مع الدرس</span>` : ''}
+<div class="flex justify-end mt-1"><button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف التحضير</button></div>
 </div>`;
 }else{
 subHTML+=`<div class="bg-red-50 border border-red-200 p-2 rounded flex justify-between items-center text-[11px]">
@@ -1129,6 +1135,21 @@ card.innerHTML=subHTML;
 container.appendChild(card);
 });
 });
+}
+
+// دالة حذف التحضير من لوحة الإدارة
+async function adminDeleteLesson(encodedClassKey, encodedSubject){
+const classKey=decodeURIComponent(encodedClassKey);
+const subject=decodeURIComponent(encodedSubject);
+
+if(!confirm(`هل تريدين حقاً حذف تحضير مادة (${subject}) لهذا الصف والشعبة؟`))return;
+
+try{
+await safeTransaction(ROOT+'/schoolSchedule/'+classKey+'/'+subject,()=>null);
+alert('✓ تم حذف التحضير بنجاح من النظام وأجهزة أولياء الأمور.');
+}catch(error){
+showError(error);
+}
 }
 
 function openLessonsArchiveModal(){
@@ -1207,6 +1228,7 @@ return;
 for(const [subject,item] of Object.entries(subjects)){
 const contentText = typeof item==='string' ? item : (item?.text || '');
 const imgData = typeof item==='object' ? (item?.image || '') : '';
+const lessonDate = typeof item==='object' && item?.date ? item.date : '';
 
 const div=document.createElement('div');
 div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 shadow-sm text-xs';
@@ -1215,6 +1237,7 @@ div.innerHTML=`
 <strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
 <button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
 </div>
+${lessonDate ? `<p class="text-gray-500 text-[11px]">📅 التاريخ: ${safeText(lessonDate)}</p>` : ''}
 <p class="text-gray-700 whitespace-pre-wrap">${safeText(contentText)}</p>
 ${imgData ? `<div class="mt-2"><img src="${imgData}" class="max-h-32 rounded border object-contain"><a href="${imgData}" download="lesson-image.png" class="inline-block mt-1 bg-blue-600 text-white px-2 py-1 rounded text-[10px]">تحميل الصورة 💾</a></div>` : ''}
 `;
