@@ -96,7 +96,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="updateSupervisorName()" class="bg-pink-600 text-white px-4 py-2 rounded-lg cursor-pointer">حفظ اسم المشرف</button>
 </div>
 
-<!-- قسم مراقبة تحاضير الكادر التدريسي (جديد) -->
+<!-- قسم مراقبة تحاضير الكادر التدريسي -->
 <div class="bg-white p-5 rounded-xl shadow border border-purple-100 space-y-3">
 <h2 class="font-bold text-purple-800 text-sm border-b pb-2">📊 مراقبة تحاضير الكادر التدريسي والدروس المرسلة</h2>
 <p class="text-xs text-gray-500">متابعة المواد والصفوف التي تم إرسال تحاضيرها والتي لم تُرسل بعد:</p>
@@ -145,7 +145,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 </div>
 
-<!-- واجهة المعلمات المخصصة (تدعم اختيار عدة مواد وعدة صفوف) -->
+<!-- واجهة المعلمات المخصصة (تدعم عدة مواد وصفوف ومرفق صور) -->
 <div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6 w-full">
 <div class="flex justify-between items-center border-b pb-3">
 <div>
@@ -186,9 +186,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <p class="text-[10px] text-purple-700">💡 يتم حفظ جدولك تلقائياً لتظهر لك استفسارات هذه المواد والصفوف فقط.</p>
 </div>
 
-<!-- قسم نشر الدروس -->
+<!-- قسم نشر الدروس مع رفع الصور -->
 <div class="space-y-3 text-xs bg-pink-50/50 p-4 rounded-xl border border-pink-100">
-<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد</h3>
+<h3 class="font-bold text-pink-800">📚 نشر درس أو واجب جديد مع إرفاق صورة</h3>
 <div>
 <label class="block font-semibold mb-1">المادة الدراسية:</label>
 <select id="teacherLessonSubject" class="w-full border rounded-lg p-2 bg-white">
@@ -224,8 +224,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <label class="block font-semibold mb-1">تفاصيل الدرس أو الواجب:</label>
 <textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتبي تفاصيل الدرس..."></textarea>
 </div>
+<div>
+<label class="block font-semibold mb-1 text-purple-800">📷 إرفاق صورة توضيحية (من الاستوديو - اختيارية):</label>
+<input type="file" id="teacherLessonImage" accept="image/*" class="w-full border rounded-lg p-1.5 bg-white text-xs">
+</div>
 <button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
-نشر الدرس للشعب المحددة 🚀
+نشر الدرس للشعب المحددة مع الصورة 🚀
 </button>
 </div>
 
@@ -987,7 +991,7 @@ const classKey=grade+'_'+section;
 if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
 scheduleData[classKey]={};
 }
-scheduleData[classKey][subject]=content;
+scheduleData[classKey][subject]={text:content, image:''};
 });
 
 return scheduleData;
@@ -1006,11 +1010,12 @@ showError(error);
 }
 }
 
-// دالة إرسال الدرس الخاصة بالمعلمات
+// دالة إرسال الدرس الخاصة بالمعلمات مع دعم الصورة
 async function teacherSendLesson(){
 const subject=document.getElementById('teacherLessonSubject').value;
 const grade=document.getElementById('teacherLessonGrade').value;
 const content=document.getElementById('teacherLessonContent').value.trim();
+const imageInput=document.getElementById('teacherLessonImage');
 const checkedSections=Array.from(document.querySelectorAll('input[name="teacherSection"]:checked')).map(cb=>cb.value);
 
 if(!content){
@@ -1026,10 +1031,10 @@ const btn=document.getElementById('teacherPublishBtn');
 btn.disabled=true;
 btn.textContent='جارٍ النشر سحابياً...';
 
-try{
-await waitForFirebaseConnection();
+const processAndPublish=(imageBase64)=>{
+waitForFirebaseConnection().then(()=>{
 const scheduleRef=db.ref(ROOT+'/schoolSchedule');
-const result=await scheduleRef.transaction(current=>{
+scheduleRef.transaction(current=>{
 const scheduleData=(current&&typeof current==='object')?{...current}:{};
 
 checkedSections.forEach(section=>{
@@ -1037,25 +1042,48 @@ const classKey=grade+'_'+section;
 if(!scheduleData[classKey]||typeof scheduleData[classKey]!=='object'){
 scheduleData[classKey]={};
 }
-scheduleData[classKey][subject]=content;
+scheduleData[classKey][subject]={
+text: content,
+image: imageBase64 || ''
+};
 });
 
 return scheduleData;
-},undefined,false);
-
+},undefined,false).then((result)=>{
 if(!result.committed){
 throw new Error('لم يتم حفظ الدرس في السحابة.');
 }
-
 document.getElementById('teacherLessonContent').value='';
+if(imageInput) imageInput.value='';
 document.querySelectorAll('input[name="teacherSection"]').forEach(cb=>cb.checked=false);
-
-alert(`✓ تم نشر الدرس بنجاح لشعب (${checkedSections.join(', ')}) وتوجيهه للأرشيف وفي أجهزة أولياء الأمور.`);
-}catch(error){
+alert(`✓ تم نشر الدرس بنجاح لشعب (${checkedSections.join(', ')}) وتوجيهه للأرشيف ولأجهزة أولياء الأمور.`);
+}).catch(error=>{
 showError(error);
-}finally{
+}).finally(()=>{
 btn.disabled=false;
-btn.textContent='نشر الدرس للشعب المحددة 🚀';
+btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+});
+}).catch(error=>{
+showError(error);
+btn.disabled=false;
+btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+});
+};
+
+if(imageInput && imageInput.files && imageInput.files[0]){
+const file=imageInput.files[0];
+const reader=new FileReader();
+reader.onload=function(e){
+processAndPublish(e.target.result);
+};
+reader.onerror=function(){
+alert('حدث خطأ أثناء قراءة الصورة.');
+btn.disabled=false;
+btn.textContent='نشر الدرس للشعب المحددة مع الصورة 🚀';
+};
+reader.readAsDataURL(file);
+}else{
+processAndPublish('');
 }
 }
 
@@ -1077,11 +1105,16 @@ card.className='p-3 bg-purple-50/50 border border-purple-200 rounded-xl space-y-
 let subHTML=`<p class="font-bold text-purple-900"> الصف: ${safeText(grade)} - شعبة (${section})</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">`;
 
 subjectsList.forEach(subj=>{
-const hasLesson = subjectsData[subj];
+const lessonItem = subjectsData[subj];
+const hasLesson = lessonItem && (typeof lessonItem==='string' || lessonItem.text || lessonItem.image);
+const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
+const hasImg = typeof lessonItem==='object' && lessonItem?.image;
+
 if(hasLesson){
-subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex justify-between items-center text-[11px]">
-<span class="font-semibold text-emerald-900">✅ ${subj}</span>
-<span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span>
+subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex flex-col gap-1 text-[11px]">
+<div class="flex justify-between items-center"><span class="font-semibold text-emerald-900">✅ ${subj}</span><span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span></div>
+${lessonText ? `<p class="text-gray-700 truncate">${safeText(lessonText)}</p>` : ''}
+${hasImg ? `<span class="text-blue-600 font-semibold">📎 مرفق صورة مع الدرس</span>` : ''}
 </div>`;
 }else{
 subHTML+=`<div class="bg-red-50 border border-red-200 p-2 rounded flex justify-between items-center text-[11px]">
@@ -1138,7 +1171,7 @@ function renderArchiveSectionsView(grade){
 archiveCurrentGrade=grade;
 archiveCurrentSection='';
 document.getElementById('archiveModalTitle').textContent=grade+' - اختر الشعبة';
-document.getElementById('archiveBackBtnContainer').classList.add('hidden');
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
 const container=document.getElementById('archiveModalContent');
 container.innerHTML='';
 
@@ -1159,7 +1192,7 @@ function renderArchiveLessonsView(grade,section){
 archiveCurrentGrade=grade;
 archiveCurrentSection=section;
 document.getElementById('archiveModalTitle').textContent=`دروس ${grade} - شعبة (${section})`;
-document.getElementById('archiveBackBtnContainer').classList.add('hidden');
+document.getElementById('archiveBackBtnContainer').classList.remove('hidden');
 const container=document.getElementById('archiveModalContent');
 container.innerHTML='';
 
@@ -1171,7 +1204,10 @@ container.innerHTML='<p class="text-center p-5 text-gray-500 text-xs">لا تو�
 return;
 }
 
-for(const [subject,content] of Object.entries(subjects)){
+for(const [subject,item] of Object.entries(subjects)){
+const contentText = typeof item==='string' ? item : (item?.text || '');
+const imgData = typeof item==='object' ? (item?.image || '') : '';
+
 const div=document.createElement('div');
 div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 shadow-sm text-xs';
 div.innerHTML=`
@@ -1179,7 +1215,8 @@ div.innerHTML=`
 <strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
 <button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
 </div>
-<p class="text-gray-700 whitespace-pre-wrap">${safeText(content)}</p>
+<p class="text-gray-700 whitespace-pre-wrap">${safeText(contentText)}</p>
+${imgData ? `<div class="mt-2"><img src="${imgData}" class="max-h-32 rounded border object-contain"><a href="${imgData}" download="lesson-image.png" class="inline-block mt-1 bg-blue-600 text-white px-2 py-1 rounded text-[10px]">تحميل الصورة 💾</a></div>` : ''}
 `;
 container.appendChild(div);
 }
