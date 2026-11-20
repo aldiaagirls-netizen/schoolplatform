@@ -1,7 +1,7 @@
 {
   "name": "بوابة ولي الأمر - مدرسة الضياء",
   "short_name": "بوابة الضياء",
-  "start_url": "parent.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#fdf2f8",
