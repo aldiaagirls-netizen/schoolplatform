@@ -10,7 +10,7 @@
   "lang": "ar",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "src": "./parent-icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
