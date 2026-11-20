@@ -1,1 +1,18 @@
 
+{
+  "name": "بوابة ولي الأمر - مدرسة الضياء",
+  "short_name": "بوابة الضياء",
+  "start_url": "./parent.html",
+  "display": "standalone",
+  "background_color": "#fdf2f8",
+  "theme_color": "#db2777",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
