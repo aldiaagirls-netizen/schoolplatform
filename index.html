@@ -6,6 +6,9 @@
 <title>بوابة ولي الأمر - مدرسة الضياء للبنات</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#db2777">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="بوابة الضياء">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -22,6 +25,25 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <body class="bg-pink-50 text-gray-800 min-h-screen p-4">
 
 <div class="max-w-xl mx-auto space-y-5">
+
+<!-- 📲 إشعار تثبيت التطبيق على شاشة الهاتف -->
+<div id="installAppBanner" class="hidden bg-white border-2 border-pink-500 rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-3">
+<div class="flex items-center gap-2.5">
+<span class="text-2xl bg-pink-100 p-2 rounded-xl">📲</span>
+<div class="space-y-0.5">
+<p id="installBannerTitle" class="font-bold text-pink-900 text-xs">تثبيت تطبيق بوابة الضياء</p>
+<p id="installBannerDesc" class="text-[11px] text-gray-600">اضغط تثبيت لإضافة التطبيق إلى شاشة الهاتف وفتحه مباشرة.</p>
+</div>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<button id="installAppBtn" type="button" onclick="triggerAppInstall()" class="bg-pink-600 text-white px-3 py-2 rounded-xl text-xs font-bold cursor-pointer hover:bg-pink-700 transition">
+تثبيت
+</button>
+<button type="button" onclick="dismissInstallBanner()" class="text-gray-400 hover:text-gray-600 px-1.5 py-1 text-xs font-bold cursor-pointer" title="إغلاق">
+✕
+</button>
+</div>
+</div>
 
 <!-- 🌸 الترويسة والرسالة الترحيبية -->
 <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-5 rounded-2xl shadow-md text-center space-y-1.5">
@@ -183,6 +205,73 @@ let globalSchoolData = {};
 let selectedGrade = '';
 let selectedSection = '';
 let parentBusy = false;
+let deferredInstallPrompt = null;
+
+function isStandaloneMode(){
+return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function isIosSafari(){
+const ua = window.navigator.userAgent || '';
+const isIos = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+const isWebkit = /WebKit/.test(ua);
+return isIos && isWebkit;
+}
+
+function updateInstallBannerUI(){
+const banner = document.getElementById('installAppBanner');
+const title = document.getElementById('installBannerTitle');
+const desc = document.getElementById('installBannerDesc');
+const btn = document.getElementById('installAppBtn');
+if(!banner) return;
+
+if(isStandaloneMode() || sessionStorage.getItem('aldiyaa_install_dismissed') === 'true'){
+banner.classList.add('hidden');
+return;
+}
+
+if(deferredInstallPrompt){
+if(title) title.textContent = 'تثبيت تطبيق بوابة الضياء';
+if(desc) desc.textContent = 'اضغط تثبيت لإضافته إلى شاشة الهاتف وفتحه مباشرة.';
+if(btn) btn.classList.remove('hidden');
+banner.classList.remove('hidden');
+}else if(isIosSafari()){
+if(title) title.textContent = 'إضافة التطبيق إلى شاشة الهاتف';
+if(desc) desc.textContent = 'اضغط زر المشاركة ⬆️ ثم اختر «إضافة إلى الشاشة الرئيسية».';
+if(btn) btn.classList.add('hidden');
+banner.classList.remove('hidden');
+}else{
+banner.classList.add('hidden');
+}
+}
+
+async function triggerAppInstall(){
+if(!deferredInstallPrompt) return;
+deferredInstallPrompt.prompt();
+const choice = await deferredInstallPrompt.userChoice;
+deferredInstallPrompt = null;
+if(choice && choice.outcome === 'accepted'){
+document.getElementById('installAppBanner')?.classList.add('hidden');
+}else{
+updateInstallBannerUI();
+}
+}
+
+function dismissInstallBanner(){
+sessionStorage.setItem('aldiyaa_install_dismissed', 'true');
+document.getElementById('installAppBanner')?.classList.add('hidden');
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+e.preventDefault();
+deferredInstallPrompt = e;
+updateInstallBannerUI();
+});
+
+window.addEventListener('appinstalled', () => {
+deferredInstallPrompt = null;
+document.getElementById('installAppBanner')?.classList.add('hidden');
+});
 
 function safeText(value){
 return String(value ?? '').replace(/[&<>"']/g, ch => ({
@@ -321,6 +410,7 @@ console.error('Visit counter error:', err);
 window.onload = function(){
 renderGradesIcons();
 updateInquiryQuotaUI();
+updateInstallBannerUI();
 recordPortalVisit();
 
 setInterval(updateInquiryQuotaUI, 60000);
