@@ -29,10 +29,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <!-- 📲 إشعار تثبيت التطبيق على شاشة الهاتف -->
 <div id="installAppBanner" class="hidden bg-white border-2 border-pink-500 rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-3">
 <div class="flex items-center gap-2.5">
-<span class="text-2xl bg-pink-100 p-2 rounded-xl">📲</span>
+<img id="installBannerIcon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="أيقونة التطبيق" class="w-11 h-11 rounded-xl object-cover border border-pink-200 bg-pink-50 shrink-0">
 <div class="space-y-0.5">
 <p id="installBannerTitle" class="font-bold text-pink-900 text-xs">تثبيت تطبيق بوابة الضياء</p>
-<p id="installBannerDesc" class="text-[11px] text-gray-600">اضغط تثبيت لإضافة التطبيق إلى شاشة الهاتف وفتحه مباشرة.</p>
+<p id="installBannerDesc" class="text-[11px] text-gray-600">اضغط تثبيت لإضافته إلى شاشة الهاتف وفتحه مباشرة.</p>
 </div>
 </div>
 <div class="flex items-center gap-1.5 shrink-0">
@@ -46,7 +46,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 
 <!-- 🌸 الترويسة والرسالة الترحيبية -->
-<div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-5 rounded-2xl shadow-md text-center space-y-1.5">
+<div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-5 rounded-2xl shadow-md text-center space-y-2">
+<div class="flex justify-center">
+<img id="parentHeaderIcon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="أيقونة بوابة أولياء الأمور" class="w-16 h-16 rounded-2xl object-cover border-2 border-white/80 shadow-sm bg-white/20">
+</div>
 <p class="text-[11px] font-bold bg-white/20 text-pink-50 inline-block px-3 py-0.5 rounded-full">
 ✨ إعداد: الست نور رحمن حسن
 </p>
@@ -162,7 +165,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <script>
 const firebaseConfig = {
-apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0n",
+apiKey: "AIzaSyA4IukTwvEFVhmgxgxKI43ch_48kwXt0",
 authDomain: "aldiyaaschool-af7e1.firebaseapp.com",
 databaseURL: "https://aldiyaaschool-af7e1-default-rtdb.firebaseio.com",
 projectId: "aldiyaaschool-af7e1",
@@ -180,6 +183,7 @@ const db = firebase.database();
 const ROOT = 'school_data';
 
 const WEEKLY_MAX_INQUIRIES = 4;
+const DEFAULT_PARENT_ICON = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
 
 const gradesList = [
 { name: 'الأول الابتدائي', icon: '1️⃣', color: 'from-pink-50 to-pink-100 border-pink-300 text-pink-900' },
@@ -207,6 +211,17 @@ let selectedSection = '';
 let parentBusy = false;
 let deferredInstallPrompt = null;
 
+function applyParentPortalIcon(){
+const iconSrc = (globalSchoolData && typeof globalSchoolData.parentPortalIcon === 'string' && globalSchoolData.parentPortalIcon.trim())
+? globalSchoolData.parentPortalIcon.trim()
+: DEFAULT_PARENT_ICON;
+
+const headerIcon = document.getElementById('parentHeaderIcon');
+const bannerIcon = document.getElementById('installBannerIcon');
+if(headerIcon) headerIcon.src = iconSrc;
+if(bannerIcon) bannerIcon.src = iconSrc;
+}
+
 function isStandaloneMode(){
 return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
@@ -224,6 +239,8 @@ const title = document.getElementById('installBannerTitle');
 const desc = document.getElementById('installBannerDesc');
 const btn = document.getElementById('installAppBtn');
 if(!banner) return;
+
+applyParentPortalIcon();
 
 if(isStandaloneMode() || sessionStorage.getItem('aldiyaa_install_dismissed') === 'true'){
 banner.classList.add('hidden');
@@ -408,6 +425,7 @@ console.error('Visit counter error:', err);
 }
 
 window.onload = function(){
+applyParentPortalIcon();
 renderGradesIcons();
 updateInquiryQuotaUI();
 updateInstallBannerUI();
@@ -424,6 +442,7 @@ badge.textContent = snap.val() === true ? '🟢 متصل مباشرة بالمد
 
 db.ref(ROOT).on('value', snapshot => {
 globalSchoolData = snapshot.val() || {};
+applyParentPortalIcon();
 renderGradesIcons();
 if(selectedGrade && !selectedSection){
 renderSectionsIcons(selectedGrade);
@@ -631,6 +650,7 @@ async function manualRefreshLessons(){
 try{
 const snap = await db.ref(ROOT).once('value');
 globalSchoolData = snap.val() || {};
+applyParentPortalIcon();
 if(selectedGrade && selectedSection){
 renderLessonsForSection(selectedGrade, selectedSection);
 }
