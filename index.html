@@ -19,205 +19,120 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <body class="bg-pink-50 text-gray-800 min-h-screen p-4">
 
-<div class="max-w-xl mx-auto space-y-6">
+<div class="max-w-xl mx-auto space-y-5">
 
-<!-- شاشة تسجيل الطالبات (مخفية افتراضياً لمنع الوميض عند التحديث) -->
-<div id="parentLoginView" class="hidden space-y-6">
-
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 text-center space-y-2">
-<h2 class="text-lg font-bold text-pink-700">👧 بوابة ولي الأمر - تسجيل الطالبات</h2>
-<p class="text-xs text-gray-500">
-أدخل بيانات الطالبات ثم اضغط على زر الإرسال لإرسال الطلبات إلى الإدارة.
+<!-- 🌸 الترويسة والرسالة الترحيبية -->
+<div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white p-5 rounded-2xl shadow-md text-center space-y-1.5">
+<p class="text-[11px] font-bold bg-white/20 text-pink-50 inline-block px-3 py-0.5 rounded-full">
+✨ إعداد: الست نور رحمن حسن
 </p>
-<p class="text-xs text-green-700 font-semibold">
-لا حاجة إلى رفع صورة الطالبة.
-</p>
+<h1 class="text-lg font-bold">🌸 أهلاً بكم في بوابة مدرسة الضياء للبنات</h1>
+<p class="text-xs text-pink-100">نتمنى لطالباتنا العزيزات يوماً دراسياً مليئاً بالتفوق والنجاح والتميز</p>
+<p id="cloudSyncBadge" class="text-[11px] bg-white/20 inline-block px-3 py-0.5 rounded-full mt-1">جارٍ الاتصال بالسحابة...</p>
 </div>
 
-<!-- الطالبة الأولى -->
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
-<h3 class="font-bold text-pink-800 text-sm border-b pb-2">📌 بيانات الطالبة الأولى</h3>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
-<input type="text" id="parentStudentName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: فاطمة أحمد علي">
-</div>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
-<input type="text" id="parentMotherName_1" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم فاطمة">
-</div>
-
-<div class="grid grid-cols-2 gap-2 text-xs">
-<div>
-<label class="block font-semibold mb-1">الصف الدراسي:</label>
-<select id="parentGrade_1" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="الأول الابتدائي">الأول الابتدائي</option>
-<option value="الثاني الابتدائي">الثاني الابتدائي</option>
-<option value="الثالث الابتدائي">الثالث الابتدائي</option>
-<option value="الرابع الابتدائي">الرابع الابتدائي</option>
-<option value="الخامس الابتدائي">الخامس الابتدائي</option>
-<option value="السادس الابتدائي">السادس الابتدائي</option>
-</select>
-</div>
-<div>
-<label class="block font-semibold mb-1">الشعبة:</label>
-<select id="parentSection_1" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="أ">الشعبة (أ)</option>
-<option value="ب">الشعبة (ب)</option>
-<option value="ج">الشعبة (ج)</option>
-</select>
-</div>
-</div>
-</div>
-
-<!-- الطالبة الثانية -->
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-100 space-y-4">
-<h3 class="font-bold text-purple-800 text-sm border-b pb-2">📌 بيانات الطالبة الثانية (إن وجدت)</h3>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
-<input type="text" id="parentStudentName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: زينب أحمد علي">
-</div>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
-<input type="text" id="parentMotherName_2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم زينب">
-</div>
-
-<div class="grid grid-cols-2 gap-2 text-xs">
-<div>
-<label class="block font-semibold mb-1">الصف الدراسي:</label>
-<select id="parentGrade_2" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="الأول الابتدائي">الأول الابتدائي</option>
-<option value="الثاني الابتدائي">الثاني الابتدائي</option>
-<option value="الثالث الابتدائي">الثالث الابتدائي</option>
-<option value="الرابع الابتدائي">الرابع الابتدائي</option>
-<option value="الخامس الابتدائي">الخامس الابتدائي</option>
-<option value="السادس الابتدائي">السادس الابتدائي</option>
-</select>
-</div>
-<div>
-<label class="block font-semibold mb-1">الشعبة:</label>
-<select id="parentSection_2" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="أ">الشعبة (أ)</option>
-<option value="ب">الشعبة (ب)</option>
-<option value="ج">الشعبة (ج)</option>
-</select>
-</div>
-</div>
-</div>
-
-<!-- الطالبة الثالثة -->
-<div class="bg-white p-6 rounded-2xl shadow-sm border border-indigo-100 space-y-4">
-<h3 class="font-bold text-indigo-800 text-sm border-b pb-2">📌 بيانات الطالبة الثالثة (إن وجدت)</h3>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم الطالبة الثلاثي:</label>
-<input type="text" id="parentStudentName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: رقية أحمد علي">
-</div>
-
-<div class="text-xs">
-<label class="block font-semibold mb-1">اسم ولي الأمر / الأم:</label>
-<input type="text" id="parentMotherName_3" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: أم رقية">
-</div>
-
-<div class="grid grid-cols-2 gap-2 text-xs">
-<div>
-<label class="block font-semibold mb-1">الصف الدراسي:</label>
-<select id="parentGrade_3" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="الأول الابتدائي">الأول الابتدائي</option>
-<option value="الثاني الابتدائي">الثاني الابتدائي</option>
-<option value="الثالث الابتدائي">الثالث الابتدائي</option>
-<option value="الرابع الابتدائي">الرابع الابتدائي</option>
-<option value="الخامس الابتدائي">الخامس الابتدائي</option>
-<option value="السادس الابتدائي">السادس الابتدائي</option>
-</select>
-</div>
-<div>
-<label class="block font-semibold mb-1">الشعبة:</label>
-<select id="parentSection_3" class="w-full px-3 py-2 border rounded-lg bg-white">
-<option value="أ">الشعبة (أ)</option>
-<option value="ب">الشعبة (ب)</option>
-<option value="ج">الشعبة (ج)</option>
-</select>
-</div>
-</div>
-</div>
-
-<button id="submitRequestsButton" onclick="submitAllStudentsRequests()" class="w-full bg-pink-600 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-pink-700 shadow-md cursor-pointer">
-إرسال كافة الطلبات للإدارة 🚀
+<!-- شريط التنقل العلوي -->
+<div id="navigationBar" class="hidden bg-white p-3 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
+<button onclick="goBackStep()" class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-700 transition">
+➡️ رجوع
 </button>
-
-<p id="parentFormError" class="text-red-600 text-xs text-center"></p>
-
-</div>
-
-<!-- شاشة انتظار الموافقة (مخفية افتراضياً) -->
-<div id="parentWaitingView" class="hidden bg-white p-8 rounded-2xl shadow-sm border border-yellow-200 text-center space-y-4">
-<div class="text-4xl">⏳</div>
-<h2 class="text-base font-bold text-yellow-700">طلبات الطالبات قيد المراجعة</h2>
-<p class="text-xs text-gray-600">
-تم إرسال الطلبات بنجاح. يرجى الانتظار لحين موافقة الإدارة وتفعيل الحسابات.
-</p>
-<button onclick="checkApprovalStatusAgain()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer">
-تحديث الحالة 🔄
+<span id="currentBreadcrumb" class="font-bold text-pink-800 text-xs">الصفوف الدراسية</span>
+<button onclick="resetToGrades()" class="bg-pink-100 text-pink-800 px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer hover:bg-pink-200 transition">
+🏠 الرئيسية
 </button>
 </div>
 
-<!-- البوابة الرئيسية (مخفية افتراضياً) -->
-<div id="parentDashboardView" class="hidden space-y-4">
+<!-- 1️⃣ المرحلة الأولى: أيقونات الصفوف الدراسية -->
+<div id="gradesSelectionView" class="space-y-3">
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100">
+<h2 class="font-bold text-pink-800 text-sm mb-3 text-center">🏫 اختر الصف الدراسي لمتابعة التحاضير اليومية:</h2>
+<div id="gradesGrid" class="grid grid-cols-2 gap-3"></div>
+</div>
+</div>
 
-<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 flex justify-between items-center">
-<div class="flex items-center gap-3">
-<div id="dashboardImageContainer" class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-700 text-xl">👧</div>
-<div>
-<h3 id="welcomeStudentTitle" class="font-bold text-pink-700 text-sm">مرحباً بك</h3>
-<p id="studentClassInfo" class="text-[11px] text-gray-500">الصف والشعبة</p>
+<!-- 2️⃣ المرحلة الثانية: أيقونات الشعب (أ، ب، ج) داخل الصف المختار -->
+<div id="sectionsSelectionView" class="hidden space-y-3">
+<div class="bg-white p-5 rounded-2xl shadow-sm border border-purple-100">
+<h2 id="selectedGradeHeading" class="font-bold text-purple-800 text-sm mb-4 text-center">اختر الشعبة الدراسية:</h2>
+<div id="sectionsGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
 </div>
 </div>
-<button onclick="logoutParent()" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">
-خروج 🚪
+
+<!-- 3️⃣ المرحلة الثالثة: عرض التحاضير والدروس الخاصة بالصف والشعبة -->
+<div id="lessonsDisplayView" class="hidden space-y-4">
+
+<!-- التعاميم المدرسية الخاصة بهذا الصف والشعبة -->
+<div id="sectionBroadcastsBox" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-indigo-100 space-y-2">
+<h3 class="font-bold text-indigo-800 text-xs border-b pb-1.5">📢 تعاميم وتوجيهات الإدارة</h3>
+<div id="sectionBroadcastsList" class="space-y-2 text-xs"></div>
+</div>
+
+<!-- قائمة الدروس والتحاضير واستقبال الصور المرسلة من المعلمين -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-pink-100 space-y-3">
+<div class="flex justify-between items-center border-b pb-2">
+<h3 id="lessonsViewTitle" class="font-bold text-pink-800 text-sm">📚 التحاضير اليومية</h3>
+<button onclick="manualRefreshLessons()" class="bg-purple-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer hover:bg-purple-700">
+🔄 تحديث
 </button>
 </div>
-
-<!-- 🌸 الرسالة الترحيبية المبهجة والمحفزة للطالبة -->
-<div class="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-4 rounded-xl shadow-md space-y-1 text-center">
-<p class="text-sm font-bold" id="welcomeGreetingText">🌸 أهلاً بكِ يا بطلتنا في مدرسة الضياء للبنات!</p>
-<p class="text-xs text-pink-100">نتمنى لكِ يوماً دراسياً مليئاً بالتفوق والنجاح والتميز.</p>
-</div>
-
-<!-- الطالبات المقبولات -->
-<div class="bg-white p-3 rounded-xl shadow-sm border border-pink-100 space-y-2">
-<p class="font-bold text-xs text-pink-800">👧 الطالبات المقبولات (اضغط على الاسم للتنقل):</p>
-<div id="siblingsButtonsList" class="flex gap-2 flex-wrap"></div>
-</div>
-
-<!-- الإشعارات -->
-<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
-<h4 class="font-bold text-indigo-700 text-xs border-b pb-2">📢 الإشعارات والتعاميم المدرسية</h4>
-<div id="parentNotificationsContainer" class="space-y-2 text-xs">
-<p class="text-gray-500">لا توجد إشعارات جديدة.</p>
+<div id="lessonsListContainer" class="space-y-3 text-xs">
+<p class="text-gray-500 text-center py-4">جارٍ تحميل التحاضير...</p>
 </div>
 </div>
 
-<!-- الجدول والتحاضير اليومية المحدثة مع تاريخ الهاتف والصور -->
-<div class="bg-white p-4 rounded-xl shadow-sm border border-pink-100 space-y-3">
-<h4 class="font-bold text-pink-700 text-xs border-b pb-2">📚 جدول الدروس والتحاضير اليومية (المحدثة سحابياً)</h4>
-<div id="parentScheduleContainer" class="space-y-3 text-xs">
-<p class="text-gray-500">لا توجد دروس منشورة حالياً.</p>
+<!-- إرسال استفسار للمعلمة أو الإدارة (4 رسائل أسبوعياً من الأحد 10:30ص إلى الخميس 2:00ظ) -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-blue-100 space-y-3 text-xs">
+<div class="flex justify-between items-center border-b pb-2">
+<h4 class="font-bold text-blue-700 text-sm">💬 إرسال استفسار لمعلمة المادة أو الإدارة</h4>
+<span id="weeklyQuotaBadge" class="bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+المتبقي: 4 / 4 رسائل
+</span>
+</div>
+
+<div id="inquiryScheduleNotice" class="p-2.5 rounded-xl text-[11px] font-semibold border"></div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+<div>
+<label class="block font-semibold mb-1">اسم الطالبة (اختياري):</label>
+<input type="text" id="inquiryStudentName" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="مثال: فاطمة أحمد">
+</div>
+<div>
+<label class="block font-semibold mb-1">المادة المستهدفة:</label>
+<select id="inquirySubjectSelect" class="w-full px-3 py-2 border rounded-lg bg-white">
+<option value="عام">الإدارة العامة</option>
+<option>القرآن الكريم</option>
+<option>اللغة العربية</option>
+<option>الرياضيات</option>
+<option>الاجتماعيات</option>
+<option>اللغة الإنجليزية</option>
+<option>الأخلاقية</option>
+<option>العلوم</option>
+</select>
 </div>
 </div>
 
-<!-- الاستفسارات -->
-<div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100 space-y-3">
-<h4 class="font-bold text-blue-700 text-xs border-b pb-2">💬 إرسال استفسار أو ملاحظة للإدارة أو المعلمة</h4>
-<textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg text-xs" placeholder="اكتب استفسارك هنا..."></textarea>
-<button id="sendInquiryButton" onclick="sendParentInquiry()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-xs font-bold cursor-pointer">
+<div>
+<label class="block font-semibold mb-1">نص الاستفسار:</label>
+<textarea id="parentInquiryText" rows="2" class="w-full px-3 py-2 border rounded-lg bg-white" placeholder="اكتب استفسارك هنا ليصل مباشرة إلى المعلمة المختصة..."></textarea>
+</div>
+
+<button id="sendInquiryButton" onclick="sendParentInquiry()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold cursor-pointer hover:bg-blue-700 transition">
 إرسال الاستفسار ✉️
 </button>
 </div>
 
+</div>
+
+</div>
+
+<!-- نافذة عرض الصورة بحجم كامل -->
+<div id="imageLightboxModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onclick="closeImageLightbox()">
+<div class="bg-white p-3 rounded-2xl max-w-2xl w-full space-y-2" onclick="event.stopPropagation()">
+<div class="flex justify-between items-center border-b pb-2">
+<span id="lightboxTitle" class="font-bold text-xs text-purple-900">صورة التحضير المرفقة</span>
+<button onclick="closeImageLightbox()" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs font-bold cursor-pointer">✕ إغلاق</button>
+</div>
+<img id="lightboxImage" src="" class="max-h-[70vh] w-auto mx-auto rounded object-contain">
 </div>
 </div>
 
@@ -237,352 +152,481 @@ if(!firebase.apps.length){
 firebase.initializeApp(firebaseConfig);
 }
 
-const db=firebase.database();
-const ROOT='school_data';
+const db = firebase.database();
+const ROOT = 'school_data';
 
-let parentSessionIds=JSON.parse(localStorage.getItem('school_parent_student_ids')||'[]');
-let currentActiveStudentId=localStorage.getItem('school_parent_active_id');
+const WEEKLY_MAX_INQUIRIES = 4;
 
-let globalSchoolData={};
-let dataLoaded=false;
-let parentBusy=false;
+const gradesList = [
+{ name: 'الأول الابتدائي', icon: '1️⃣', color: 'from-pink-50 to-pink-100 border-pink-300 text-pink-900' },
+{ name: 'الثاني الابتدائي', icon: '2️⃣', color: 'from-purple-50 to-purple-100 border-purple-300 text-purple-900' },
+{ name: 'الثالث الابتدائي', icon: '3️⃣', color: 'from-blue-50 to-blue-100 border-blue-300 text-blue-900' },
+{ name: 'الرابع الابتدائي', icon: '4️⃣', color: 'from-emerald-50 to-emerald-100 border-emerald-300 text-emerald-900' },
+{ name: 'الخامس الابتدائي', icon: '5️⃣', color: 'from-amber-50 to-amber-100 border-amber-300 text-amber-900' },
+{ name: 'السادس الابتدائي', icon: '6️⃣', color: 'from-indigo-50 to-indigo-100 border-indigo-300 text-indigo-900' }
+];
+
+const sectionsList = [
+{ code: 'أ', label: 'الشعبة (أ)', icon: '🅰️', color: 'bg-pink-50 border-pink-300 text-pink-900 hover:bg-pink-100' },
+{ code: 'ب', label: 'الشعبة (ب)', icon: '🅱️', color: 'bg-purple-50 border-purple-300 text-purple-900 hover:bg-purple-100' },
+{ code: 'ج', label: 'الشعبة (ج)', icon: '©️', color: 'bg-indigo-50 border-indigo-300 text-indigo-900 hover:bg-indigo-100' }
+];
+
+const subjectsOrder = [
+'القرآن الكريم', 'اللغة العربية', 'الرياضيات',
+'الاجتماعيات', 'اللغة الإنجليزية', 'الأخلاقية', 'العلوم'
+];
+
+let globalSchoolData = {};
+let selectedGrade = '';
+let selectedSection = '';
+let parentBusy = false;
+
+function safeText(value){
+return String(value ?? '').replace(/[&<>"']/g, ch => ({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[ch]));
+}
 
 function asArray(value){
-if(Array.isArray(value)){
-return value.filter(x=>x&&typeof x==='object');
-}
-if(value&&typeof value==='object'){
-return Object.entries(value).map(([key,item])=>{
-if(!item||typeof item!=='object')return null;
-return {...item,id:item.id??key};
+if(Array.isArray(value)) return value.filter(x => x && typeof x === 'object');
+if(value && typeof value === 'object'){
+return Object.entries(value).map(([key, item]) => {
+if(!item || typeof item !== 'object') return null;
+return { ...item, id: item.id ?? key };
 }).filter(Boolean);
 }
 return [];
 }
 
-function sameId(a,b){
-return String(a??'')===String(b??'');
+function getLocalWeekCycleId(now = new Date()){
+const day = now.getDay();
+const minutesOfDay = now.getHours() * 60 + now.getMinutes();
+const openMinutes = 10 * 60 + 30;
+
+const sundayMidnight = new Date(now);
+sundayMidnight.setHours(0, 0, 0, 0);
+sundayMidnight.setDate(sundayMidnight.getDate() - day);
+
+const cycleStart = new Date(sundayMidnight.getTime() + openMinutes * 60 * 1000);
+
+if(day === 0 && minutesOfDay < openMinutes){
+cycleStart.setDate(cycleStart.getDate() - 7);
 }
 
-function showParentError(message){
-document.getElementById('parentFormError').textContent=message;
+const y = cycleStart.getFullYear();
+const m = String(cycleStart.getMonth() + 1).padStart(2, '0');
+const d = String(cycleStart.getDate()).padStart(2, '0');
+return `${y}-${m}-${d}_1030`;
 }
 
-function setButtonLoading(id,loading,label){
-const btn=document.getElementById(id);
-if(!btn)return;
-btn.disabled=loading;
-if(loading){
-btn.dataset.originalText=btn.textContent;
-btn.textContent='جارٍ الإرسال...';
+function getInquiryWindowStatus(now = new Date()){
+const day = now.getDay();
+const minutesOfDay = now.getHours() * 60 + now.getMinutes();
+
+const startMinutes = 10 * 60 + 30;
+const endMinutes = 14 * 60;
+
+const isAllowedDay = day >= 0 && day <= 4;
+const isWithinTime = minutesOfDay >= startMinutes && minutesOfDay <= endMinutes;
+
+if(isAllowedDay && isWithinTime){
+return {
+allowed: true,
+message: '🟢 باب الاستفسارات مفتوح الآن (من الأحد 10:30 صباحاً حتى الخميس 2:00 ظهراً - توقيت الهاتف).'
+};
+}
+
+return {
+allowed: false,
+message: '🔴 إرسال الاستفسارات متاح فقط من الأحد (10:30 صباحاً) حتى الخميس (2:00 ظهراً) حسب توقيت الهاتف.'
+};
+}
+
+function getDeviceWeeklyUsage(){
+const cycleId = getLocalWeekCycleId(new Date());
+const storageKey = 'aldiyaa_parent_inq_' + cycleId;
+const count = Number(localStorage.getItem(storageKey) || '0');
+return { cycleId, storageKey, count };
+}
+
+function updateInquiryQuotaUI(){
+const badge = document.getElementById('weeklyQuotaBadge');
+const notice = document.getElementById('inquiryScheduleNotice');
+const btn = document.getElementById('sendInquiryButton');
+if(!badge || !notice || !btn) return;
+
+const { count } = getDeviceWeeklyUsage();
+const remaining = Math.max(0, WEEKLY_MAX_INQUIRIES - count);
+const windowStatus = getInquiryWindowStatus(new Date());
+
+badge.textContent = `المتبقي: ${remaining} / ${WEEKLY_MAX_INQUIRIES} رسائل`;
+badge.className = remaining > 0
+? 'bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold'
+: 'bg-red-50 text-red-800 border border-red-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold';
+
+notice.textContent = windowStatus.message;
+notice.className = windowStatus.allowed
+? 'bg-emerald-50 text-emerald-800 border-emerald-200 p-2.5 rounded-xl text-[11px] font-semibold border'
+: 'bg-amber-50 text-amber-900 border-amber-300 p-2.5 rounded-xl text-[11px] font-semibold border';
+
+if(!windowStatus.allowed){
+btn.disabled = true;
+btn.textContent = 'خارج أوقات الاستفسار المحددة 🔒';
+}else if(remaining <= 0){
+btn.disabled = true;
+btn.textContent = 'تم استنفاد حد الـ 4 رسائل الأسبوعية 🛑';
+}else if(!parentBusy){
+btn.disabled = false;
+btn.textContent = 'إرسال الاستفسار ✉️';
+}
+}
+
+async function recordPortalVisit(){
+if(sessionStorage.getItem('aldiyaa_visit_counted') === 'true') return;
+
+try{
+const todayStr = new Date().toISOString().slice(0, 10);
+const timeStr = new Date().toLocaleString('ar-IQ', {
+year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'
+});
+
+await db.ref(ROOT + '/portalVisits').transaction(current => {
+const data = (current && typeof current === 'object') ? { ...current } : {
+total: 0,
+todayDate: todayStr,
+todayCount: 0,
+lastVisit: ''
+};
+
+data.total = (Number(data.total) || 0) + 1;
+if(data.todayDate === todayStr){
+data.todayCount = (Number(data.todayCount) || 0) + 1;
 }else{
-btn.textContent=label||btn.dataset.originalText||'إرسال';
+data.todayDate = todayStr;
+data.todayCount = 1;
+}
+data.lastVisit = timeStr;
+return data;
+}, undefined, false);
+
+sessionStorage.setItem('aldiyaa_visit_counted', 'true');
+}catch(err){
+console.error('Visit counter error:', err);
 }
 }
 
-function getPendingList(){
-return asArray(globalSchoolData.pendingRequests);
+window.onload = function(){
+renderGradesIcons();
+updateInquiryQuotaUI();
+recordPortalVisit();
+
+setInterval(updateInquiryQuotaUI, 60000);
+
+db.ref('.info/connected').on('value', snap => {
+const badge = document.getElementById('cloudSyncBadge');
+if(badge){
+badge.textContent = snap.val() === true ? '🟢 متصل مباشرة بالمدرسة' : '🔴 جارٍ إعادة الاتصال...';
 }
+});
 
-function getApprovedList(){
-return asArray(globalSchoolData.approvedStudents);
+db.ref(ROOT).on('value', snapshot => {
+globalSchoolData = snapshot.val() || {};
+renderGradesIcons();
+if(selectedGrade && !selectedSection){
+renderSectionsIcons(selectedGrade);
+}else if(selectedGrade && selectedSection){
+renderLessonsForSection(selectedGrade, selectedSection);
 }
-
-window.onload=function(){
-db.ref(ROOT).on('value',snapshot=>{
-globalSchoolData=snapshot.val()||{};
-dataLoaded=true;
-
-checkAndSyncSession();
-
-},error=>{
-console.error('Firebase read error:',error);
-showParentError('تعذر تحميل بيانات المدرسة. يرجى تحديث الصفحة.');
+}, error => {
+console.error('Firebase read error:', error);
 });
 };
 
-async function submitAllStudentsRequests(){
-if(parentBusy)return;
-if(!dataLoaded){
-alert('يرجى الانتظار حتى يتم تحميل بيانات المدرسة.');
+function renderGradesIcons(){
+const grid = document.getElementById('gradesGrid');
+if(!grid) return;
+grid.innerHTML = '';
+
+const schedule = globalSchoolData.schoolSchedule || {};
+
+gradesList.forEach(g => {
+let lessonsCount = 0;
+['أ','ب','ج'].forEach(sec => {
+const key = `${g.name}_${sec}`;
+if(schedule[key] && typeof schedule[key] === 'object'){
+lessonsCount += Object.keys(schedule[key]).length;
+}
+});
+
+const btn = document.createElement('button');
+btn.className = `bg-gradient-to-br ${g.color} border-2 p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] transition`;
+btn.innerHTML = `
+<span class="text-3xl">${g.icon}</span>
+<span class="font-bold text-sm">${safeText(g.name)}</span>
+<span class="text-[11px] bg-white/80 px-2.5 py-0.5 rounded-full font-semibold">
+${lessonsCount > 0 ? `📚 ${lessonsCount} تحضير منشور` : 'اضغط للدخول'}
+</span>
+`;
+btn.onclick = () => openGradeSections(g.name);
+grid.appendChild(btn);
+});
+}
+
+function openGradeSections(gradeName){
+selectedGrade = gradeName;
+selectedSection = '';
+
+document.getElementById('gradesSelectionView').classList.add('hidden');
+document.getElementById('lessonsDisplayView').classList.add('hidden');
+document.getElementById('sectionsSelectionView').classList.remove('hidden');
+document.getElementById('navigationBar').classList.remove('hidden');
+document.getElementById('currentBreadcrumb').textContent = gradeName;
+
+renderSectionsIcons(gradeName);
+}
+
+function renderSectionsIcons(gradeName){
+document.getElementById('selectedGradeHeading').textContent = `🏫 ${gradeName} - اختر الشعبة:`;
+const grid = document.getElementById('sectionsGrid');
+grid.innerHTML = '';
+
+const schedule = globalSchoolData.schoolSchedule || {};
+
+sectionsList.forEach(sec => {
+const key = `${gradeName}_${sec.code}`;
+const secLessons = (schedule[key] && typeof schedule[key] === 'object') ? schedule[key] : {};
+const count = Object.keys(secLessons).length;
+
+const btn = document.createElement('button');
+btn.className = `${sec.color} border-2 p-5 rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] transition`;
+btn.innerHTML = `
+<span class="text-3xl">${sec.icon}</span>
+<span class="font-bold text-sm">${sec.label}</span>
+<span class="text-[11px] bg-white px-2.5 py-0.5 rounded-full font-semibold shadow-xs">
+${count > 0 ? `✅ ${count} دروس مرسلة` : 'لا توجد دروس بعد'}
+</span>
+`;
+btn.onclick = () => openSectionLessons(gradeName, sec.code);
+grid.appendChild(btn);
+});
+}
+
+function openSectionLessons(gradeName, sectionCode){
+selectedGrade = gradeName;
+selectedSection = sectionCode;
+
+document.getElementById('gradesSelectionView').classList.add('hidden');
+document.getElementById('sectionsSelectionView').classList.add('hidden');
+document.getElementById('lessonsDisplayView').classList.remove('hidden');
+document.getElementById('navigationBar').classList.remove('hidden');
+document.getElementById('currentBreadcrumb').textContent = `${gradeName} - شعبة (${sectionCode})`;
+
+updateInquiryQuotaUI();
+renderLessonsForSection(gradeName, sectionCode);
+}
+
+function openImageLightbox(imgSrc, titleText){
+const modal = document.getElementById('imageLightboxModal');
+const img = document.getElementById('lightboxImage');
+const title = document.getElementById('lightboxTitle');
+if(modal && img && title){
+img.src = imgSrc;
+title.textContent = titleText || 'صورة التحضير المرفقة';
+modal.classList.remove('hidden');
+}
+}
+
+function closeImageLightbox(){
+const modal = document.getElementById('imageLightboxModal');
+if(modal) modal.classList.add('hidden');
+}
+
+function renderLessonsForSection(gradeName, sectionCode){
+document.getElementById('lessonsViewTitle').textContent = `📚 تحاضير ${gradeName} - الشعبة (${sectionCode})`;
+
+const broadcastsBox = document.getElementById('sectionBroadcastsBox');
+const broadcastsList = document.getElementById('sectionBroadcastsList');
+const allBroadcasts = asArray(globalSchoolData.generalBroadcasts);
+const matchingBroadcasts = allBroadcasts.filter(b =>
+(b.grade === 'الكل' || b.grade === gradeName) &&
+(b.section === 'الكل' || b.section === sectionCode)
+);
+
+if(matchingBroadcasts.length > 0){
+broadcastsBox.classList.remove('hidden');
+broadcastsList.innerHTML = '';
+matchingBroadcasts.slice(0, 5).forEach(b => {
+const div = document.createElement('div');
+div.className = 'bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl';
+div.innerHTML = `
+<div class="flex justify-between items-center text-[10px] text-indigo-700 font-bold mb-1">
+<span>📢 تعميم إداري</span>
+<span>${safeText(b.date || '')}</span>
+</div>
+<p class="text-gray-800 whitespace-pre-wrap">${safeText(b.body || '')}</p>
+`;
+broadcastsList.appendChild(div);
+});
+}else{
+broadcastsBox.classList.add('hidden');
+}
+
+const container = document.getElementById('lessonsListContainer');
+const classKey = `${gradeName}_${sectionCode}`;
+const schedule = (globalSchoolData.schoolSchedule && globalSchoolData.schoolSchedule[classKey]) || {};
+container.innerHTML = '';
+
+const availableSubjects = Object.keys(schedule);
+if(availableSubjects.length === 0){
+container.innerHTML = `
+<div class="text-center py-6 space-y-2">
+<p class="text-2xl">📭</p>
+<p class="text-gray-500 font-semibold">لم تقم المعلمة بإرسال تحاضير لـ (${gradeName} - شعبة ${sectionCode}) حتى الآن.</p>
+</div>
+`;
 return;
 }
 
-parentBusy=true;
-setButtonLoading('submitRequestsButton',true);
+const orderedKeys = [
+...subjectsOrder.filter(s => schedule[s]),
+...availableSubjects.filter(s => !subjectsOrder.includes(s))
+];
 
-try{
-const newRequests=[];
-const approved=getApprovedList();
-const pending=getPendingList();
+orderedKeys.forEach(subject => {
+const item = schedule[subject];
+const contentText = typeof item === 'string' ? item : (item?.text || '');
+const imgData = typeof item === 'object' ? (item?.image || '') : '';
+const lessonDate = typeof item === 'object' && item?.date ? item.date : '';
 
-for(let i=1;i<=3;i++){
-const student=document.getElementById(`parentStudentName_${i}`).value.trim();
-const mother=document.getElementById(`parentMotherName_${i}`).value.trim();
-const grade=document.getElementById(`parentGrade_${i}`).value;
-const section=document.getElementById(`parentSection_${i}`).value;
-
-if(!student&&!mother)continue;
-
-if(!student||!mother){
-throw new Error(`يرجى إكمال بيانات الطالبة رقم ${i} أو ترك الحقول فارغة تماماً.`);
-}
-
-const duplicateInForm=newRequests.some(s=>s.student.toLowerCase()===student.toLowerCase());
-const duplicatePending=pending.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
-const duplicateApproved=approved.some(s=>String(s.student||'').toLowerCase()===student.toLowerCase());
-
-if(duplicateInForm||duplicatePending||duplicateApproved){
-throw new Error(`الطالبة (${student}) مسجلة مسبقاً في النظام أو في الطلبات المعلقة ولا يمكن تكرارها.`);
-}
-
-newRequests.push({
-id:'st_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,7),
-student:student,
-mother:mother,
-grade:grade,
-section:section,
-createdAt:Date.now()
-});
-}
-
-if(newRequests.length===0){
-throw new Error('يرجى إدخال بيانات طالبة واحدة على الأقل.');
-}
-
-const pendingRef=db.ref(ROOT+'/pendingRequests');
-const result=await pendingRef.transaction(current=>{
-const list=asArray(current);
-for(const newStudent of newRequests){
-const existsPending=list.some(s=>String(s.student||'').toLowerCase()===newStudent.student.toLowerCase());
-if(existsPending)return;
-}
-return list.concat(newRequests);
-},undefined,false);
-
-if(!result.committed){
-throw new Error('لم يتم حفظ الطلبات. قد تكون الطالبة مسجلة مسبقاً في السحابة.');
-}
-
-parentSessionIds=newRequests.map(s=>s.id);
-currentActiveStudentId=parentSessionIds[0];
-
-localStorage.setItem('school_parent_student_ids',JSON.stringify(parentSessionIds));
-localStorage.setItem('school_parent_active_id',currentActiveStudentId);
-
-document.getElementById('parentFormError').textContent='';
-showWaitingScreen();
-alert(`✓ تم إرسال طلبات ${newRequests.length} طالبة بنجاح إلى الإدارة.`);
-
-}catch(error){
-console.error(error);
-alert('⚠️ '+error.message);
-}finally{
-parentBusy=false;
-setButtonLoading('submitRequestsButton',false,'إرسال كافة الطلبات للإدارة 🚀');
-}
-}
-
-function checkAndSyncSession(){
-if(!dataLoaded)return;
-const approved=getApprovedList();
-const pending=getPendingList();
-
-const approvedSiblings=parentSessionIds.map(id=>approved.find(s=>sameId(s.id,id))).filter(Boolean);
-const pendingSiblings=parentSessionIds.map(id=>pending.find(s=>sameId(s.id,id))).filter(Boolean);
-
-if(approvedSiblings.length>0){
-if(!approvedSiblings.some(s=>sameId(s.id,currentActiveStudentId))){
-currentActiveStudentId=approvedSiblings[0].id;
-localStorage.setItem('school_parent_active_id',currentActiveStudentId);
-}
-const activeStudent=approvedSiblings.find(s=>sameId(s.id,currentActiveStudentId))||approvedSiblings[0];
-showDashboard(activeStudent,approvedSiblings);
-renderParentContent(activeStudent);
-}else if(pendingSiblings.length>0){
-showWaitingScreen();
-}else{
-if(parentSessionIds.length>0){
-localStorage.removeItem('school_parent_student_ids');
-localStorage.removeItem('school_parent_active_id');
-parentSessionIds=[];
-currentActiveStudentId=null;
-}
-document.getElementById('parentDashboardView').classList.add('hidden');
-document.getElementById('parentWaitingView').classList.add('hidden');
-document.getElementById('parentLoginView').classList.remove('hidden');
-}
-}
-
-async function checkApprovalStatusAgain(){
-try{
-const snapshot=await db.ref(ROOT).once('value');
-globalSchoolData=snapshot.val()||{};
-dataLoaded=true;
-checkAndSyncSession();
-alert('✓ تم فحص حالة الطلبات.');
-}catch(error){
-alert('تعذر الاتصال بقاعدة البيانات: '+error.message);
-}
-}
-
-function showWaitingScreen(){
-document.getElementById('parentLoginView').classList.add('hidden');
-document.getElementById('parentWaitingView').classList.remove('hidden');
-document.getElementById('parentDashboardView').classList.add('hidden');
-}
-
-function showDashboard(student,siblings){
-document.getElementById('parentLoginView').classList.add('hidden');
-document.getElementById('parentWaitingView').classList.add('hidden');
-document.getElementById('parentDashboardView').classList.remove('hidden');
-
-document.getElementById('welcomeStudentTitle').innerText='👧 الطالبة الحالية: '+student.student;
-document.getElementById('studentClassInfo').innerText=`${student.grade} - الشعبة (${student.section}) | ولي الأمر: ${student.mother}`;
-document.getElementById('dashboardImageContainer').innerHTML='👧';
-
-// 🌸 تحديث نص التحية الترحيبية باسم الطالبة
-const greetingEl=document.getElementById('welcomeGreetingText');
-if(greetingEl){
-greetingEl.textContent=`🌸 أهلاً بكِ يا بطلتنا (${student.student}) في مدرسة الضياء للبنات!`;
-}
-
-const listDiv=document.getElementById('siblingsButtonsList');
-listDiv.innerHTML='';
-
-siblings.forEach(sib=>{
-const isActive=sameId(sib.id,student.id);
-const btn=document.createElement('button');
-btn.className='px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer '+(
-isActive?'bg-pink-600 text-white font-bold shadow':'bg-pink-100 text-pink-800 hover:bg-pink-200'
-);
-const icon=document.createElement('span');
-icon.textContent='👧';
-const name=document.createElement('span');
-name.textContent=sib.student||'طالبة';
-btn.append(icon,name);
-btn.onclick=()=>switchActiveSibling(sib.id);
-listDiv.appendChild(btn);
-});
-}
-
-function switchActiveSibling(id){
-currentActiveStudentId=id;
-localStorage.setItem('school_parent_active_id',id);
-checkAndSyncSession();
-}
-
-function renderParentContent(student){
-const notifContainer=document.getElementById('parentNotificationsContainer');
-const notifications=Array.isArray(student.notifications)?student.notifications:[];
-
-if(notifications.length===0){
-notifContainer.innerHTML='<p class="text-gray-500">لا توجد إشعارات جديدة حالياً.</p>';
-}else{
-notifContainer.innerHTML='';
-notifications.forEach(n=>{
-const div=document.createElement('div');
-div.className='bg-indigo-50 border border-indigo-100 p-2 rounded-lg';
-const title=document.createElement('p');
-title.className='font-bold text-indigo-900';
-title.textContent=n.title||'إشعار مدرسي';
-const body=document.createElement('p');
-body.className='text-gray-700 mt-0.5';
-body.textContent=n.body||'';
-div.append(title,body);
-notifContainer.appendChild(div);
-});
-}
-
-const scheduleContainer=document.getElementById('parentScheduleContainer');
-const classKey=`${student.grade}_${student.section}`;
-const schedule=(globalSchoolData.schoolSchedule&&globalSchoolData.schoolSchedule[classKey])||{};
-scheduleContainer.innerHTML='';
-
-if(Object.keys(schedule).length===0){
-scheduleContainer.innerHTML='<p class="text-gray-500">لا توجد دروس أو تحاضير منشورة لهذا الصف والشعبة حالياً.</p>';
-}else{
-for(const [subject,item] of Object.entries(schedule)){
-const contentText = typeof item==='string' ? item : (item?.text || '');
-const imgData = typeof item==='object' ? (item?.image || '') : '';
-const lessonDate = typeof item==='object' && item?.date ? item.date : '';
-
-const div=document.createElement('div');
-div.className='bg-pink-50 border border-pink-100 p-3 rounded-lg space-y-1.5';
-div.innerHTML=`
-<div class="flex justify-between items-center border-b pb-1">
-<span class="font-bold text-pink-900">📖 مادة: ${subject}</span>
-${lessonDate ? `<span class="text-gray-500 text-[10px]">📅 تاريخ التحديث: ${lessonDate}</span>` : ''}
+const card = document.createElement('div');
+card.className = 'bg-gradient-to-br from-pink-50 to-purple-50/40 border border-pink-200 p-3.5 rounded-xl space-y-2 shadow-xs';
+card.innerHTML = `
+<div class="flex justify-between items-center border-b border-pink-200 pb-1.5">
+<span class="font-bold text-pink-900 text-sm">📖 مادة: ${safeText(subject)}</span>
+${lessonDate ? `<span class="bg-white text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-purple-100">📅 ${safeText(lessonDate)}</span>` : ''}
 </div>
-<p class="text-gray-700 whitespace-pre-wrap">${contentText}</p>
-${imgData ? `<div class="mt-2"><img src="${imgData}" class="max-h-40 rounded border object-contain"><a href="${imgData}" download="lesson-image.png" class="inline-block mt-1 bg-blue-600 text-white px-2.5 py-1 rounded text-[10px]">تحميل الصورة المرفقة 💾</a></div>` : ''}
+${contentText ? `<p class="text-gray-800 whitespace-pre-wrap leading-relaxed">${safeText(contentText)}</p>` : ''}
+${imgData ? `
+<div class="mt-2 bg-white p-2.5 rounded-xl border border-pink-200 space-y-2">
+<div class="flex justify-between items-center text-[11px] text-purple-800 font-semibold">
+<span>🖼️ صورة مرفقة من المعلمة</span>
+<button type="button" data-open-img="1" class="text-pink-700 underline cursor-pointer">تكبير الصورة 🔍</button>
+</div>
+<img src="${imgData}" data-img-preview="1" class="max-h-56 w-auto mx-auto rounded-lg object-contain cursor-pointer border border-gray-100">
+<div class="text-center pt-1">
+<a href="${imgData}" download="${safeText(subject)}-${safeText(gradeName)}.png" class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-[11px] font-semibold hover:bg-blue-700">
+تحميل الصورة 💾
+</a>
+</div>
+</div>
+` : ''}
 `;
-scheduleContainer.appendChild(div);
+
+if(imgData){
+const titleLabel = `صورة مادة ${subject} - ${gradeName} (${sectionCode})`;
+const previewImg = card.querySelector('[data-img-preview="1"]');
+const openBtn = card.querySelector('[data-open-img="1"]');
+if(previewImg) previewImg.onclick = () => openImageLightbox(imgData, titleLabel);
+if(openBtn) openBtn.onclick = () => openImageLightbox(imgData, titleLabel);
+}
+
+container.appendChild(card);
+});
+}
+
+async function manualRefreshLessons(){
+try{
+const snap = await db.ref(ROOT).once('value');
+globalSchoolData = snap.val() || {};
+if(selectedGrade && selectedSection){
+renderLessonsForSection(selectedGrade, selectedSection);
+}
+alert('✓ تم تحديث التحاضير بنجاح.');
+}catch(e){
+alert('تعذر التحديث: ' + e.message);
 }
 }
+
+function goBackStep(){
+if(selectedSection){
+openGradeSections(selectedGrade);
+}else if(selectedGrade){
+resetToGrades();
+}
+}
+
+function resetToGrades(){
+selectedGrade = '';
+selectedSection = '';
+document.getElementById('sectionsSelectionView').classList.add('hidden');
+document.getElementById('lessonsDisplayView').classList.add('hidden');
+document.getElementById('navigationBar').classList.add('hidden');
+document.getElementById('gradesSelectionView').classList.remove('hidden');
+renderGradesIcons();
 }
 
 async function sendParentInquiry(){
-if(parentBusy)return;
-const content=document.getElementById('parentInquiryText').value.trim();
-const approved=getApprovedList();
-const currentStudent=approved.find(s=>sameId(s.id,currentActiveStudentId));
+if(parentBusy) return;
+
+const windowStatus = getInquiryWindowStatus(new Date());
+if(!windowStatus.allowed){
+alert('⚠️ ' + windowStatus.message);
+updateInquiryQuotaUI();
+return;
+}
+
+const usage = getDeviceWeeklyUsage();
+if(usage.count >= WEEKLY_MAX_INQUIRIES){
+alert(`⚠️ عذراً، لقد وصلت إلى الحد الأقصى المسموح به (${WEEKLY_MAX_INQUIRIES} رسائل أسبوعياً) لهذا الجهاز والمتصفح.`);
+updateInquiryQuotaUI();
+return;
+}
+
+const content = document.getElementById('parentInquiryText').value.trim();
+const studentName = document.getElementById('inquiryStudentName').value.trim() || 'ولي أمر';
+const subject = document.getElementById('inquirySubjectSelect').value;
 
 if(!content){
-alert('يرجى كتابة الاستفسار أولاً.');
-return;
-}
-if(!currentStudent){
-alert('تعذر تحديد الطالبة الحالية. يرجى تحديث الصفحة.');
+alert('يرجى كتابة نص الاستفسار أولاً.');
 return;
 }
 
-parentBusy=true;
-setButtonLoading('sendInquiryButton',true);
+parentBusy = true;
+const btn = document.getElementById('sendInquiryButton');
+btn.disabled = true;
+btn.textContent = 'جارٍ الإرسال...';
 
 try{
-const inquiry={
-id:'inq_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-studentId:currentStudent.id,
-studentName:currentStudent.student,
-grade:currentStudent.grade,
-section:currentStudent.section,
-content:content,
-createdAt:Date.now()
+const inquiry = {
+id: 'inq_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+studentId: 'guest_' + Date.now(),
+studentName: studentName,
+grade: selectedGrade || 'غير محدد',
+section: selectedSection || 'غير محدد',
+subject: subject,
+content: content,
+weekCycle: usage.cycleId,
+createdAt: Date.now()
 };
 
-const inquiriesRef=db.ref(ROOT+'/parentInquiries');
-const result=await inquiriesRef.transaction(current=>{
-const list=asArray(current);
+const result = await db.ref(ROOT + '/parentInquiries').transaction(current => {
+const list = asArray(current);
 list.push(inquiry);
 return list;
-},undefined,false);
+}, undefined, false);
 
-if(!result.committed){
-throw new Error('لم يتم حفظ الاستفسار.');
-}
+if(!result.committed) throw new Error('لم يتم حفظ الاستفسار.');
 
-document.getElementById('parentInquiryText').value='';
-alert('✓ تم إرسال استفسارك للإدارة والمعلمة بنجاح!');
+localStorage.setItem(usage.storageKey, String(usage.count + 1));
+document.getElementById('parentInquiryText').value = '';
+alert(`✓ تم إرسال استفسارك بنجاح! المتبقي لك هذا الأسبوع: ${Math.max(0, WEEKLY_MAX_INQUIRIES - (usage.count + 1))} رسائل.`);
 }catch(error){
-console.error(error);
-alert('تعذر إرسال الاستفسار: '+error.message);
+alert('تعذر إرسال الاستفسار: ' + error.message);
 }finally{
-parentBusy=false;
-setButtonLoading('sendInquiryButton',false,'إرسال الاستفسار ✉️');
+parentBusy = false;
+updateInquiryQuotaUI();
 }
-}
-
-function logoutParent(){
-localStorage.removeItem('school_parent_student_ids');
-localStorage.removeItem('school_parent_active_id');
-parentSessionIds=[];
-currentActiveStudentId=null;
-
-document.getElementById('parentDashboardView').classList.add('hidden');
-document.getElementById('parentWaitingView').classList.add('hidden');
-document.getElementById('parentLoginView').classList.remove('hidden');
-document.getElementById('parentFormError').textContent='';
 }
 </script>
 </body>
