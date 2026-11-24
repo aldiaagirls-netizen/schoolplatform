@@ -307,6 +307,20 @@ return { ...item, id: item.id ?? key };
 return [];
 }
 
+function extractLessonImages(item){
+if(!item || typeof item !== 'object') return [];
+const list = [];
+if(Array.isArray(item.images)){
+item.images.forEach(img => {
+if(typeof img === 'string' && img.trim()) list.push(img.trim());
+});
+}
+if(typeof item.image === 'string' && item.image.trim() && !list.includes(item.image.trim())){
+list.unshift(item.image.trim());
+}
+return list;
+}
+
 function getLocalWeekCycleId(now = new Date()){
 const day = now.getDay();
 const minutesOfDay = now.getHours() * 60 + now.getMinutes();
@@ -424,6 +438,17 @@ console.error('Visit counter error:', err);
 }
 }
 
+function applyIncomingSchoolData(val){
+globalSchoolData = (val && typeof val === 'object') ? val : {};
+applyParentPortalIcon();
+renderGradesIcons();
+if(selectedGrade && !selectedSection){
+renderSectionsIcons(selectedGrade);
+}else if(selectedGrade && selectedSection){
+renderLessonsForSection(selectedGrade, selectedSection);
+}
+}
+
 window.onload = function(){
 applyParentPortalIcon();
 renderGradesIcons();
@@ -440,15 +465,12 @@ badge.textContent = snap.val() === true ? '🟢 متصل مباشرة بالمد
 }
 });
 
+db.ref(ROOT).once('value').then(snap => {
+if(snap.exists()) applyIncomingSchoolData(snap.val());
+}).catch(() => {});
+
 db.ref(ROOT).on('value', snapshot => {
-globalSchoolData = snapshot.val() || {};
-applyParentPortalIcon();
-renderGradesIcons();
-if(selectedGrade && !selectedSection){
-renderSectionsIcons(selectedGrade);
-}else if(selectedGrade && selectedSection){
-renderLessonsForSection(selectedGrade, selectedSection);
-}
+applyIncomingSchoolData(snapshot.val() || {});
 }, error => {
 console.error('Firebase read error:', error);
 });
@@ -567,15 +589,15 @@ const matchingBroadcasts = allBroadcasts.filter(b =>
 if(matchingBroadcasts.length > 0){
 broadcastsBox.classList.remove('hidden');
 broadcastsList.innerHTML = '';
-matchingBroadcasts.slice(0, 5).forEach(b => {
+matchingBroadcasts.slice(0, 10).forEach(b => {
 const div = document.createElement('div');
-div.className = 'bg-indigo-50 border border-indigo-200 p-2.5 rounded-xl';
+div.className = 'bg-indigo-50 border border-indigo-200 p-3 rounded-xl';
 div.innerHTML = `
 <div class="flex justify-between items-center text-[10px] text-indigo-700 font-bold mb-1">
 <span>📢 تعميم إداري</span>
 <span>${safeText(b.date || '')}</span>
 </div>
-<p class="text-gray-800 whitespace-pre-wrap">${safeText(b.body || '')}</p>
+<p class="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">${safeText(b.body || '')}</p>
 `;
 broadcastsList.appendChild(div);
 });
@@ -607,40 +629,52 @@ const orderedKeys = [
 orderedKeys.forEach(subject => {
 const item = schedule[subject];
 const contentText = typeof item === 'string' ? item : (item?.text || '');
-const imgData = typeof item === 'object' ? (item?.image || '') : '';
+const imagesList = extractLessonImages(item);
 const lessonDate = typeof item === 'object' && item?.date ? item.date : '';
 
-const card = document.createElement('div');
-card.className = 'bg-gradient-to-br from-pink-50 to-purple-50/40 border border-pink-200 p-3.5 rounded-xl space-y-2 shadow-xs';
-card.innerHTML = `
-<div class="flex justify-between items-center border-b border-pink-200 pb-1.5">
-<span class="font-bold text-pink-900 text-sm">📖 مادة: ${safeText(subject)}</span>
-${lessonDate ? `<span class="bg-white text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-purple-100">📅 ${safeText(lessonDate)}</span>` : ''}
-</div>
-${contentText ? `<p class="text-gray-800 whitespace-pre-wrap leading-relaxed">${safeText(contentText)}</p>` : ''}
-${imgData ? `
-<div class="mt-2 bg-white p-2.5 rounded-xl border border-pink-200 space-y-2">
+let imagesHTML = '';
+if(imagesList.length > 0){
+const cardsHTML = imagesList.map((imgSrc, idx) => `
+<div class="bg-pink-50/40 p-2 rounded-xl border border-pink-100 space-y-1.5">
 <div class="flex justify-between items-center text-[11px] text-purple-800 font-semibold">
-<span>🖼️ صورة مرفقة من المعلمة</span>
-<button type="button" data-open-img="1" class="text-pink-700 underline cursor-pointer">تكبير الصورة 🔍</button>
+<span>🖼️ صورة (${idx + 1} من ${imagesList.length})</span>
+<button type="button" data-open-img-idx="${idx}" class="text-pink-700 underline cursor-pointer">تكبير 🔍</button>
 </div>
-<img src="${imgData}" data-img-preview="1" class="max-h-56 w-auto mx-auto rounded-lg object-contain cursor-pointer border border-gray-100">
-<div class="text-center pt-1">
-<a href="${imgData}" download="${safeText(subject)}-${safeText(gradeName)}.png" class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-[11px] font-semibold hover:bg-blue-700">
+<img src="${imgSrc}" data-img-idx="${idx}" class="max-h-56 w-auto mx-auto rounded-lg object-contain cursor-pointer border border-gray-100 bg-white">
+<div class="text-center">
+<a href="${imgSrc}" download="${safeText(subject)}-${safeText(gradeName)}-${idx + 1}.jpg" class="inline-block bg-blue-600 text-white px-3 py-1 rounded-lg text-[11px] font-semibold hover:bg-blue-700">
 تحميل الصورة 💾
 </a>
 </div>
 </div>
-` : ''}
+`).join('');
+
+imagesHTML = `
+<div class="mt-2 bg-white p-2.5 rounded-xl border border-pink-200 space-y-2.5">
+<p class="text-[11px] text-purple-900 font-bold">📎 الصور المرفقة من المعلمة (${imagesList.length}):</p>
+<div class="grid grid-cols-1 gap-2.5">${cardsHTML}</div>
+</div>
+`;
+}
+
+const card = document.createElement('div');
+card.className = 'bg-gradient-to-br from-pink-50 to-purple-50/40 border border-pink-200 p-3.5 rounded-xl space-y-2 shadow-xs';
+card.innerHTML = `
+<div class="flex justify-between items-center border-b border-pink-200 pb-1.5 gap-2">
+<span class="font-bold text-pink-900 text-sm">📖 مادة: ${safeText(subject)}</span>
+${lessonDate ? `<span class="bg-white text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-purple-100 shrink-0">📅 ${safeText(lessonDate)}</span>` : ''}
+</div>
+${contentText ? `<p class="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">${safeText(contentText)}</p>` : ''}
+${imagesHTML}
 `;
 
-if(imgData){
-const titleLabel = `صورة مادة ${subject} - ${gradeName} (${sectionCode})`;
-const previewImg = card.querySelector('[data-img-preview="1"]');
-const openBtn = card.querySelector('[data-open-img="1"]');
-if(previewImg) previewImg.onclick = () => openImageLightbox(imgData, titleLabel);
-if(openBtn) openBtn.onclick = () => openImageLightbox(imgData, titleLabel);
-}
+imagesList.forEach((imgSrc, idx) => {
+const titleLabel = `صورة (${idx + 1}) مادة ${subject} - ${gradeName} (${sectionCode})`;
+const previewImg = card.querySelector(`[data-img-idx="${idx}"]`);
+const openBtn = card.querySelector(`[data-open-img-idx="${idx}"]`);
+if(previewImg) previewImg.onclick = () => openImageLightbox(imgSrc, titleLabel);
+if(openBtn) openBtn.onclick = () => openImageLightbox(imgSrc, titleLabel);
+});
 
 container.appendChild(card);
 });
@@ -649,11 +683,7 @@ container.appendChild(card);
 async function manualRefreshLessons(){
 try{
 const snap = await db.ref(ROOT).once('value');
-globalSchoolData = snap.val() || {};
-applyParentPortalIcon();
-if(selectedGrade && selectedSection){
-renderLessonsForSection(selectedGrade, selectedSection);
-}
+applyIncomingSchoolData(snap.val() || {});
 alert('✓ تم تحديث التحاضير بنجاح.');
 }catch(e){
 alert('تعذر التحديث: ' + e.message);
