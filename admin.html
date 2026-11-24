@@ -1389,6 +1389,60 @@ renderArchiveGradesView();
 }
 }
 
+async function replyToInquiry(id, replyText){
+const cleanReply=String(replyText||'').trim();
+if(!cleanReply){
+return alert('يرجى كتابة نص الرد أولاً.');
+}
+
+const replyDate=new Date().toLocaleString('ar-IQ', {
+year:'numeric', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'
+});
+
+try{
+await safeTransaction(ROOT+'/parentInquiries', current=>{
+const list=asArray(current);
+return list.map(q=>{
+if(String(q.id)!==String(id)) return q;
+return {
+...q,
+reply: cleanReply,
+repliedAt: replyDate
+};
+});
+});
+alert('✓ تم حفظ وإرسال الرد بنجاح.');
+}catch(error){
+showError(error);
+}
+}
+
+function buildInquiryCardHTML(q, accentColor='blue'){
+const existingReply = q.reply ? `
+<div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg space-y-1">
+<div class="flex justify-between items-center text-[10px] text-emerald-800 font-bold">
+<span>↩️ الرد المرسل:</span>
+<span>${safeText(q.repliedAt||'')}</span>
+</div>
+<p class="text-emerald-950 whitespace-pre-wrap break-words">${safeText(q.reply)}</p>
+</div>
+` : '';
+
+return `
+<p class="font-bold text-${accentColor}-900">المرسل: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
+<p class="text-[11px] text-gray-600 font-semibold">المادة: ${safeText(q.subject||'عام')}</p>
+<p class="bg-white p-2.5 rounded-lg border text-gray-800 whitespace-pre-wrap break-words">${safeText(q.content)}</p>
+${existingReply}
+<div class="space-y-2 pt-1">
+<textarea data-reply-input rows="2" class="w-full px-2.5 py-1.5 border rounded-lg bg-white text-xs" placeholder="اكتب الرد هنا...">${safeText(q.reply||'')}</textarea>
+<div class="flex flex-wrap gap-2">
+<button type="button" data-action="reply" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg cursor-pointer font-bold hover:bg-emerald-700 transition">إرسال الرد ↩️</button>
+<button type="button" data-action="delete" class="bg-red-600 text-white px-3 py-1.5 rounded-lg cursor-pointer font-semibold hover:bg-red-700 transition">حذف الاستفسار</button>
+</div>
+</div>
+`;
+}
+
 function renderAdminInquiries(){
 const container=document.getElementById('adminInquiriesContainer');
 if(!container)return;
@@ -1401,16 +1455,11 @@ return;
 container.innerHTML='';
 parentInquiries.forEach(q=>{
 const div=document.createElement('div');
-div.className='p-3 bg-blue-50 border rounded-lg space-y-2 mb-2';
+div.className='p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2 mb-2';
+div.innerHTML=buildInquiryCardHTML(q, 'blue');
 
-div.innerHTML=`
-<p class="font-bold">المرسل: ${safeText(q.studentName)}</p>
-<p>${safeText(q.grade)} - شعبة ${safeText(q.section)} | المادة: ${safeText(q.subject||'عام')}</p>
-<p class="bg-white p-2 rounded whitespace-pre-wrap break-words">${safeText(q.content)}</p>
-<div class="flex gap-2">
-<button class="bg-red-600 text-white px-3 py-2 rounded cursor-pointer" data-action="delete">حذف الاستفسار</button>
-</div>`;
-
+const replyInput=div.querySelector('[data-reply-input]');
+div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'');
 div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
 container.appendChild(div);
 });
@@ -1428,15 +1477,12 @@ return;
 container.innerHTML='';
 parentInquiries.forEach(q=>{
 const div=document.createElement('div');
-div.className='p-3 bg-purple-50 border border-purple-100 rounded-lg space-y-2 mb-2';
+div.className='p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2 mb-2';
+div.innerHTML=buildInquiryCardHTML(q, 'purple');
 
-div.innerHTML=`
-<p class="font-bold text-purple-900">المرسل: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
-<p class="text-xs text-gray-600 font-semibold">المادة المطلوبة: ${safeText(q.subject||'عام')}</p>
-<p class="bg-white p-2 rounded text-gray-700 whitespace-pre-wrap break-words">${safeText(q.content)}</p>
-<div class="flex gap-2">
-<button onclick="deleteInquiry('${safeText(q.id)}')" class="bg-red-500 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">حذف الاستفسار</button>
-</div>`;
+const replyInput=div.querySelector('[data-reply-input]');
+div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'');
+div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
 container.appendChild(div);
 });
 }
