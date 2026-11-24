@@ -281,8 +281,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <textarea id="teacherLessonContent" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتب التحضير الجديد..."></textarea>
 </div>
 <div>
-<label class="block font-semibold mb-1 text-purple-800">📷 إرفاق صورة توضيحية (من الاستوديو - اختيارية):</label>
-<input type="file" id="teacherLessonImage" accept="image/*" class="w-full border rounded-lg p-1.5 bg-white text-xs">
+<label class="block font-semibold mb-1 text-purple-800">📷 إرفاق صور توضيحية (من الاستوديو - يمكن اختيار أكثر من صورة):</label>
+<input type="file" id="teacherLessonImage" accept="image/*" multiple class="w-full border rounded-lg p-1.5 bg-white text-xs">
 </div>
 <button id="teacherPublishBtn" onclick="teacherSendLesson()" class="w-full bg-pink-600 text-white py-2.5 rounded-xl font-bold text-xs hover:bg-pink-700 transition cursor-pointer">
 إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀
@@ -425,21 +425,40 @@ return {...item,id:item.id??key};
 return [];
 }
 
-function waitForFirebaseConnection(timeout=20000){
-return new Promise((resolve,reject)=>{
+function extractLessonImages(item){
+if(!item || typeof item!=='object') return [];
+const list=[];
+if(Array.isArray(item.images)){
+item.images.forEach(img=>{
+if(typeof img==='string' && img.trim()) list.push(img.trim());
+});
+}
+if(typeof item.image==='string' && item.image.trim() && !list.includes(item.image.trim())){
+list.unshift(item.image.trim());
+}
+return list;
+}
+
+function withTimeout(promise, ms=10000, label='انتهت مهلة الاتصال بقاعدة البيانات.'){
+return Promise.race([
+promise,
+new Promise((_, reject)=>setTimeout(()=>reject(new Error(label)), ms))
+]);
+}
+
+function waitForFirebaseConnection(timeout=5000){
+return new Promise((resolve)=>{
 if(firebaseConnected){
 resolve(true);
 return;
 }
-
 let finished=false;
 const ref=db.ref('.info/connected');
-
 const timer=setTimeout(()=>{
 if(finished)return;
 finished=true;
 ref.off('value',handler);
-reject(new Error('لم يعد الاتصال بقاعدة Firebase خلال المهلة المحددة.'));
+resolve(true);
 },timeout);
 
 function handler(snapshot){
@@ -450,29 +469,26 @@ ref.off('value',handler);
 resolve(true);
 }
 }
-
-function cancelHandler(error){
-if(finished)return;
-finished=true;
-clearTimeout(timer);
-ref.off('value',handler);
-reject(error||new Error('تعذر التحقق من اتصال Firebase.'));
-}
-
-ref.on('value',handler,cancelHandler);
+ref.on('value',handler);
 });
 }
 
 async function safeTransaction(path,updater){
-await waitForFirebaseConnection();
+await waitForFirebaseConnection(5000);
 if(!dataLoaded){
+const snap=await withTimeout(db.ref(ROOT).once('value'), 8000, 'تعذر تحميل بيانات المدرسة.');
+if(snap.exists()){
+loadSchoolData(snap.val());
+dataLoaded=true;
+}else{
 throw new Error('لم يكتمل تحميل بيانات المدرسة. اضغطي تحديث البيانات ثم حاولي مجدداً.');
 }
+}
 
-const result=await db.ref(path).transaction(
-current=>updater(current),
-undefined,
-false
+const result=await withTimeout(
+db.ref(path).transaction(current=>updater(current), undefined, false),
+10000,
+'تأخر رد قاعدة Firebase أثناء الحفظ.'
 );
 
 if(!result.committed){
@@ -497,7 +513,7 @@ message+=' التفاصيل: '+error.message;
 alert('⚠️ '+message);
 }
 
-function compressImageDataUrl(dataUrl, maxWidth=900, quality=0.72){
+function compressImageDataUrl(dataUrl, maxWidth=850, quality=0.68){
 return new Promise((resolve)=>{
 if(!dataUrl || typeof dataUrl!=='string' || !dataUrl.startsWith('data:image/')){
 resolve(dataUrl||'');
@@ -530,6 +546,15 @@ img.onerror=function(){
 resolve(dataUrl);
 };
 img.src=dataUrl;
+});
+}
+
+function readFileAsDataUrl(file){
+return new Promise((resolve,reject)=>{
+const reader=new FileReader();
+reader.onload=e=>resolve(e.target?.result||'');
+reader.onerror=()=>reject(new Error('حدث خطأ أثناء قراءة الصورة.'));
+reader.readAsDataURL(file);
 });
 }
 
@@ -710,13 +735,42 @@ renderArchiveGradesView();
 }
 }
 
+function activateRoleView(role){
+if(role==='admin'){
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.add('hidden');
+document.getElementById('adminDashboardView').classList.remove('hidden');
+renderPortalVisitsStats();
+renderAdminInquiries();
+renderAdminTeachersReport();
+}else if(role==='teacher'){
+document.getElementById('adminAuthView').classList.add('hidden');
+document.getElementById('adminDashboardView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.remove('hidden');
+renderTeacherActiveLessons();
+renderTeacherSentGuidances();
+renderTeacherInquiries();
+}
+}
+
 window.onload=function(){
+if(userRole==='admin' || userRole==='teacher'){
+activateRoleView(userRole);
+}
+
 db.ref('.info/connected').on('value',snapshot=>{
 firebaseConnected=snapshot.val()===true;
 const connStatus=document.getElementById('connectionStatus');
 if(connStatus)connStatus.textContent=
 firebaseConnected?'🟢 متصل بقاعدة البيانات':'🔴 غير متصل بالسحابة';
 });
+
+db.ref(ROOT).once('value').then(snap=>{
+if(snap.exists()){
+loadSchoolData(snap.val());
+dataLoaded=true;
+}
+}).catch(()=>{});
 
 db.ref(ROOT).on('value',snapshot=>{
 try{
@@ -736,17 +790,6 @@ warning.classList.remove('hidden');
 warning.textContent='تعذر تحميل بيانات المدرسة: '+error.message;
 }
 });
-
-if(userRole==='admin'){
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('adminDashboardView').classList.remove('hidden');
-}else if(userRole==='teacher'){
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('teacherDashboardView').classList.remove('hidden');
-renderTeacherActiveLessons();
-renderTeacherSentGuidances();
-renderTeacherInquiries();
-}
 };
 
 function loginAdmin(){
@@ -756,18 +799,13 @@ const p=document.getElementById('adminPassInput').value.trim();
 if((u===adminUser&&p===adminPass)||p===adminPass){
 userRole='admin';
 localStorage.setItem('school_user_role','admin');
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('adminDashboardView').classList.remove('hidden');
 document.getElementById('loginError').textContent='';
+activateRoleView('admin');
 }else if(p===teacherPass){
 userRole='teacher';
 localStorage.setItem('school_user_role','teacher');
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('teacherDashboardView').classList.remove('hidden');
 document.getElementById('loginError').textContent='';
-renderTeacherActiveLessons();
-renderTeacherSentGuidances();
-renderTeacherInquiries();
+activateRoleView('teacher');
 }else{
 document.getElementById('loginError').textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
 }
@@ -785,8 +823,8 @@ document.getElementById('adminUserInput').value='';
 
 async function forceRefreshData(){
 try{
-await waitForFirebaseConnection();
-const snap=await db.ref(ROOT).once('value');
+await waitForFirebaseConnection(5000);
+const snap=await withTimeout(db.ref(ROOT).once('value'), 10000, 'تأخر جلب البيانات من قاعدة Firebase.');
 if(snap.exists()){
 loadSchoolData(snap.val());
 dataLoaded=true;
@@ -813,8 +851,8 @@ showError(error);
 
 async function restoreOldData(){
 try{
-await waitForFirebaseConnection();
-const snap=await db.ref(ROOT).once('value');
+await waitForFirebaseConnection(5000);
+const snap=await withTimeout(db.ref(ROOT).once('value'), 10000, 'تأخر جلب البيانات من قاعدة Firebase.');
 if(!snap.exists()){
 alert('لا توجد بيانات في قاعدة البيانات حالياً.');
 return;
@@ -827,8 +865,8 @@ alert('✓ تمت قراءة أحدث البيانات من السحابة دو�
 
 async function exportBackup(){
 try{
-await waitForFirebaseConnection();
-const snap=await db.ref(ROOT).once('value');
+await waitForFirebaseConnection(5000);
+const snap=await withTimeout(db.ref(ROOT).once('value'), 10000, 'تأخر جلب البيانات من قاعدة Firebase.');
 if(!snap.exists()){
 alert('لا توجد بيانات لإنشاء نسخة احتياطية.');
 return;
@@ -880,6 +918,7 @@ if(!content)return alert('اكتبي تفاصيل الدرس.');
 if(checkedSections.length===0)return alert('يرجى اختيار شعبة واحدة على الأقل.');
 
 const btn=document.getElementById('adminLessonBtn');
+const originalText='إرسال وتحديث الدرس لبوابة أولياء الأمور 🚀';
 if(btn){
 btn.disabled=true;
 btn.textContent='جارٍ الإرسال...';
@@ -888,13 +927,18 @@ btn.textContent='جارٍ الإرسال...';
 const phoneDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
 
 try{
-await waitForFirebaseConnection();
+await waitForFirebaseConnection(4000);
 const updates={};
 checkedSections.forEach(section=>{
 const classKey=grade+'_'+section;
-updates[`${ROOT}/schoolSchedule/${classKey}/${subject}`]={text:content, image:'', date:phoneDate};
+updates[`${ROOT}/schoolSchedule/${classKey}/${subject}`]={
+text:content,
+image:'',
+images:[],
+date:phoneDate
+};
 });
-await db.ref().update(updates);
+await withTimeout(db.ref().update(updates), 10000, 'تأخر رد قاعدة Firebase أثناء حفظ الدرس.');
 
 document.getElementById('lessonContent').value='';
 document.querySelectorAll('input[name="lessonSection"]').forEach(cb=>cb.checked=false);
@@ -905,7 +949,7 @@ showError(error);
 }finally{
 if(btn){
 btn.disabled=false;
-btn.textContent='إرسال وتحديث الدرس لبوابة أولياء الأمور 🚀';
+btn.textContent=originalText;
 }
 }
 }
@@ -927,52 +971,46 @@ return;
 }
 
 const btn=document.getElementById('teacherPublishBtn');
+const originalText='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
 btn.disabled=true;
-btn.textContent='جارٍ النشر والتحديث السحابي...';
+btn.textContent='جارٍ ضغط الصور والنشر السحابي...';
 
 const phoneDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
 
-const processAndPublish=async(imageBase64)=>{
 try{
-const finalImage=imageBase64 ? await compressImageDataUrl(imageBase64, 900, 0.72) : '';
-await waitForFirebaseConnection();
+const compressedImages=[];
+const files=(imageInput && imageInput.files) ? Array.from(imageInput.files) : [];
+for(const file of files){
+const rawDataUrl=await readFileAsDataUrl(file);
+const compressed=await compressImageDataUrl(rawDataUrl, 850, 0.68);
+if(compressed) compressedImages.push(compressed);
+}
+
+await waitForFirebaseConnection(4000);
 const updates={};
 checkedSections.forEach(section=>{
 const classKey=grade+'_'+section;
 updates[`${ROOT}/schoolSchedule/${classKey}/${subject}`]={
 text: content,
-image: finalImage,
+image: compressedImages[0] || '',
+images: compressedImages,
 date: phoneDate
 };
 });
-await db.ref().update(updates);
+
+await withTimeout(db.ref().update(updates), 12000, 'تأخر رد قاعدة Firebase أثناء حفظ التحضير.');
 
 document.getElementById('teacherLessonContent').value='';
 if(imageInput) imageInput.value='';
 document.querySelectorAll('input[name="teacherSection"]').forEach(cb=>cb.checked=false);
-alert(`✓ تم تحديث وإرسال تحضير (${subject}) لـ (${grade} - الشعب: ${checkedSections.join(', ')}) مباشرة إلى بوابة ولي الأمر.`);
+
+const imgNote = compressedImages.length > 0 ? ` مع (${compressedImages.length}) صورة` : '';
+alert(`✓ تم تحديث وإرسال تحضير (${subject}) لـ (${grade} - الشعب: ${checkedSections.join(', ')})${imgNote} مباشرة إلى بوابة ولي الأمر.`);
 }catch(error){
 showError(error);
 }finally{
 btn.disabled=false;
-btn.textContent='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
-}
-};
-
-if(imageInput && imageInput.files && imageInput.files[0]){
-const file=imageInput.files[0];
-const reader=new FileReader();
-reader.onload=function(e){
-processAndPublish(e.target.result);
-};
-reader.onerror=function(){
-alert('حدث خطأ أثناء قراءة الصورة.');
-btn.disabled=false;
-btn.textContent='إرسال وتحديث التحضير اليومي لبوابة ولي الأمر تلقائياً 🚀';
-};
-reader.readAsDataURL(file);
-}else{
-processAndPublish('');
+btn.textContent=originalText;
 }
 }
 
@@ -1033,7 +1071,7 @@ row.className='bg-white border border-indigo-100 p-2.5 rounded-lg flex justify-b
 row.innerHTML=`
 <div class="space-y-0.5">
 <p class="font-bold text-indigo-900 text-[11px]">${safeText(item.grade)} - شعبة (${safeText(item.section)}) | <span class="text-gray-400">${safeText(item.date||'')}</span></p>
-<p class="text-gray-700 whitespace-pre-wrap">${safeText(item.body||'')}</p>
+<p class="text-gray-700 whitespace-pre-wrap break-words">${safeText(item.body||'')}</p>
 </div>
 <button onclick="deleteGuidanceItem('${safeText(item.id)}')" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer shrink-0">حذف</button>
 `;
@@ -1110,17 +1148,17 @@ let subHTML=`<p class="font-bold text-purple-900"> الصف: ${safeText(grade)} 
 
 subjectsList.forEach(subj=>{
 const lessonItem = subjectsData[subj];
-const hasLesson = lessonItem && (typeof lessonItem==='string' || lessonItem.text || lessonItem.image);
+const imgsList = extractLessonImages(lessonItem);
 const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
-const hasImg = typeof lessonItem==='object' && lessonItem?.image;
+const hasLesson = Boolean(lessonText || imgsList.length > 0);
 const lessonDate = typeof lessonItem==='object' && lessonItem?.date ? lessonItem.date : '';
 
 if(hasLesson){
 subHTML+=`<div class="bg-emerald-50 border border-emerald-200 p-2 rounded flex flex-col gap-1 text-[11px]">
 <div class="flex justify-between items-center"><span class="font-semibold text-emerald-900">✅ ${subj}</span><span class="text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">تم التحضير</span></div>
 ${lessonDate ? `<span class="text-gray-500 text-[10px]">📅 تاريخ التحديث اليومي: ${safeText(lessonDate)}</span>` : ''}
-${lessonText ? `<p class="text-gray-700 truncate">${safeText(lessonText)}</p>` : ''}
-${hasImg ? `<div class="flex items-center justify-between mt-1"><span class="text-blue-600 font-semibold">📎 مرفق صورة</span><button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصورة</button></div>` : ''}
+${lessonText ? `<p class="text-gray-700 whitespace-pre-wrap break-words">${safeText(lessonText)}</p>` : ''}
+${imgsList.length > 0 ? `<div class="flex items-center justify-between mt-1"><span class="text-blue-600 font-semibold">📎 مرفق (${imgsList.length}) صورة</span><button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-amber-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصور</button></div>` : ''}
 <div class="flex justify-end mt-1"><button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(subj)}')" class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف الدرس بالكامل</button></div>
 </div>`;
 }else{
@@ -1157,13 +1195,17 @@ sectionsList.forEach(section=>{
 const classKey=selectedGrade+'_'+section;
 const subjectsData=schoolSchedule[classKey]||{};
 const lessonItem = subjectsData[selectedSubject];
-const hasLesson = lessonItem && (typeof lessonItem==='string' || lessonItem.text || lessonItem.image);
+const imgsList = extractLessonImages(lessonItem);
+const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
+const hasLesson = Boolean(lessonText || imgsList.length > 0);
 
 if(hasLesson){
 hasAnyLesson=true;
-const lessonText = typeof lessonItem==='string' ? lessonItem : (lessonItem?.text || '');
-const hasImg = typeof lessonItem==='object' && lessonItem?.image;
 const lessonDate = typeof lessonItem==='object' && lessonItem?.date ? lessonItem.date : '';
+
+const imgsPreviewHTML = imgsList.length > 0
+? `<div class="mt-1 space-y-1"><span class="text-blue-600 font-semibold text-[11px] block">📎 الصور المرفقة (${imgsList.length}):</span><div class="flex flex-wrap gap-2">${imgsList.map(src=>`<img src="${src}" class="max-h-24 rounded border object-contain bg-white">`).join('')}</div></div>`
+: '';
 
 const div=document.createElement('div');
 div.className='bg-white border border-purple-200 p-2.5 rounded-lg space-y-1.5 text-xs';
@@ -1172,10 +1214,10 @@ div.innerHTML=`
 <span>📖 شعبة (${section}) - ${safeText(selectedSubject)}</span>
 <span class="text-gray-400 text-[10px]">${safeText(lessonDate)}</span>
 </div>
-${lessonText ? `<p class="text-gray-700 whitespace-pre-wrap">${safeText(lessonText)}</p>` : ''}
-${hasImg ? `<div class="mt-1"><span class="text-blue-600 font-semibold text-[11px] block mb-1">📎 مرفق صورة مع الدرس</span><img src="${lessonItem.image}" class="max-h-24 rounded border object-contain"></div>` : ''}
+${lessonText ? `<p class="text-gray-700 whitespace-pre-wrap break-words">${safeText(lessonText)}</p>` : ''}
+${imgsPreviewHTML}
 <div class="flex gap-2 justify-end pt-1">
-${hasImg ? `<button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(selectedSubject)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصورة</button>` : ''}
+${imgsList.length > 0 ? `<button onclick="adminDeleteImage('${encodeURIComponent(classKey)}','${encodeURIComponent(selectedSubject)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600">🗑️ حذف الصور</button>` : ''}
 <button onclick="adminDeleteLesson('${encodeURIComponent(classKey)}','${encodeURIComponent(selectedSubject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[10px] cursor-pointer hover:bg-red-600">🗑️ حذف الدرس بالكامل</button>
 </div>
 `;
@@ -1192,18 +1234,19 @@ async function adminDeleteImage(encodedClassKey, encodedSubject){
 const classKey=decodeURIComponent(encodedClassKey);
 const subject=decodeURIComponent(encodedSubject);
 
-if(!confirm(`هل تريدين حذف الصورة المرفقة فقط لدرس (${subject}) لهذا الصف والشعبة؟`))return;
+if(!confirm(`هل تريدين حذف الصور المرفقة لدرس (${subject}) لهذا الصف والشعبة؟`))return;
 
 try{
-await waitForFirebaseConnection();
+await waitForFirebaseConnection(5000);
 const lessonRef=db.ref(ROOT+'/schoolSchedule/'+classKey+'/'+subject);
-const snap=await lessonRef.once('value');
+const snap=await withTimeout(lessonRef.once('value'), 8000, 'تأخر قراءة الدرس.');
 const val=snap.val();
 
 if(val && typeof val==='object'){
 val.image='';
-await lessonRef.set(val);
-alert('✓ تم حذف الصورة بنجاح وتحديث بوابة أولياء الأمور.');
+val.images=[];
+await withTimeout(lessonRef.set(val), 8000, 'تأخر حذف الصور.');
+alert('✓ تم حذف الصور بنجاح وتحديث بوابة أولياء الأمور.');
 }
 }catch(error){
 showError(error);
@@ -1299,8 +1342,12 @@ return;
 
 for(const [subject,item] of Object.entries(subjects)){
 const contentText = typeof item==='string' ? item : (item?.text || '');
-const imgData = typeof item==='object' ? (item?.image || '') : '';
+const imgsList = extractLessonImages(item);
 const lessonDate = typeof item==='object' && item?.date ? item.date : '';
+
+const imgsBlockHTML = imgsList.length > 0
+? `<div class="mt-2 flex flex-wrap gap-2">${imgsList.map((src, idx)=>`<div class="space-y-1"><img src="${src}" class="max-h-32 rounded border object-contain bg-white"><a href="${src}" download="lesson-${idx+1}.jpg" class="inline-block bg-blue-600 text-white px-2 py-1 rounded text-[10px]">تحميل (${idx+1}) 💾</a></div>`).join('')}</div>`
+: '';
 
 const div=document.createElement('div');
 div.className='bg-white border border-purple-100 p-3 rounded-xl mb-2 space-y-2 shadow-sm text-xs';
@@ -1308,13 +1355,13 @@ div.innerHTML=`
 <div class="flex justify-between items-center border-b pb-1.5">
 <strong class="text-purple-900 font-bold">📖 مادة: ${safeText(subject)}</strong>
 <div class="flex gap-1.5">
-${imgData ? `<button onclick="adminDeleteImage('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600 transition">حذف الصورة</button>` : ''}
+${imgsList.length > 0 ? `<button onclick="adminDeleteImage('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-600 transition">حذف الصور</button>` : ''}
 <button onclick="deleteArchiveLesson('${encodeURIComponent(key)}','${encodeURIComponent(subject)}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-[11px] cursor-pointer hover:bg-red-600 transition">حذف الدرس</button>
 </div>
 </div>
 ${lessonDate ? `<p class="text-gray-500 text-[11px]">📅 تاريخ التحديث: ${safeText(lessonDate)}</p>` : ''}
-<p class="text-gray-700 whitespace-pre-wrap">${safeText(contentText)}</p>
-${imgData ? `<div class="mt-2"><img src="${imgData}" class="max-h-32 rounded border object-contain"><a href="${imgData}" download="lesson-image.png" class="inline-block mt-1 bg-blue-600 text-white px-2 py-1 rounded text-[10px]">تحميل الصورة 💾</a></div>` : ''}
+<p class="text-gray-700 whitespace-pre-wrap break-words">${safeText(contentText)}</p>
+${imgsBlockHTML}
 `;
 container.appendChild(div);
 }
@@ -1359,7 +1406,7 @@ div.className='p-3 bg-blue-50 border rounded-lg space-y-2 mb-2';
 div.innerHTML=`
 <p class="font-bold">المرسل: ${safeText(q.studentName)}</p>
 <p>${safeText(q.grade)} - شعبة ${safeText(q.section)} | المادة: ${safeText(q.subject||'عام')}</p>
-<p class="bg-white p-2 rounded">${safeText(q.content)}</p>
+<p class="bg-white p-2 rounded whitespace-pre-wrap break-words">${safeText(q.content)}</p>
 <div class="flex gap-2">
 <button class="bg-red-600 text-white px-3 py-2 rounded cursor-pointer" data-action="delete">حذف الاستفسار</button>
 </div>`;
@@ -1386,7 +1433,7 @@ div.className='p-3 bg-purple-50 border border-purple-100 rounded-lg space-y-2 mb
 div.innerHTML=`
 <p class="font-bold text-purple-900">المرسل: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
 <p class="text-xs text-gray-600 font-semibold">المادة المطلوبة: ${safeText(q.subject||'عام')}</p>
-<p class="bg-white p-2 rounded text-gray-700">${safeText(q.content)}</p>
+<p class="bg-white p-2 rounded text-gray-700 whitespace-pre-wrap break-words">${safeText(q.content)}</p>
 <div class="flex gap-2">
 <button onclick="deleteInquiry('${safeText(q.id)}')" class="bg-red-500 text-white px-3 py-1.5 rounded cursor-pointer font-semibold">حذف الاستفسار</button>
 </div>`;
