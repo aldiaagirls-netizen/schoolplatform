@@ -23,10 +23,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <!-- شاشة تسجيل الدخول الموحد -->
 <div id="adminAuthView" class="bg-white p-8 rounded-2xl shadow border border-pink-100 max-w-md mx-auto space-y-4">
 <h2 class="text-xl font-bold text-pink-700 text-center">🔐 تسجيل الدخول الموحد</h2>
-<p class="text-xs text-gray-500 text-center">أدخل كلمة المرور الخاصة بك (الإدارة أو الكادر التعليمي).</p>
+<p class="text-xs text-gray-500 text-center">أدخل الرمز وكلمة المرور الخاصة بك (الإدارة، المرشد التربوي، أو الكادر التعليمي).</p>
 <div>
-<label class="block text-xs font-semibold mb-1">اسم المستخدم أو كلمة المرور</label>
-<input id="adminUserInput" class="w-full px-3 py-2 border rounded-lg bg-white mb-2 text-xs" placeholder="اسم المستخدم (للإدارة فقط)">
+<label class="block text-xs font-semibold mb-1">اسم المستخدم / رمز الدخول</label>
+<input id="adminUserInput" class="w-full px-3 py-2 border rounded-lg bg-white mb-2 text-xs" placeholder="الرمز الخاص (للإدارة والمرشد التربوي)">
+<label class="block text-xs font-semibold mb-1">كلمة المرور</label>
 <input id="adminPassInput" type="password" class="w-full px-3 py-2 border rounded-lg bg-white text-xs" placeholder="كلمة المرور">
 </div>
 <button onclick="loginAdmin()" class="w-full bg-pink-600 text-white py-2.5 rounded-lg font-bold text-xs cursor-pointer hover:bg-pink-700 transition">دخول النظام 🚀</button>
@@ -116,6 +117,19 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button onclick="sendBroadcastMessage()" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-bold cursor-pointer hover:bg-indigo-700 transition">
 إرسال التعميم السحابي لأولياء الأمور 🚀
 </button>
+
+<!-- قائمة التعاميم والتوجيهات المرسلة وإدارتها -->
+<div class="pt-3 border-t border-indigo-100 space-y-2">
+<div class="flex justify-between items-center gap-2">
+<h3 class="font-bold text-indigo-900 text-xs">📋 التوجيهات والتعاميم المرسلة حالياً:</h3>
+<button type="button" onclick="deleteAllBroadcasts()" class="bg-red-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer hover:bg-red-700 transition">
+🗑️ حذف جميع التوجيهات
+</button>
+</div>
+<div id="adminSentBroadcastsList" class="space-y-2">
+<p class="text-gray-400 text-[11px]">لا توجد توجيهات أو تعاميم مرسلة حالياً.</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -223,7 +237,98 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 </div>
 
-<!-- واجهة المعلم المخصصة -->
+<!-- 🧭 واجهة المرشد التربوي المخصصة (مرتبطة بالإدارة) -->
+<div id="counselorDashboardView" class="hidden space-y-5 w-full max-w-2xl mx-auto">
+
+<div class="bg-gradient-to-r from-teal-600 to-indigo-600 text-white p-5 rounded-2xl shadow flex flex-wrap justify-between items-center gap-3">
+<div>
+<p class="text-[11px] bg-white/20 inline-block px-2.5 py-0.5 rounded-full font-bold mb-1">🔗 مرتبط بالإدارة المدرسية</p>
+<h2 class="text-base font-bold">🧭 بوابة المرشد التربوي - مدرسة الضياء</h2>
+<p class="text-xs text-teal-100 mt-0.5">إدارة التبليغات والتعاميم والرد التربوي والإداري على استفسارات أولياء الأمور</p>
+<p id="counselorConnectionStatus" class="text-[11px] mt-1.5">جارٍ الاتصال...</p>
+</div>
+<div class="flex gap-2">
+<button onclick="forceRefreshData()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">🔄 تحديث</button>
+<button onclick="logoutAdmin()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs cursor-pointer font-semibold">خروج 🚪</button>
+</div>
+</div>
+
+<!-- قسم إرسال وتعديل وحذف التعاميم والتنبيهات للمرشد التربوي -->
+<div class="bg-white p-5 rounded-2xl shadow border border-teal-100 space-y-3 text-xs">
+<div class="flex justify-between items-center border-b pb-2">
+<h3 class="font-bold text-teal-800 text-sm">📢 إرسال أو تعديل تعميم وتنبيه لأولياء الأمور</h3>
+<span id="counselorBroadcastModeBadge" class="bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold">وضع الإرسال الجديد</span>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+<div>
+<label class="block font-semibold mb-1">الصف المستهدف:</label>
+<select id="counselorBroadcastGrade" class="w-full border rounded-lg p-2 bg-white">
+<option value="الكل">جميع الصفوف (الكل)</option>
+<option>الأول الابتدائي</option>
+<option>الثاني الابتدائي</option>
+<option>الثالث الابتدائي</option>
+<option>الرابع الابتدائي</option>
+<option>الخامس الابتدائي</option>
+<option>السادس الابتدائي</option>
+</select>
+</div>
+<div>
+<label class="block font-semibold mb-1">الشعبة المستهدفة:</label>
+<select id="counselorBroadcastSection" class="w-full border rounded-lg p-2 bg-white">
+<option value="الكل">جميع الشعب (الكل)</option>
+<option value="أ">الشعبة (أ)</option>
+<option value="ب">الشعبة (ب)</option>
+<option value="ج">الشعبة (ج)</option>
+</select>
+</div>
+</div>
+
+<div>
+<label class="block font-semibold mb-1">نص التعميم أو التنبيه التربوي/الإداري:</label>
+<textarea id="counselorBroadcastText" rows="3" class="w-full border rounded-lg p-2 bg-white" placeholder="اكتب التعميم أو التنبيه ليصل مباشرة إلى بوابة ولي الأمر..."></textarea>
+</div>
+
+<div class="flex flex-wrap gap-2">
+<button id="counselorSaveBroadcastBtn" type="button" onclick="saveCounselorBroadcast()" class="flex-1 bg-teal-600 text-white py-2.5 px-4 rounded-xl font-bold cursor-pointer hover:bg-teal-700 transition">
+إرسال التعميم / التنبيه لأولياء الأمور 🚀
+</button>
+<button id="counselorCancelEditBtn" type="button" onclick="cancelCounselorEditBroadcast()" class="hidden bg-gray-500 text-white py-2.5 px-4 rounded-xl font-bold cursor-pointer hover:bg-gray-600 transition">
+إلغاء التعديل ✕
+</button>
+</div>
+
+<!-- قائمة جميع التعاميم والتنبيهات السابقة مع إمكانية التعديل أو الحذف -->
+<div class="pt-3 border-t border-teal-100 space-y-2">
+<div class="flex justify-between items-center gap-2">
+<h4 class="font-bold text-teal-900 text-xs">📋 سجل التبليغات والتعاميم المرسلة (تعديل / حذف):</h4>
+<button type="button" onclick="deleteAllBroadcasts()" class="bg-red-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer hover:bg-red-700 transition">
+🗑️ حذف الكل
+</button>
+</div>
+<div id="counselorBroadcastsList" class="space-y-2">
+<p class="text-gray-400 text-[11px]">لا توجد تعاميم أو تنبيهات مرسلة حالياً.</p>
+</div>
+</div>
+</div>
+
+<!-- قسم استفسارات أولياء الأمور الكامل (حصري للمرشد التربوي والإدارة) -->
+<div class="bg-white p-5 rounded-2xl shadow border border-indigo-100 space-y-3 text-xs">
+<div class="flex flex-wrap justify-between items-center gap-2 border-b pb-2">
+<div>
+<h3 class="font-bold text-indigo-800 text-sm">💬 استفسارات أولياء الأمور (المتابعة والرد الإداري والتربوي)</h3>
+<p class="text-[11px] text-gray-500">تشمل جميع الاستفسارات العامة واستفسارات المواد الدراسية</p>
+</div>
+<span id="counselorInquiriesCountBadge" class="bg-indigo-50 text-indigo-800 border border-indigo-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold">0 رسالة</span>
+</div>
+<div id="counselorInquiriesContainer" class="space-y-3">
+<p class="text-gray-500">لا توجد استفسارات جديدة حالياً.</p>
+</div>
+</div>
+
+</div>
+
+<!-- واجهة المعلم المخصصة (بدون استفسارات أولياء الأمور) -->
 <div id="teacherDashboardView" class="hidden bg-white p-6 rounded-2xl shadow border border-pink-100 max-w-xl mx-auto space-y-6 w-full">
 
 <!-- إعداد وتنفيذ في أعلى بوابة المعلم -->
@@ -233,7 +338,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <div class="flex justify-between items-center border-b pb-3">
 <div>
-<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلم - التحاضير والتوجيهات والاستفسارات</h2>
+<h2 class="font-bold text-pink-700 text-sm">👩‍🏫 بوابة المعلم - التحاضير والتوجيهات الدراسية</h2>
 <p class="text-[11px] text-gray-500">إرسال مباشر إلى بوابة ولي الأمر حسب الصف والشعبة</p>
 </div>
 <div class="flex gap-2">
@@ -291,7 +396,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <!-- قسم إرسال توجيه من المعلم لأولياء الأمور -->
 <div class="space-y-3 text-xs bg-indigo-50/60 p-4 rounded-xl border border-indigo-200">
-<h3 class="font-bold text-indigo-900 text-sm border-b border-indigo-200 pb-1.5">📣 إرسال توجيه لأولياء الأمور</h3>
+<h3 class="font-bold text-indigo-900 text-sm border-b border-indigo-200 pb-1.5">📣 إرسال توجيه دراسي لأولياء الأمور</h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 <div>
 <label class="block font-semibold mb-1">الصف المستهدف:</label>
@@ -333,12 +438,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </div>
 
-<!-- قسم استفسارات أولياء الأمور للمعلم -->
-<div class="space-y-3 text-xs border-t pt-4">
-<h3 class="font-bold text-purple-700">💬 استفسارات أولياء الأمور</h3>
-<div id="teacherInquiriesContainer" class="space-y-3"></div>
-</div>
-
 </div>
 
 </div>
@@ -374,15 +473,20 @@ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 const ROOT='school_data';
 
+// بيانات الدخول للأدوار الثلاثة
 const adminUser='admin';
 const adminPass='123456';
+const counselorUser='counselor';
+const counselorPass='counselor2026';
 const teacherPass='teacher2026';
+
 const DEFAULT_PARENT_ICON='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
 
 let principalName='د. أمل عبد الله';
 let supervisorName='الأستاذ أحمد علي';
 let parentPortalIcon=DEFAULT_PARENT_ICON;
 let pendingParentIconData='';
+let editingBroadcastId='';
 
 let parentInquiries=[];
 let schoolSchedule={};
@@ -718,8 +822,10 @@ iconUrlInput.value=parentPortalIcon;
 }
 
 renderPortalVisitsStats();
+renderAdminSentBroadcasts();
+renderCounselorBroadcasts();
 renderAdminInquiries();
-renderTeacherInquiries();
+renderCounselorInquiries();
 renderTeacherActiveLessons();
 renderTeacherSentGuidances();
 renderAdminTeachersReport();
@@ -736,33 +842,40 @@ renderArchiveGradesView();
 }
 
 function activateRoleView(role){
-if(role==='admin'){
-document.getElementById('adminAuthView').classList.add('hidden');
-document.getElementById('teacherDashboardView').classList.add('hidden');
-document.getElementById('adminDashboardView').classList.remove('hidden');
-renderPortalVisitsStats();
-renderAdminInquiries();
-renderAdminTeachersReport();
-}else if(role==='teacher'){
 document.getElementById('adminAuthView').classList.add('hidden');
 document.getElementById('adminDashboardView').classList.add('hidden');
+document.getElementById('counselorDashboardView').classList.add('hidden');
+document.getElementById('teacherDashboardView').classList.add('hidden');
+
+if(role==='admin'){
+document.getElementById('adminDashboardView').classList.remove('hidden');
+renderPortalVisitsStats();
+renderAdminSentBroadcasts();
+renderAdminInquiries();
+renderAdminTeachersReport();
+}else if(role==='counselor'){
+document.getElementById('counselorDashboardView').classList.remove('hidden');
+renderCounselorBroadcasts();
+renderCounselorInquiries();
+}else if(role==='teacher'){
 document.getElementById('teacherDashboardView').classList.remove('hidden');
 renderTeacherActiveLessons();
 renderTeacherSentGuidances();
-renderTeacherInquiries();
 }
 }
 
 window.onload=function(){
-if(userRole==='admin' || userRole==='teacher'){
+if(userRole==='admin' || userRole==='counselor' || userRole==='teacher'){
 activateRoleView(userRole);
 }
 
 db.ref('.info/connected').on('value',snapshot=>{
 firebaseConnected=snapshot.val()===true;
+const statusMsg=firebaseConnected?'🟢 متصل بقاعدة البيانات':'🔴 غير متصل بالسحابة';
 const connStatus=document.getElementById('connectionStatus');
-if(connStatus)connStatus.textContent=
-firebaseConnected?'🟢 متصل بقاعدة البيانات':'🔴 غير متصل بالسحابة';
+const counselorConn=document.getElementById('counselorConnectionStatus');
+if(connStatus)connStatus.textContent=statusMsg;
+if(counselorConn)counselorConn.textContent=statusMsg;
 });
 
 db.ref(ROOT).once('value').then(snap=>{
@@ -796,25 +909,32 @@ function loginAdmin(){
 const u=document.getElementById('adminUserInput').value.trim();
 const p=document.getElementById('adminPassInput').value.trim();
 
-if((u===adminUser&&p===adminPass)||p===adminPass){
+if((u===adminUser&&p===adminPass)||(!u&&p===adminPass)){
 userRole='admin';
 localStorage.setItem('school_user_role','admin');
 document.getElementById('loginError').textContent='';
 activateRoleView('admin');
+}else if((u===counselorUser&&p===counselorPass)||(!u&&p===counselorPass)){
+userRole='counselor';
+localStorage.setItem('school_user_role','counselor');
+document.getElementById('loginError').textContent='';
+activateRoleView('counselor');
 }else if(p===teacherPass){
 userRole='teacher';
 localStorage.setItem('school_user_role','teacher');
 document.getElementById('loginError').textContent='';
 activateRoleView('teacher');
 }else{
-document.getElementById('loginError').textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+document.getElementById('loginError').textContent='❌ الرمز أو كلمة المرور غير صحيحة';
 }
 }
 
 function logoutAdmin(){
 userRole=null;
+editingBroadcastId='';
 localStorage.removeItem('school_user_role');
 document.getElementById('adminDashboardView').classList.add('hidden');
+document.getElementById('counselorDashboardView').classList.add('hidden');
 document.getElementById('teacherDashboardView').classList.add('hidden');
 document.getElementById('adminAuthView').classList.remove('hidden');
 document.getElementById('adminPassInput').value='';
@@ -828,7 +948,7 @@ const snap=await withTimeout(db.ref(ROOT).once('value'), 10000, 'تأخر جلب
 if(snap.exists()){
 loadSchoolData(snap.val());
 dataLoaded=true;
-alert('✓ تم تحديث وجلب أحدث البيانات والتحاضير من السحابة بنجاح.');
+alert('✓ تم تحديث وجلب أحدث البيانات من السحابة بنجاح.');
 }else{
 alert('لا توجد بيانات حالية في السحابة.');
 }
@@ -1054,6 +1174,165 @@ btn.textContent='إرسال التوجيه إلى بوابة ولي الأمر �
 }
 }
 
+function startCounselorEditBroadcast(id){
+const target=generalBroadcasts.find(b=>String(b.id)===String(id));
+if(!target) return;
+
+editingBroadcastId=String(target.id);
+document.getElementById('counselorBroadcastGrade').value=target.grade||'الكل';
+document.getElementById('counselorBroadcastSection').value=target.section||'الكل';
+document.getElementById('counselorBroadcastText').value=target.body||'';
+
+const badge=document.getElementById('counselorBroadcastModeBadge');
+const saveBtn=document.getElementById('counselorSaveBroadcastBtn');
+const cancelBtn=document.getElementById('counselorCancelEditBtn');
+
+if(badge){
+badge.textContent='✏️ وضع تعديل التعميم';
+badge.className='bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full text-[11px] font-bold';
+}
+if(saveBtn) saveBtn.textContent='حفظ التعديلات على التعميم 💾';
+if(cancelBtn) cancelBtn.classList.remove('hidden');
+
+document.getElementById('counselorBroadcastText').focus();
+}
+
+function cancelCounselorEditBroadcast(){
+editingBroadcastId='';
+document.getElementById('counselorBroadcastGrade').value='الكل';
+document.getElementById('counselorBroadcastSection').value='الكل';
+document.getElementById('counselorBroadcastText').value='';
+
+const badge=document.getElementById('counselorBroadcastModeBadge');
+const saveBtn=document.getElementById('counselorSaveBroadcastBtn');
+const cancelBtn=document.getElementById('counselorCancelEditBtn');
+
+if(badge){
+badge.textContent='وضع الإرسال الجديد';
+badge.className='bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full text-[11px] font-bold';
+}
+if(saveBtn) saveBtn.textContent='إرسال التعميم / التنبيه لأولياء الأمور 🚀';
+if(cancelBtn) cancelBtn.classList.add('hidden');
+}
+
+async function saveCounselorBroadcast(){
+const targetGrade=document.getElementById('counselorBroadcastGrade').value;
+const targetSection=document.getElementById('counselorBroadcastSection').value;
+const textContent=document.getElementById('counselorBroadcastText').value.trim();
+
+if(!textContent){
+return alert('يرجى كتابة نص التعميم أو التنبيه أولاً.');
+}
+
+const btn=document.getElementById('counselorSaveBroadcastBtn');
+btn.disabled=true;
+btn.textContent='جارٍ الحفظ...';
+
+const phoneDate=new Date().toLocaleDateString('ar-IQ', {year:'numeric', month:'numeric', day:'numeric'});
+
+try{
+if(editingBroadcastId){
+const targetId=editingBroadcastId;
+await safeTransaction(ROOT+'/generalBroadcasts', current=>{
+const list=asArray(current);
+return list.map(item=>{
+if(String(item.id)!==String(targetId)) return item;
+return {
+...item,
+grade: targetGrade,
+section: targetSection,
+body: textContent,
+date: phoneDate + ' (معدّل)'
+};
+});
+});
+cancelCounselorEditBroadcast();
+alert('✓ تم تعديل التعميم وتحديثه في بوابة أولياء الأمور.');
+}else{
+await safeTransaction(ROOT+'/generalBroadcasts', current=>{
+const list=asArray(current);
+list.unshift({
+id: 'cns_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+source: 'counselor',
+grade: targetGrade,
+section: targetSection,
+body: textContent,
+date: phoneDate
+});
+return list.slice(0, 30);
+});
+document.getElementById('counselorBroadcastText').value='';
+alert('✓ تم إرسال التعميم / التنبيه بنجاح إلى بوابة أولياء الأمور.');
+}
+}catch(error){
+showError(error);
+}finally{
+btn.disabled=false;
+if(!editingBroadcastId){
+btn.textContent='إرسال التعميم / التنبيه لأولياء الأمور 🚀';
+}
+}
+}
+
+function getBroadcastSourceLabel(source){
+if(source==='counselor') return '🧭 توجيه المرشد التربوي';
+if(source==='teacher') return '📣 توجيه معلم';
+return '📢 تعميم إداري';
+}
+
+function renderCounselorBroadcasts(){
+const container=document.getElementById('counselorBroadcastsList');
+if(!container) return;
+
+if(!generalBroadcasts.length){
+container.innerHTML='<p class="text-gray-400 text-[11px]">لا توجد تعاميم أو تنبيهات مرسلة حالياً.</p>';
+return;
+}
+
+container.innerHTML='';
+generalBroadcasts.forEach(item=>{
+const row=document.createElement('div');
+row.className='bg-teal-50/60 border border-teal-200 p-3 rounded-xl flex justify-between items-start gap-2';
+row.innerHTML=`
+<div class="space-y-1">
+<p class="font-bold text-teal-900 text-[11px]">${getBroadcastSourceLabel(item.source)} | ${safeText(item.grade)} - شعبة (${safeText(item.section)}) ${item.date ? `| <span class="text-gray-500">${safeText(item.date)}</span>` : ''}</p>
+<p class="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">${safeText(item.body||'')}</p>
+</div>
+<div class="flex flex-col gap-1 shrink-0">
+<button type="button" data-edit-brd class="bg-amber-500 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer hover:bg-amber-600 transition">✏️ تعديل</button>
+<button type="button" data-del-brd class="bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer hover:bg-red-700 transition">🗑️ حذف</button>
+</div>
+`;
+row.querySelector('[data-edit-brd]').onclick=()=>startCounselorEditBroadcast(item.id);
+row.querySelector('[data-del-brd]').onclick=()=>deleteGuidanceItem(item.id);
+container.appendChild(row);
+});
+}
+
+function renderAdminSentBroadcasts(){
+const container=document.getElementById('adminSentBroadcastsList');
+if(!container) return;
+
+if(!generalBroadcasts.length){
+container.innerHTML='<p class="text-gray-400 text-[11px]">لا توجد توجيهات أو تعاميم مرسلة حالياً.</p>';
+return;
+}
+
+container.innerHTML='';
+generalBroadcasts.forEach(item=>{
+const row=document.createElement('div');
+row.className='bg-indigo-50/60 border border-indigo-200 p-2.5 rounded-xl flex justify-between items-start gap-2';
+row.innerHTML=`
+<div class="space-y-1">
+<p class="font-bold text-indigo-900 text-[11px]">${getBroadcastSourceLabel(item.source)} | ${safeText(item.grade)} - شعبة (${safeText(item.section)}) ${item.date ? `| <span class="text-gray-500">${safeText(item.date)}</span>` : ''}</p>
+<p class="text-gray-800 whitespace-pre-wrap break-words leading-relaxed">${safeText(item.body||'')}</p>
+</div>
+<button type="button" onclick="deleteGuidanceItem('${safeText(item.id)}')" class="bg-red-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer hover:bg-red-700 transition shrink-0">🗑️ حذف</button>
+`;
+container.appendChild(row);
+});
+}
+
 function renderTeacherSentGuidances(){
 const container=document.getElementById('teacherSentGuidancesList');
 if(!container) return;
@@ -1073,20 +1352,35 @@ row.innerHTML=`
 <p class="font-bold text-indigo-900 text-[11px]">${safeText(item.grade)} - شعبة (${safeText(item.section)}) | <span class="text-gray-400">${safeText(item.date||'')}</span></p>
 <p class="text-gray-700 whitespace-pre-wrap break-words">${safeText(item.body||'')}</p>
 </div>
-<button onclick="deleteGuidanceItem('${safeText(item.id)}')" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer shrink-0">حذف</button>
+<button type="button" onclick="deleteGuidanceItem('${safeText(item.id)}')" class="bg-red-500 text-white px-2 py-1 rounded text-[10px] cursor-pointer shrink-0">حذف</button>
 `;
 container.appendChild(row);
 });
 }
 
 async function deleteGuidanceItem(id){
-if(!confirm('هل تريد حذف هذا التوجيه من بوابة ولي الأمر؟')) return;
+if(!confirm('هل تريد حذف هذا التعميم / التوجيه من بوابة ولي الأمر؟')) return;
 try{
+if(String(editingBroadcastId)===String(id)){
+cancelCounselorEditBroadcast();
+}
 await safeTransaction(ROOT+'/generalBroadcasts', current => {
 const list = asArray(current);
 return list.filter(b => String(b.id) !== String(id));
 });
-alert('✓ تم حذف التوجيه.');
+alert('✓ تم الحذف بنجاح.');
+}catch(error){
+showError(error);
+}
+}
+
+async function deleteAllBroadcasts(){
+if(!generalBroadcasts.length) return alert('لا توجد توجيهات أو تعاميم لحذفها.');
+if(!confirm('هل تريد حذف جميع التوجيهات والتعاميم المرسلة لأولياء الأمور؟')) return;
+try{
+cancelCounselorEditBroadcast();
+await safeTransaction(ROOT+'/generalBroadcasts', ()=>[]);
+alert('✓ تم حذف جميع التوجيهات والتعاميم بنجاح.');
 }catch(error){
 showError(error);
 }
@@ -1105,7 +1399,7 @@ try{
 await safeTransaction(ROOT+'/generalBroadcasts', current => {
 const list = asArray(current);
 list.unshift({
-id: 'brd_' + Date.now(),
+id: 'brd_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
 source: 'admin',
 grade: targetGrade,
 section: targetSection,
@@ -1389,7 +1683,7 @@ renderArchiveGradesView();
 }
 }
 
-async function replyToInquiry(id, replyText){
+async function replyToInquiry(id, replyText, senderRole='الإدارة'){
 const cleanReply=String(replyText||'').trim();
 if(!cleanReply){
 return alert('يرجى كتابة نص الرد أولاً.');
@@ -1407,6 +1701,7 @@ if(String(q.id)!==String(id)) return q;
 return {
 ...q,
 reply: cleanReply,
+repliedBy: senderRole,
 repliedAt: replyDate
 };
 });
@@ -1421,7 +1716,7 @@ function buildInquiryCardHTML(q, accentColor='blue'){
 const existingReply = q.reply ? `
 <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg space-y-1">
 <div class="flex justify-between items-center text-[10px] text-emerald-800 font-bold">
-<span>↩️ الرد المرسل:</span>
+<span>↩️ رد (${safeText(q.repliedBy||'الإدارة / المرشد التربوي')}):</span>
 <span>${safeText(q.repliedAt||'')}</span>
 </div>
 <p class="text-emerald-950 whitespace-pre-wrap break-words">${safeText(q.reply)}</p>
@@ -1430,11 +1725,11 @@ const existingReply = q.reply ? `
 
 return `
 <p class="font-bold text-${accentColor}-900">المرسل: ${safeText(q.studentName)} (${safeText(q.grade)} - شعبة ${safeText(q.section)})</p>
-<p class="text-[11px] text-gray-600 font-semibold">المادة: ${safeText(q.subject||'عام')}</p>
+<p class="text-[11px] text-gray-600 font-semibold">المادة المستهدفة: ${safeText(q.subject||'عام')}</p>
 <p class="bg-white p-2.5 rounded-lg border text-gray-800 whitespace-pre-wrap break-words">${safeText(q.content)}</p>
 ${existingReply}
 <div class="space-y-2 pt-1">
-<textarea data-reply-input rows="2" class="w-full px-2.5 py-1.5 border rounded-lg bg-white text-xs" placeholder="اكتب الرد هنا...">${safeText(q.reply||'')}</textarea>
+<textarea data-reply-input rows="2" class="w-full px-2.5 py-1.5 border rounded-lg bg-white text-xs" placeholder="اكتب الرد الإداري أو التربوي هنا...">${safeText(q.reply||'')}</textarea>
 <div class="flex flex-wrap gap-2">
 <button type="button" data-action="reply" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg cursor-pointer font-bold hover:bg-emerald-700 transition">إرسال الرد ↩️</button>
 <button type="button" data-action="delete" class="bg-red-600 text-white px-3 py-1.5 rounded-lg cursor-pointer font-semibold hover:bg-red-700 transition">حذف الاستفسار</button>
@@ -1459,15 +1754,17 @@ div.className='p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2 mb-2';
 div.innerHTML=buildInquiryCardHTML(q, 'blue');
 
 const replyInput=div.querySelector('[data-reply-input]');
-div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'');
+div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'', 'الإدارة');
 div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
 container.appendChild(div);
 });
 }
 
-function renderTeacherInquiries(){
-const container=document.getElementById('teacherInquiriesContainer');
-if(!container)return;
+function renderCounselorInquiries(){
+const container=document.getElementById('counselorInquiriesContainer');
+const badge=document.getElementById('counselorInquiriesCountBadge');
+if(badge) badge.textContent=`${parentInquiries.length} رسالة`;
+if(!container) return;
 
 if(!parentInquiries.length){
 container.innerHTML='<p class="text-gray-500 text-xs">لا توجد استفسارات جديدة حالياً.</p>';
@@ -1477,18 +1774,18 @@ return;
 container.innerHTML='';
 parentInquiries.forEach(q=>{
 const div=document.createElement('div');
-div.className='p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2 mb-2';
-div.innerHTML=buildInquiryCardHTML(q, 'purple');
+div.className='p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2 mb-2';
+div.innerHTML=buildInquiryCardHTML(q, 'indigo');
 
 const replyInput=div.querySelector('[data-reply-input]');
-div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'');
+div.querySelector('[data-action="reply"]').onclick=()=>replyToInquiry(q.id, replyInput?.value||'', 'المرشد التربوي');
 div.querySelector('[data-action="delete"]').onclick=()=>deleteInquiry(q.id);
 container.appendChild(div);
 });
 }
 
 async function deleteInquiry(id){
-if(!confirm('هل تريدين حذف الاستفسار؟'))return;
+if(!confirm('هل تريد حذف الاستفسار؟'))return;
 
 try{
 await safeTransaction(ROOT+'/parentInquiries',current=>{
